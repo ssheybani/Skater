@@ -301,11 +301,11 @@ class TestPartialDependence(unittest.TestCase):
 
     def test_pd_with_long_string_feature_name_issue_166(self):
 
-        feature_names = ['longstring_{}'.format(i) for i in self.X.shape[1]]
+        feature_names = ['longstring_{}'.format(i) for i in range(self.X.shape[1])]
         interpreter = Interpretation(self.X, feature_names=feature_names)
         try:
-            pdp_df = interpreter.partial_dependence.partial_dependence(feature_names[0],
-                                                                       self.regressor_predict_fn)
+            interpreter.partial_dependence.partial_dependence(feature_names[0],
+                                                              self.regressor_predict_fn)
         except:
             self.fail("1D Partial dependence failed when passing long string name")
 
