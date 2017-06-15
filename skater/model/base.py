@@ -25,62 +25,20 @@ class ModelType(object):
     __metaclass__ = abc.ABCMeta
 
 
-    def __init__(self, log_level=30, target_names=None, examples=None, feature_names=None, unique_values=None,
-                 input_formatter=None, output_formatter=None):
-        """
-        Base model class for wrapping prediction functions. Common methods
-        involve output type inference in requiring predict methods
-
-        Parameters
-        ----------
-            log_level: int
-                0, 10, 20, 30, 40, or 50 for verbosity of logs.
-            target_names: arraytype
-                The names of the target variable/classes. There should be as many
-                 names as there are outputs per prediction (n=1 for regression,
-                 n=2 for binary classification, etc). Defaults to Predicted Value for
-                 regression and Class 1...n for classification.
-
-
-
-        Attributes
-        ----------
-            model_type: string
-
-        """
-        self._log_level = log_level
-        self.logger = build_logger(log_level, __name__)
-        self.examples = None
-        self.model_type = StaticTypes.unknown
-        self.output_var_type = StaticTypes.unknown
-        self.output_shape = StaticTypes.unknown
-        self.n_classes = StaticTypes.unknown
-        self.input_shape = StaticTypes.unknown
-        self.probability = StaticTypes.unknown
-        self.transformer = self.identity_function
-        self.label_encoder = LabelEncoder()
-        self.one_hot_encoder = OneHotEncoder()
-        self.target_names = target_names
-        self.feature_names = feature_names
-        self.unique_values = unique_values
-        self.input_formatter = input_formatter or self.identity_function
-        self.output_formatter = output_formatter or self.identity_function
-        self.has_metadata = False
-
-        if examples is not None:
-            self.input_type = type(examples)
-            examples = DataManager(examples, feature_names=feature_names)
-            self._build_model_metadata(examples)
-        else:
-            self.input_type = None
-            self.logger.warn("No examples provided, cannot infer model type")
-
-
-    def predict(self, *args, **kwargs):
+    @abc.abstractmethod
+    def output_formatter(self, *args, **kwargs):
         """
         The way in which the submodule predicts values given an input
         """
-        return self.transformer(self.output_formatter(self._execute(self.input_formatter(*args, **kwargs))))
+        return
+
+
+    @abc.abstractmethod
+    def input_formatter(self, *args, **kwargs):
+        """
+        The way in which the submodule predicts values given an input
+        """
+        return
 
 
     @abc.abstractmethod
@@ -97,6 +55,14 @@ class ModelType(object):
         The way in which the submodule predicts values given an input
         """
         return
+
+    @abc.abstractmethod
+    def predict(self, *args, **kwargs):
+        """
+        The way in which the submodule predicts values given an input
+        """
+        return
+
 
     @abc.abstractmethod
     def _get_static_predictor(self, *args, **kwargs):
@@ -122,6 +88,83 @@ class ModelType(object):
         else:
             return np.array(examples)
 
+
+    @abc.abstractmethod
+    def _build_model_metadata(self, dataset):
+        return
+
+    @abc.abstractmethod
+    def model_report(self, *args, **kwargs):
+        """
+        Just returns a list of model attributes as a list
+
+        Parameters
+        ----------
+        examples: array type:
+            Examples to use for which we report behavior of predict_fn.
+
+
+        Returns
+        ----------
+        reports: list of strings
+            metadata about function.
+
+        """
+        return
+
+
+    @staticmethod
+    def identity_function(x):
+        return x
+
+
+
+class Classifier(ModelType):
+
+
+    def __init__(self, log_level=30, examples=None, feature_names=None,
+                 input_formatter=None, output_formatter=None, unique_values=None,
+                 target_names=None, probability=True):
+        """
+        Base model class for wrapping prediction functions. Common methods
+        involve output type inference in requiring predict methods
+
+        Parameters
+        ----------
+            log_level: int
+                0, 10, 20, 30, 40, or 50 for verbosity of logs.
+            target_names: arraytype
+                The names of the target variable/classes. There should be as many
+                 names as there are outputs per prediction (n=1 for regression,
+                 n=2 for binary classification, etc). Defaults to Predicted Value for
+                 regression and Class 1...n for classification.
+
+
+
+        Attributes
+        ----------
+            model_type: string
+
+        """
+        self._log_level = log_level
+        self.logger = build_logger(log_level, __name__)
+        self.examples = None
+        self.output_shape = StaticTypes.unknown
+        self.input_shape = StaticTypes.unknown
+        self.feature_names = feature_names
+        self.input_formatter = input_formatter or self.identity_function
+        self.output_formatter = output_formatter or self.identity_function
+        self.has_metadata = False
+        self.unique_values = unique_values
+        self.probability = probability
+
+        if examples is not None:
+            self.input_type = type(examples)
+            examples = DataManager(examples, feature_names=feature_names)
+            self._build_model_metadata(examples)
+        else:
+            self.input_type = None
+            self.logger.warn("No examples provided, cannot infer model type")
 
     def _build_model_metadata(self, dataset):
         """
@@ -160,18 +203,26 @@ class ModelType(object):
             self.output_type = False
 
         if self.output_type == 'continuous':
-            self.model_type = StaticTypes.model_types.regressor
-            self.n_classes = 1
-            self.probability = StaticTypes.not_applicable
+            raise exceptions.ModelError("Your model is outputting a 1D array"
+                                        "of floats. You are probably using a "
+                                        "regression.")
 
         elif self.output_type == 'multiclass':
             self.model_type = StaticTypes.model_types.classifier
-            self.probability = False
+            if self.probability == True:
+                self.logger.warn("Your model is outputting multiclass-like outputs,"
+                                 "as though its just outputting predicted labels"
+                                 "(not probabilities), but probability=True was "
+                                 "passed.")
             self.n_classes = len(np.unique(outputs))
 
         elif self.output_type == 'continuous-multioutput':
             self.model_type = StaticTypes.model_types.classifier
-            self.probability = True
+            if self.probability == False:
+                raise exceptions.ModelError("probability=False was passed, but the model"
+                                            "is outputting continuous values. Try"
+                                            "passing probability=True instead.")
+
             self.n_classes = outputs.shape[1]
 
         elif self.output_type == 'binary':
@@ -208,6 +259,12 @@ class ModelType(object):
             self.target_names = range(self.n_classes)
 
         self.has_metadata = True
+
+    def predict(self, *args, **kwargs):
+        """
+        The way in which the submodule predicts values given an input
+        """
+        return self.transformer(self.output_formatter(self._execute(self.input_formatter(*args, **kwargs))))
 
 
     def predict_function_transformer(self, output):
@@ -268,6 +325,13 @@ class ModelType(object):
         else:
             return lambda x: x
 
+    def predict_subset_classes(self, data, subset_of_classes):
+        """Filters predictions to a subset of classes."""
+        if subset_of_classes is None:
+            return self.predict(data)
+        else:
+            return DataManager(self.predict(data), feature_names=self.target_names)[subset_of_classes]
+
 
     def model_report(self, examples):
         """
@@ -298,15 +362,3 @@ class ModelType(object):
         reports.append("Input Shape: {} \n".format(self.input_shape))
         reports.append("Probability: {} \n".format(self.probability))
         return reports
-
-    def predict_subset_classes(self, data, subset_of_classes):
-        """Filters predictions to a subset of classes."""
-        if subset_of_classes is None:
-            return self.predict(data)
-        else:
-            return DataManager(self.predict(data), feature_names=self.target_names)[subset_of_classes]
-
-
-    @staticmethod
-    def identity_function(x):
-        return x
