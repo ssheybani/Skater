@@ -136,7 +136,7 @@ class PartialDependence(BaseGlobalInterpretation):
         return "{}".format(columnname)
 
     def _check_features(self, feature_ids):
-        if not hasattr(feature_ids, "__iter__"):
+        if StaticTypes.data_types.is_string(feature_ids) or StaticTypes.data_types.is_numeric(feature_ids):
             feature_ids = [feature_ids]
 
         if len(feature_ids) >= 3:
