@@ -57,8 +57,7 @@ Dependencies
 ~~~~~~~~~~~~~~~~
 Skater relies on numpy, pandas, scikit-learn, and the DataScience.com fork of
 the LIME package. Plotting functionality requires matplotlib, though it is not
-required to install the package. Currently we only distribute to pypi, though
-adding a conda distribution is on the roadmap.
+required to install the package.
 
 pip
 ~~~~~~~~~~~~~~~~
@@ -70,6 +69,17 @@ is recommended that you use a virtual environment (virtualenv, conda environment
 
     pip install -U Skater
 
+conda
+~~~~~~~~~~~~~~~~
+
+Skater is available in the `conda-forge`_ channel with builds for Linux, OS X and
+Windows.
+
+::
+
+    conda install -c conda-forge Skater
+
+.. _conda-forge: http://conda-forge.github.io/
 
 Usage
 ==============
