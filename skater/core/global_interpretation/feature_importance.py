@@ -117,7 +117,7 @@ class FeatureImportance(BaseGlobalInterpretation):
         return importances
 
 
-    def plot_feature_importance(self, predict_fn, filter_classes=None, ascending=True, ax=None):
+    def plot_feature_importance(self, predict_fn, filter_classes=None, ascending=True, ax=None, progressbar=True):
         """Computes feature importance of all features related to a model instance,
         then plots the results. Supports classification, multi-class classification, and regression.
 
@@ -161,7 +161,7 @@ class FeatureImportance(BaseGlobalInterpretation):
         except RuntimeError:
             raise (MatplotlibDisplayError("Matplotlib unable to open display"))
 
-        importances = self.feature_importance(predict_fn, filter_classes=filter_classes)
+        importances = self.feature_importance(predict_fn, filter_classes=filter_classes, progressbar=progressbar)
 
         if ax is None:
             f, ax = pyplot.subplots(1)
