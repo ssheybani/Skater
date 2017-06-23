@@ -11,6 +11,7 @@ from ...model.base import ModelType
 from ...util.dataops import divide_zerosafe
 from ...util.progressbar import ProgressBar
 
+
 class FeatureImportance(BaseGlobalInterpretation):
     """Contains methods for feature importance. Subclass of BaseGlobalInterpretation.
 
