@@ -9,14 +9,14 @@ from ...util.plotting import COLORS
 from ...util.exceptions import *
 from ...model.base import ModelType
 from ...util.dataops import divide_zerosafe
-
+from ...util.progressbar import ProgressBar
 
 class FeatureImportance(BaseGlobalInterpretation):
     """Contains methods for feature importance. Subclass of BaseGlobalInterpretation.
 
     """
 
-    def feature_importance(self, model_instance, ascending=True, filter_classes=None):
+    def feature_importance(self, model_instance, ascending=True, filter_classes=None, progressbar=True):
 
         """
         Computes feature importance of all features related to a model instance.
@@ -72,8 +72,15 @@ class FeatureImportance(BaseGlobalInterpretation):
                                        feature_names=self.data_set.feature_ids,
                                        index=self.data_set.index)
 
+        if progressbar:
+            n_iter = len(self.data_set.feature_ids)
+            p = ProgressBar(n_iter, units='features')
+
         for feature_id in self.data_set.feature_ids:
             # collect perturbations
+            if progressbar:
+                p.animate()
+
             if self.data_set.feature_info[feature_id]['numeric']:
                 samples = self.data_set.generate_column_sample(feature_id, n_samples=n, method='stratified')
             else:
