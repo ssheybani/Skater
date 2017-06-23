@@ -9,6 +9,7 @@ from ...util.plotting import COLORS
 from ...util.exceptions import *
 from ...model.base import ModelType
 from ...util.dataops import divide_zerosafe
+from ...util.progressbar import ProgressBar
 
 
 class FeatureImportance(BaseGlobalInterpretation):
@@ -16,7 +17,7 @@ class FeatureImportance(BaseGlobalInterpretation):
 
     """
 
-    def feature_importance(self, model_instance, ascending=True, filter_classes=None):
+    def feature_importance(self, model_instance, ascending=True, filter_classes=None, progressbar=True):
 
         """
         Computes feature importance of all features related to a model instance.
@@ -72,8 +73,15 @@ class FeatureImportance(BaseGlobalInterpretation):
                                        feature_names=self.data_set.feature_ids,
                                        index=self.data_set.index)
 
+        if progressbar:
+            n_iter = len(self.data_set.feature_ids)
+            p = ProgressBar(n_iter, units='features')
+
         for feature_id in self.data_set.feature_ids:
             # collect perturbations
+            if progressbar:
+                p.animate()
+
             if self.data_set.feature_info[feature_id]['numeric']:
                 samples = self.data_set.generate_column_sample(feature_id, n_samples=n, method='stratified')
             else:
@@ -109,7 +117,7 @@ class FeatureImportance(BaseGlobalInterpretation):
         return importances
 
 
-    def plot_feature_importance(self, predict_fn, filter_classes=None, ascending=True, ax=None):
+    def plot_feature_importance(self, predict_fn, filter_classes=None, ascending=True, ax=None, progressbar=True):
         """Computes feature importance of all features related to a model instance,
         then plots the results. Supports classification, multi-class classification, and regression.
 
@@ -153,7 +161,7 @@ class FeatureImportance(BaseGlobalInterpretation):
         except RuntimeError:
             raise (MatplotlibDisplayError("Matplotlib unable to open display"))
 
-        importances = self.feature_importance(predict_fn, filter_classes=filter_classes)
+        importances = self.feature_importance(predict_fn, filter_classes=filter_classes, progressbar=progressbar)
 
         if ax is None:
             f, ax = pyplot.subplots(1)
