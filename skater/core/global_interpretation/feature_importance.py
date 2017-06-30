@@ -62,6 +62,7 @@ class FeatureImportance(BaseGlobalInterpretation):
                       "Expected members of: {0}\n" \
                       "got: {1}".format(model_instance.target_names,
                                         filter_classes)
+            filter_classes = list(filter_classes)
             assert all([i in model_instance.target_names for i in filter_classes]), err_msg
 
         importances = {}

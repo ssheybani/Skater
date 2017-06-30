@@ -257,6 +257,7 @@ class PartialDependence(BaseGlobalInterpretation):
                       "got: " \
                       "{1}".format(modelinstance.target_names,
                                    filter_classes)
+            filter_classes = list(filter_classes)
             assert all([i in modelinstance.target_names for i in filter_classes]), err_msg
 
         # TODO: There might be a better place to do this check
