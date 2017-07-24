@@ -16,6 +16,7 @@ from ...util.plotting import COLORS, \
     coordinate_gradients_to_1d_colorscale, plot_2d_color_scale
 from ...util.exceptions import *
 from ...util.static_types import StaticTypes
+from ...util.progressbar import ProgressBar
 
 # if we want to employ instance methods in multiprocessing, enable this code:
 # copy_reg.pickle(types.MethodType, pickle_method, unpickle_method)
@@ -136,7 +137,7 @@ class PartialDependence(BaseGlobalInterpretation):
         return "{}".format(columnname)
 
     def _check_features(self, feature_ids):
-        if not hasattr(feature_ids, "__iter__"):
+        if StaticTypes.data_types.is_string(feature_ids) or StaticTypes.data_types.is_numeric(feature_ids):
             feature_ids = [feature_ids]
 
         if len(feature_ids) >= 3:
@@ -158,7 +159,8 @@ class PartialDependence(BaseGlobalInterpretation):
     def partial_dependence(self, feature_ids, modelinstance, filter_classes=None, grid=None,
                            grid_resolution=30, n_jobs=-1, grid_range=None, sample=True,
                            sampling_strategy='random-choice', n_samples=1000,
-                           bin_count=50, samples_per_bin=10, return_metadata=False):
+                           bin_count=50, samples_per_bin=10, return_metadata=False,
+                           progressbar=True):
 
         """
         Approximates the partial dependence of the predict_fn with respect to the
@@ -255,6 +257,7 @@ class PartialDependence(BaseGlobalInterpretation):
                       "got: " \
                       "{1}".format(modelinstance.target_names,
                                    filter_classes)
+            filter_classes = list(filter_classes)
             assert all([i in modelinstance.target_names for i in filter_classes]), err_msg
 
         # TODO: There might be a better place to do this check
@@ -355,11 +358,21 @@ class PartialDependence(BaseGlobalInterpretation):
                                     filter_classes=filter_classes)
         arg_list = [i for i in range(grid_expanded.shape[0])]
         executor_instance = Pool(n_jobs)
+        p = ProgressBar(len(arg_list), units='grid cells')
+        pd_list = []
         try:
-            pd_list = executor_instance.map(pd_func, arg_list)
+            # pd_list = executor_instance.map(pd_func, arg_list)
+            for pd_row in executor_instance.map(pd_func, arg_list):
+                if progressbar:
+                    p.animate()
+                pd_list.append(pd_row)
         except:
             self.interpreter.logger.debug("Multiprocessing failed, going single process")
-            pd_list = map(pd_func, arg_list)
+            # pd_list = map(pd_func, arg_list)
+            for pd_row in map(pd_func, arg_list):
+                if progressbar:
+                    p.animate()
+                pd_list.append(pd_row)
         finally:
             executor_instance.close()
             executor_instance.join()
@@ -374,7 +387,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                 grid=None, grid_resolution=30, grid_range=None,
                                 n_jobs=-1, sample=True, sampling_strategy='random-choice',
                                 n_samples=1000, bin_count=50, samples_per_bin=10,
-                                with_variance=False, figsize=(16, 10)):
+                                with_variance=False, figsize=(16, 10), progressbar=True):
         """
         Computes partial_dependence of a set of variables. Essentially approximates
         the partial partial_dependence of the predict_fn with respect to the variables
@@ -490,7 +503,8 @@ class PartialDependence(BaseGlobalInterpretation):
                                                       sampling_strategy=sampling_strategy,
                                                       n_samples=n_samples, bin_count=bin_count,
                                                       samples_per_bin=samples_per_bin,
-                                                      n_jobs=n_jobs, return_metadata=True)
+                                                      n_jobs=n_jobs, return_metadata=True,
+                                                      progressbar=progressbar)
 
             self.interpreter.logger.info("done computing pd, now plotting ...")
             ax = self._plot_pdp_from_df(pd_df, metadata, with_variance=with_variance, figsize=figsize)
@@ -505,7 +519,8 @@ class PartialDependence(BaseGlobalInterpretation):
                                                           sampling_strategy=sampling_strategy,
                                                           n_samples=n_samples, bin_count=bin_count,
                                                           samples_per_bin=samples_per_bin,
-                                                          n_jobs=n_jobs, return_metadata=True)
+                                                          n_jobs=n_jobs, return_metadata=True,
+                                                          progressbar=progressbar)
 
                 self.interpreter.logger.info("done computing pd, now plotting ...")
                 ax = self._plot_pdp_from_df(pd_df, metadata, with_variance=with_variance, figsize=figsize)

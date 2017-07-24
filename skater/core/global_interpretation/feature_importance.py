@@ -11,6 +11,7 @@ from ...util.plotting import COLORS
 from ...util.exceptions import *
 from ...model.base import ModelType
 from ...util.dataops import divide_zerosafe
+from ...util.progressbar import ProgressBar
 
 
 def compute_feature_importance(feature_id, input_data, estimator_fn,
@@ -66,7 +67,7 @@ class FeatureImportance(BaseGlobalInterpretation):
 
     """
 
-    def feature_importance(self, model_instance, ascending=True, filter_classes=None, n_jobs=-1):
+    def feature_importance(self, model_instance, ascending=True, filter_classes=None, n_jobs=-1, progressbar=True):
 
         """
         Computes feature importance of all features related to a model instance.
@@ -111,12 +112,17 @@ class FeatureImportance(BaseGlobalInterpretation):
                       "Expected members of: {0}\n" \
                       "got: {1}".format(model_instance.target_names,
                                         filter_classes)
+            filter_classes = list(filter_classes)
             assert all([i in model_instance.target_names for i in filter_classes]), err_msg
 
         original_predictions = model_instance.predict(self.data_set.data)
 
         n = original_predictions.shape[0]
 
+        if progressbar:
+            n_iter = len(self.data_set.feature_ids)
+            p = ProgressBar(n_iter, units='features')
+        
         # copy_of_data_set = DataManager(self.data_set.data.copy(),
         #                                feature_names=self.data_set.feature_ids,
         #                                index=self.data_set.index)
@@ -137,10 +143,18 @@ class FeatureImportance(BaseGlobalInterpretation):
         executor_instance = Pool(n_jobs)
         importances = {}
         try:
-            importance_dicts = executor_instance.map(fi_func, arg_list)
+            importance_dicts = []
+            for importance in executor_instance.map(fi_func, arg_list):
+                importance_dicts.append(importance)
+                if progressbar:
+                    p.animate()
         except:
             self.interpreter.logger.debug("Multiprocessing failed, going single process")
-            importance_dicts = map(fi_func, arg_list)
+            importance_dicts = []
+            for importance in map(fi_func, arg_list):
+                importance_dicts.append(importance)
+                if progressbar:
+                    p.animate()
         finally:
             executor_instance.close()
             executor_instance.join()
@@ -166,7 +180,7 @@ class FeatureImportance(BaseGlobalInterpretation):
         return importances
 
 
-    def plot_feature_importance(self, predict_fn, filter_classes=None, ascending=True, ax=None):
+    def plot_feature_importance(self, predict_fn, filter_classes=None, ascending=True, ax=None, progressbar=True):
         """Computes feature importance of all features related to a model instance,
         then plots the results. Supports classification, multi-class classification, and regression.
 
@@ -210,7 +224,7 @@ class FeatureImportance(BaseGlobalInterpretation):
         except RuntimeError:
             raise (MatplotlibDisplayError("Matplotlib unable to open display"))
 
-        importances = self.feature_importance(predict_fn, filter_classes=filter_classes)
+        importances = self.feature_importance(predict_fn, filter_classes=filter_classes, progressbar=progressbar)
 
         if ax is None:
             f, ax = pyplot.subplots(1)
