@@ -124,8 +124,8 @@ class TestLime(unittest.TestCase):
         explainer = LimeTabularExplainer(self.X,
                                          discretize_continuous=True, mode="regression")
         explanation = explainer.explain_instance(self.example,
-                                                           self.regressor.predict,
-                                                           model_regressor=self.model_regressor)
+                                                 self.regressor.predict,
+                                                 model_regressor=self.model_regressor)
 
         vals = dict(explanation.as_list())
         keys = ['{} <= 0.00'.format(i) for i in [2, 1, 0]]
