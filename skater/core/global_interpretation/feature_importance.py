@@ -122,7 +122,7 @@ class FeatureImportance(BaseGlobalInterpretation):
         if progressbar:
             n_iter = len(self.data_set.feature_ids)
             p = ProgressBar(n_iter, units='features')
-        
+
         # copy_of_data_set = DataManager(self.data_set.data.copy(),
         #                                feature_names=self.data_set.feature_ids,
         #                                index=self.data_set.index)
