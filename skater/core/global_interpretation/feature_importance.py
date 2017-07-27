@@ -2,6 +2,8 @@
 from itertools import cycle
 import numpy as np
 import pandas as pd
+from functools import partial
+from pathos.multiprocessing import Pool
 
 from ...data import DataManager
 from .base import BaseGlobalInterpretation
@@ -12,12 +14,60 @@ from ...util.dataops import divide_zerosafe
 from ...util.progressbar import ProgressBar
 
 
+def compute_feature_importance(feature_id, input_data, estimator_fn,
+                               original_predictions, feature_info,
+                               feature_names, n):
+    """Global function for computing column-wise importance
+
+    Parameters
+    ----------
+    feature_id: hashable
+
+    input_data:
+
+    estimator_fn: callable
+
+    original_predictions:
+
+    feature_info: dict
+
+    feature_names: array type
+
+    n: int
+
+    Returns
+    ----------
+    importance: dict
+        {feature id: importance value}
+    """
+
+    copy_of_data_set = DataManager(input_data.copy(), feature_names=feature_names)
+
+    # collect perturbations
+    if feature_info[feature_id]['numeric']:
+        samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n, method='stratified')
+    else:
+        samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n, method='random-choice')
+
+    # set the samples
+    copy_of_data_set[feature_id] = samples
+
+    # predict based on perturbed values
+    new_predictions = estimator_fn(copy_of_data_set.data)
+
+    importance = compute_importance(new_predictions,
+                                    original_predictions,
+                                    copy_of_data_set[feature_id],
+                                    samples)
+    return {feature_id: importance}
+
+
 class FeatureImportance(BaseGlobalInterpretation):
     """Contains methods for feature importance. Subclass of BaseGlobalInterpretation.
 
     """
 
-    def feature_importance(self, model_instance, ascending=True, filter_classes=None, progressbar=True):
+    def feature_importance(self, model_instance, ascending=True, filter_classes=None, n_jobs=-1, progressbar=True):
 
         """
         Computes feature importance of all features related to a model instance.
@@ -65,41 +115,53 @@ class FeatureImportance(BaseGlobalInterpretation):
             filter_classes = list(filter_classes)
             assert all([i in model_instance.target_names for i in filter_classes]), err_msg
 
-        importances = {}
-        original_predictions = model_instance.predict_subset_classes(self.data_set.data, filter_classes)
+        original_predictions = model_instance.predict(self.data_set.data)
 
         n = original_predictions.shape[0]
-
-        copy_of_data_set = DataManager(self.data_set.data.copy(),
-                                       feature_names=self.data_set.feature_ids,
-                                       index=self.data_set.index)
 
         if progressbar:
             n_iter = len(self.data_set.feature_ids)
             p = ProgressBar(n_iter, units='features')
 
-        for feature_id in self.data_set.feature_ids:
-            # collect perturbations
-            if progressbar:
-                p.animate()
+        # copy_of_data_set = DataManager(self.data_set.data.copy(),
+        #                                feature_names=self.data_set.feature_ids,
+        #                                index=self.data_set.index)
 
-            if self.data_set.feature_info[feature_id]['numeric']:
-                samples = self.data_set.generate_column_sample(feature_id, n_samples=n, method='stratified')
-            else:
-                samples = self.data_set.generate_column_sample(feature_id, n_samples=n, method='random-choice')
-            copy_of_data_set[feature_id] = samples
+        # prep for multiprocessing
+        predict_fn = model_instance._get_static_predictor()
+        n_jobs = None if n_jobs < 0 else n_jobs
+        arg_list = self.data_set.feature_ids
+        # just a function of feature_id
+        fi_func = partial(compute_feature_importance,
+                          input_data=self.data_set.data.copy(),
+                          estimator_fn=predict_fn,
+                          original_predictions=original_predictions,
+                          feature_info=self.data_set.feature_info,
+                          feature_names=self.data_set.feature_ids,
+                          n=n)
 
-            # predict based on perturbed values
-            new_predictions = model_instance.predict_subset_classes(copy_of_data_set.data, filter_classes)
+        executor_instance = Pool(n_jobs)
+        importances = {}
+        try:
+            importance_dicts = []
+            for importance in executor_instance.map(fi_func, arg_list):
+                importance_dicts.append(importance)
+                if progressbar:
+                    p.animate()
+        except:
+            self.interpreter.logger.debug("Multiprocessing failed, going single process")
+            importance_dicts = []
+            for importance in map(fi_func, arg_list):
+                importance_dicts.append(importance)
+                if progressbar:
+                    p.animate()
+        finally:
+            executor_instance.close()
+            executor_instance.join()
+            executor_instance.terminate()
 
-            importance = self.compute_importance(new_predictions,
-                                                 original_predictions,
-                                                 self.data_set[feature_id],
-                                                 samples)
-            importances[feature_id] = importance
-
-            # reset copy
-            copy_of_data_set[feature_id] = self.data_set[feature_id]
+        for i in importance_dicts:
+            importances.update(i)
 
         importances = pd.Series(importances).sort_values(ascending=ascending)
 
@@ -180,31 +242,31 @@ class FeatureImportance(BaseGlobalInterpretation):
         return f, ax
 
 
-    def compute_importance(self, new_predictions, original_predictions, original_x, perturbed_x,
-                           method='output-variance', scaled=False):
-        if method == 'output-variance':
-            importance = self._compute_importance_via_output_variance(np.array(new_predictions),
-                                                                      np.array(original_predictions),
-                                                                      np.array(original_x),
-                                                                      np.array(perturbed_x),
-                                                                      scaled)
-        else:
-            raise(KeyError("Unrecongized method for computing feature_importance: {}".format(method)))
-        return importance
+def compute_importance(new_predictions, original_predictions, original_x, perturbed_x,
+                       method='output-variance', scaled=False):
+    if method == 'output-variance':
+        importance = compute_importance_via_output_variance(np.array(new_predictions),
+                                                            np.array(original_predictions),
+                                                            np.array(original_x),
+                                                            np.array(perturbed_x),
+                                                            scaled)
+    else:
+        raise(KeyError("Unrecongized method for computing feature_importance: {}".format(method)))
+    return importance
 
 
-    def _compute_importance_via_output_variance(self, new_predictions, original_predictions,
-                                                original_x, perturbed_x, scaled=True):
-        """Mean absolute error of predictions given perturbations in a feature"""
-        changes_in_predictions = abs(new_predictions - original_predictions)
+def compute_importance_via_output_variance(new_predictions, original_predictions,
+                                           original_x, perturbed_x, scaled=True):
+    """Mean absolute error of predictions given perturbations in a feature"""
+    changes_in_predictions = abs(new_predictions - original_predictions)
 
-        if scaled:
-            changes_in_predictions = self._importance_scaler(changes_in_predictions, original_x, perturbed_x)
+    if scaled:
+        changes_in_predictions = importance_scaler(changes_in_predictions, original_x, perturbed_x)
 
-        importance = np.mean(changes_in_predictions)
-        return importance
+    importance = np.mean(changes_in_predictions)
+    return importance
 
 
-    def _importance_scaler(self, values, original_x, perturbed_x):
-        raise(NotImplementedError("We currently don't support scaling, we are researching the best"
-                                  "approaches to do so."))
+def importance_scaler(values, original_x, perturbed_x):
+    raise(NotImplementedError("We currently don't support scaling, we are researching the best"
+                              "approaches to do so."))
