@@ -58,8 +58,8 @@ class TestLime(unittest.TestCase):
         :return:
         """
 
-        interpretor = LimeTabularExplainer(self.X, feature_names=self.feature_names)
-        assert interpretor.explain_regressor_instance(self.example, self.regressor.predict)
+        interpretor = LimeTabularExplainer(self.X, feature_names=self.feature_names, mode="regression")
+        assert interpretor.explain_instance(self.example, self.regressor.predict)
 
     def test_regression_without_feature_names(self):
         """
@@ -67,8 +67,8 @@ class TestLime(unittest.TestCase):
         and feature names are NOT passed
         :return:
         """
-        interpretor = LimeTabularExplainer(self.X)
-        assert interpretor.explain_regressor_instance(self.example, self.regressor.predict)
+        interpretor = LimeTabularExplainer(self.X, mode="regression")
+        assert interpretor.explain_instance(self.example, self.regressor.predict)
 
     def test_classifier_no_proba_without_feature_names(self):
         """
@@ -122,8 +122,8 @@ class TestLime(unittest.TestCase):
 
         error_epsilon = .1
         explainer = LimeTabularExplainer(self.X,
-                                         discretize_continuous=True)
-        explanation = explainer.explain_regressor_instance(self.example,
+                                         discretize_continuous=True, mode="regression")
+        explanation = explainer.explain_instance(self.example,
                                                            self.regressor.predict,
                                                            model_regressor=self.model_regressor)
 
