@@ -3,7 +3,7 @@ from itertools import cycle
 import numpy as np
 import pandas as pd
 from functools import partial
-from pathos.multiprocessing import Pool
+from multiprocess import Pool
 
 from ...data import DataManager
 from .base import BaseGlobalInterpretation
@@ -38,7 +38,7 @@ class Scorer(object):
 
 def compute_feature_importance(feature_id, input_data, estimator_fn,
                                original_predictions, feature_info,
-                               feature_names, index, training_labels=None,
+                               feature_names, training_labels=None,
                                method='output-variance', model_type='regression'):
     """Global function for computing column-wise importance
 
@@ -64,7 +64,7 @@ def compute_feature_importance(feature_id, input_data, estimator_fn,
         {feature id: importance value}
     """
 
-    copy_of_data_set = DataManager(input_data.copy(), feature_names=feature_names, index=index)
+    copy_of_data_set = DataManager(input_data.copy(), feature_names=feature_names)
     n = copy_of_data_set.n_rows
 
     original_values = copy_of_data_set[feature_id]
@@ -76,7 +76,7 @@ def compute_feature_importance(feature_id, input_data, estimator_fn,
         samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n, strategy='uniform-over-similarity-ranks')
     else:
         samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n, strategy='random-choice')
-    copy_of_data_set[feature_id] = samples.values.reshape(-1)
+    copy_of_data_set[feature_id] = samples.reshape(-1)
 
     new_predictions = estimator_fn(copy_of_data_set.values)
 
@@ -156,14 +156,18 @@ class FeatureImportance(BaseGlobalInterpretation):
         else:
             training_labels = None
 
+        if progressbar:
+            self.interpreter.logger.warn("Progress bars slow down runs by 10-20%. For slightly \n"
+                                         "faster runs, do progress_bar=False")
+
         if n_samples <= self.data_set.n_rows:
             inputs = self.data_set.generate_sample(strategy='random-choice',
                                                    sample=True,
                                                    n_samples=n_samples)
         else:
-            inputs = self.data_set
+            inputs = self.data_set.data
 
-        original_predictions = model_instance.predict(inputs.data)
+        original_predictions = model_instance.predict(inputs)
         model_type = model_instance.model_type
 
         if progressbar:
@@ -175,23 +179,23 @@ class FeatureImportance(BaseGlobalInterpretation):
         n_jobs = None if n_jobs < 0 else n_jobs
         arg_list = self.data_set.feature_ids
         fi_func = partial(compute_feature_importance,
-                          input_data=inputs.data,
+                          input_data=inputs,
                           estimator_fn=predict_fn,
                           original_predictions=original_predictions,
                           feature_info=self.data_set.feature_info,
                           feature_names=self.data_set.feature_ids,
-                          index=inputs.index,
                           training_labels=training_labels,
                           method=method,
                           model_type=model_type)
 
         executor_instance = Pool(n_jobs)
+        mapper = executor_instance.imap if progressbar else executor_instance.map
         importances = {}
         try:
             if n_jobs == 1:
                 raise ValueError("Skipping to single processing")
             importance_dicts = []
-            for importance in executor_instance.map(fi_func, arg_list):
+            for importance in mapper(fi_func, arg_list):
                 importance_dicts.append(importance)
                 if progressbar:
                     p.animate()

@@ -3,8 +3,9 @@
 from itertools import product, cycle
 import numpy as np
 import pandas as pd
-from pathos.multiprocessing import Pool
+from multiprocess import Pool
 import functools
+import sys
 
 from ...data import DataManager
 from .base import BaseGlobalInterpretation
@@ -99,6 +100,8 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data, fil
             pd_dict[target_columns[class_i]] = mean_prediction[class_i]
         pd_dict['sd'] = std_prediction[0]
 
+    sys.stdout.flush()
+
     return pd_dict
 
 
@@ -141,8 +144,8 @@ class PartialDependence(BaseGlobalInterpretation):
             feature_ids = [feature_ids]
 
         if len(feature_ids) >= 3:
-            too_many_features_err_msg = "Pass in at most 2 features for pdp. If you have a " \
-                                        "use case where you'd like to look at 3 simultaneously" \
+            too_many_features_err_msg = "Pass in at most 2 features for pdp. If you have a \n" \
+                                        "use case where you'd like to look at 3 simultaneously \n" \
                                         ", please let us know."
             raise(exceptions.TooManyFeaturesError(too_many_features_err_msg))
 
@@ -241,20 +244,23 @@ class PartialDependence(BaseGlobalInterpretation):
         >>> interpreter.partial_dependence.partial_dependence(features,model)
         """
 
+        if progressbar:
+            self.interpreter.logger.warn("Progress bars slow down runs by 10-20%. For slightly \n"
+                                         "faster runs, do progress_bar=False")
         if self.data_set is None:
-            load_data_not_called_err_msg = "self.interpreter.data_set not found. " \
-                                           "Please call Interpretation.load_data " \
+            load_data_not_called_err_msg = "self.interpreter.data_set not found. \n" \
+                                           "Please call Interpretation.load_data \n" \
                                            "before running this method."
             raise(exceptions.DataSetNotLoadedError(load_data_not_called_err_msg))
 
         feature_ids = self._check_features(feature_ids)
 
         if filter_classes:
-            err_msg = "members of filter classes must be" \
-                      "members of modelinstance.classes." \
-                      "Expected members of: " \
+            err_msg = "members of filter classes must be \n" \
+                      "members of modelinstance.classes. \n" \
+                      "Expected members of: \n" \
                       "{0}\n" \
-                      "got: " \
+                      "got: \n" \
                       "{1}".format(modelinstance.target_names,
                                    filter_classes)
             filter_classes = list(filter_classes)
@@ -262,17 +268,17 @@ class PartialDependence(BaseGlobalInterpretation):
 
         # TODO: There might be a better place to do this check
         if not isinstance(modelinstance, ModelType):
-            raise(exceptions.ModelError("Incorrect estimator function used for computing partial dependence, try one "
-                                        "creating one with skater.model.local.InMemoryModel or"
+            raise(exceptions.ModelError("Incorrect estimator function used for computing partial dependence, try one \n"
+                                        "creating one with skater.model.local.InMemoryModel or \n"
                                         "skater.model.remote.DeployedModel"))
 
         if modelinstance.model_type == 'classifier' and modelinstance.probability is False:
 
             if modelinstance.unique_values is None:
-                raise(exceptions.ModelError('If using classifier without probability scores, unique_values cannot '
+                raise(exceptions.ModelError('If using classifier without probability scores, unique_values cannot \n'
                                             'be None'))
-            self.interpreter.logger.warn("Classifiers with probability scores can be explained "
-                                         "more granularly than those without scores. If a prediction method with "
+            self.interpreter.logger.warn("Classifiers with probability scores can be explained \n"
+                                         "more granularly than those without scores. If a prediction method with \n"
                                          "scores is available, use that instead.")
 
         # TODO: This we can change easily to functional style
@@ -282,8 +288,8 @@ class PartialDependence(BaseGlobalInterpretation):
                 missing_feature_ids.append(feature_id)
 
         if missing_feature_ids:
-            missing_feature_id_err_msg = "Features {0} not found in " \
-                                         "Interpretation.data_set.feature_ids" \
+            missing_feature_id_err_msg = "Features {0} not found in \n" \
+                                         "Interpretation.data_set.feature_ids \n" \
                                          "{1}".format(missing_feature_ids, self.data_set.feature_ids)
             raise(KeyError(missing_feature_id_err_msg))
 
@@ -300,6 +306,8 @@ class PartialDependence(BaseGlobalInterpretation):
             examples = self.data_set.generate_sample(strategy='random-choice',
                                                      sample=True,
                                                      n_samples=10)
+
+            examples = DataManager(examples, feature_names=self.data_set.feature_ids)
             modelinstance._build_model_metadata(examples)
 
         # if you dont pass a grid, build one.
@@ -352,21 +360,21 @@ class PartialDependence(BaseGlobalInterpretation):
                                     estimator_fn=predict_fn,
                                     grid_expanded=grid_expanded,
                                     pd_metadata=_pdp_metadata,
-                                    input_data=data_sample.data,
+                                    input_data=data_sample,
                                     filter_classes=filter_classes)
         arg_list = [i for i in range(grid_expanded.shape[0])]
         executor_instance = Pool(n_jobs)
+
+        mapper = executor_instance.imap if progressbar else executor_instance.map
         p = ProgressBar(len(arg_list), units='grid cells')
         pd_list = []
         try:
-            # pd_list = executor_instance.map(pd_func, arg_list)
-            for pd_row in executor_instance.map(pd_func, arg_list):
+            for pd_row in mapper(pd_func, arg_list):
                 if progressbar:
                     p.animate()
                 pd_list.append(pd_row)
         except:
-            self.interpreter.logger.debug("Multiprocessing failed, going single process")
-            # pd_list = map(pd_func, arg_list)
+            self.interpreter.logger.warn("Multiprocessing failed, going single process")
             for pd_row in map(pd_func, arg_list):
                 if progressbar:
                     p.animate()

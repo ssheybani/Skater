@@ -276,19 +276,16 @@ class DataManager(object):
 
     def __getitem_pandas__(self, i):
         """if you passed in a pandas dataframe, it has columns which are strings."""
-        if StaticTypes.data_types.return_data_type(i) == StaticTypes.output_types.iterable:
-            return DataManager(self.data[i], feature_names=i, index=self.index)
-        else:
-            return DataManager(pd.DataFrame(self.data[i]), feature_names=[i], index=self.index)
+        return self.data[i]
 
     def __getitem_ndarray__(self, i):
         """if you passed in a pandas dataframe, it has columns which are strings."""
         if StaticTypes.data_types.return_data_type(i) == StaticTypes.output_types.iterable:
             idx = [self.feature_ids.index(j) for j in i]
-            return DataManager(self.data[:, idx], feature_names=i, index=self.index)
+            return self.data[:, idx]
         elif StaticTypes.data_types.is_string(i) or StaticTypes.data_types.is_numeric(i):
             idx = self.feature_ids.index(i)
-            return DataManager(self.data[:, idx], feature_names=[i], index=self.index)
+            return self.data[:, idx]
         else:
             raise(ValueError("Unrecongized index type: {}. This should not happen, "
                              "submit a issue here: "
@@ -311,13 +308,13 @@ class DataManager(object):
             i = [self.index.index(i) for i in idx]
         else:
             i = [self.index[idx]]
-        return DataManager(self.data.iloc[i], feature_names=self.feature_ids, index=idx)
+        return self.data.iloc[i]
 
 
     def __getrows_ndarray__(self, idx):
         """if you passed in a pandas dataframe, it has columns which are strings."""
         i = [self.index.index(i) for i in idx]
-        return DataManager(self.data[i], feature_names=self.feature_ids, index=idx)
+        return self.data[i]
 
 
     def generate_sample(self, sample=True, strategy='random-choice', n_samples=1000,
@@ -404,7 +401,10 @@ class DataManager(object):
 
 
         """
-        return self[feature_id].generate_sample(*args, **kwargs)
+        dm = DataManager(self[feature_id],
+                         feature_names=[feature_id],
+                         index=self.index)
+        return dm.generate_sample(*args, **kwargs)
 
     def set_index(self, index):
         self.index = index
