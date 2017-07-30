@@ -151,6 +151,10 @@ class FeatureImportance(BaseGlobalInterpretation):
             raise FeatureImportanceError("If interpretation.training_labels are not set, you"
                                          "can only use feature importance methods that do "
                                          "not require ground truth labels")
+        elif method == 'performance-decrease':
+            training_labels = self.training_labels.data
+        else:
+            training_labels = None
 
         if n_samples <= self.data_set.n_rows:
             inputs = self.data_set.generate_sample(strategy='random-choice',
@@ -177,7 +181,7 @@ class FeatureImportance(BaseGlobalInterpretation):
                           feature_info=self.data_set.feature_info,
                           feature_names=self.data_set.feature_ids,
                           index=inputs.index,
-                          training_labels=self.training_labels.data,
+                          training_labels=training_labels,
                           method=method,
                           model_type=model_type)
 
@@ -283,8 +287,9 @@ class FeatureImportance(BaseGlobalInterpretation):
             importances.sort_values(ascending=True).plot(kind='barh', ax=ax, color=color)
         return f, ax
 
-def compute_importance(new_predictions, original_predictions, training_labels, original_x, perturbed_x,
-                       method='output-variance', scaled=False, model_type='regression'):
+def compute_importance(new_predictions, original_predictions, original_x, perturbed_x,
+                       training_labels, method='output-variance', scaled=False,
+                       model_type='regression'):
     if method == 'output-variance':
         importance = compute_importance_via_output_variance(np.array(new_predictions),
                                                             np.array(original_predictions),
@@ -294,9 +299,9 @@ def compute_importance(new_predictions, original_predictions, training_labels, o
     elif method == 'performance-decrease':
         importance = compute_importance_via_performance_decrease(np.array(new_predictions),
                                                                  np.array(original_predictions),
-                                                                 training_labels,
                                                                  np.array(original_x),
                                                                  np.array(perturbed_x),
+                                                                 training_labels,
                                                                  model_type,
                                                                  scaled)
 
