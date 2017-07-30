@@ -15,6 +15,11 @@ class ModelInterpreter(object):
         """data_set routes to the Interpreter's dataset"""
         return self.interpreter.data_set
 
+    @property
+    def training_labels(self):
+        """training_labels routes to the Interpreter's training labels"""
+        return self.interpreter.training_labels
+
     @staticmethod
     def _types():
         return ['partial_dependence', 'lime']

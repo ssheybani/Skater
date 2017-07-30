@@ -12,11 +12,34 @@ from ...util.exceptions import *
 from ...model.base import ModelType
 from ...util.dataops import divide_zerosafe
 from ...util.progressbar import ProgressBar
+from ...util.static_types import StaticTypes
 
+from sklearn.metrics import log_loss, mean_absolute_error
+from sklearn.utils.multiclass import type_of_target
+
+class Scorer(object):
+    def __init__(self, predictions, labels, model_type):
+        assert predictions.shape[0] == labels.shape[0], "labels and prediction shapes dont match" \
+                                                        "predictions: {0}, labels: {1}".format(predictions.shape,
+                                                                                               labels.shape)
+        # continuous, binary, continuous multioutput, multiclass, multilabel-indicator
+        self.prediction_type = type_of_target(predictions)
+        self.label_type = type_of_target(labels)
+        self.labels = labels
+        self.predictions = predictions
+        self.model_type = model_type
+    def score(self):
+        if self.model_type == StaticTypes.model_types.classifier:
+            return log_loss(self.labels, self.predictions)
+        elif self.model_type == StaticTypes.model_types.regressor:
+            return mean_absolute_error(self.labels, self.predictions)
+        else:
+            raise ValueError("Model type unknown")
 
 def compute_feature_importance(feature_id, input_data, estimator_fn,
                                original_predictions, feature_info,
-                               feature_names, n):
+                               feature_names, index, training_labels=None,
+                               method='output-variance', model_type='regression'):
     """Global function for computing column-wise importance
 
     Parameters
@@ -41,33 +64,37 @@ def compute_feature_importance(feature_id, input_data, estimator_fn,
         {feature id: importance value}
     """
 
-    copy_of_data_set = DataManager(input_data.copy(), feature_names=feature_names)
+    copy_of_data_set = DataManager(input_data.copy(), feature_names=feature_names, index=index)
+    n = copy_of_data_set.n_rows
+
+    original_values = copy_of_data_set[feature_id]
 
     # collect perturbations
     if feature_info[feature_id]['numeric']:
-        samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n, method='stratified')
+        #data going in: (20, 1)
+        # n: 20
+        samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n, strategy='uniform-over-similarity-ranks')
     else:
-        samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n, method='random-choice')
+        samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n, strategy='random-choice')
+    copy_of_data_set[feature_id] = samples.values.reshape(-1)
 
-    # set the samples
-    copy_of_data_set[feature_id] = samples
+    new_predictions = estimator_fn(copy_of_data_set.values)
 
-    # predict based on perturbed values
-    new_predictions = estimator_fn(copy_of_data_set.data)
-
-    importance = compute_importance(new_predictions,
-                                    original_predictions,
-                                    copy_of_data_set[feature_id],
-                                    samples)
+    importance = compute_importance(new_predictions.data,
+                                    original_predictions.data,
+                                    training_labels,
+                                    original_values.data,
+                                    samples.data,
+                                    method=method,
+                                    model_type=model_type)
     return {feature_id: importance}
-
 
 class FeatureImportance(BaseGlobalInterpretation):
     """Contains methods for feature importance. Subclass of BaseGlobalInterpretation.
 
     """
 
-    def feature_importance(self, model_instance, ascending=True, filter_classes=None, n_jobs=-1, progressbar=True):
+    def feature_importance(self, model_instance, ascending=True, filter_classes=None, n_jobs=-1, progressbar=True, n_samples=5000, method='output-variance'):
 
         """
         Computes feature importance of all features related to a model instance.
@@ -76,6 +103,7 @@ class FeatureImportance(BaseGlobalInterpretation):
         Wei, Pengfei, Zhenzhou Lu, and Jingwen Song.
         "Variable Importance Analysis: A Comprehensive Review".
         Reliability Engineering & System Safety 142 (2015): 399-432.
+
 
         Parameters
         ----------
@@ -87,6 +115,10 @@ class FeatureImportance(BaseGlobalInterpretation):
         filter_classes: array type
             The classes to run partial dependence on. Default None invokes all classes.
             Only used in classification models.
+        method: string
+            How to compute feature importance. performance-decrease requires Interpretation.training_labels
+            output-variance: mean absolute value of changes in predictions, given perturbations.
+            performance-decrease: difference in log_loss or MAE of training_labels given perturbations.
 
         Returns
         -------
@@ -115,41 +147,52 @@ class FeatureImportance(BaseGlobalInterpretation):
             filter_classes = list(filter_classes)
             assert all([i in model_instance.target_names for i in filter_classes]), err_msg
 
-        original_predictions = model_instance.predict(self.data_set.data)
+        if method == 'performance-decrease' and self.training_labels is None:
+            raise FeatureImportanceError("If interpretation.training_labels are not set, you"
+                                         "can only use feature importance methods that do "
+                                         "not require ground truth labels")
 
-        n = original_predictions.shape[0]
+        if n_samples <= self.data_set.n_rows:
+            inputs = self.data_set.generate_sample(strategy='random-choice',
+                                                   sample=True,
+                                                   n_samples=n_samples)
+        else:
+            inputs = self.data_set
+
+        original_predictions = model_instance.predict(inputs.data)
+        model_type = model_instance.model_type
 
         if progressbar:
             n_iter = len(self.data_set.feature_ids)
             p = ProgressBar(n_iter, units='features')
 
-        # copy_of_data_set = DataManager(self.data_set.data.copy(),
-        #                                feature_names=self.data_set.feature_ids,
-        #                                index=self.data_set.index)
-
         # prep for multiprocessing
         predict_fn = model_instance._get_static_predictor()
         n_jobs = None if n_jobs < 0 else n_jobs
         arg_list = self.data_set.feature_ids
-        # just a function of feature_id
         fi_func = partial(compute_feature_importance,
-                          input_data=self.data_set.data.copy(),
+                          input_data=inputs.data,
                           estimator_fn=predict_fn,
                           original_predictions=original_predictions,
                           feature_info=self.data_set.feature_info,
                           feature_names=self.data_set.feature_ids,
-                          n=n)
+                          index=inputs.index,
+                          training_labels=self.training_labels.data,
+                          method=method,
+                          model_type=model_type)
 
         executor_instance = Pool(n_jobs)
         importances = {}
         try:
+            if n_jobs == 1:
+                raise ValueError("Skipping to single processing")
             importance_dicts = []
             for importance in executor_instance.map(fi_func, arg_list):
                 importance_dicts.append(importance)
                 if progressbar:
                     p.animate()
         except:
-            self.interpreter.logger.debug("Multiprocessing failed, going single process")
+            self.interpreter.logger.warn("Multiprocessing failed, going single process")
             importance_dicts = []
             for importance in map(fi_func, arg_list):
                 importance_dicts.append(importance)
@@ -167,13 +210,12 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         if not importances.sum() > 0:
             self.interpreter.logger.debug("Importances that caused a bug: {}".format(importances))
-            raise(FeatureImportanceError("Something went wrong. Importances do not sum to a positive value"
-                                         "This could be due to:"
-                                         "1) 0 or infinite divisions"
-                                         "2) perturbed values == original values"
-                                         "3) feature is a constant"
-                                         ""
-                                         "Please submit an issue here:"
+            raise(FeatureImportanceError("Something went wrong. Importances do not sum to a positive value\n"
+                                         "This could be due to:\n"
+                                         "1) 0 or infinite divisions\n"
+                                         "2) perturbed values == original values\n"
+                                         "3) feature is a constant\n"
+                                         "Please submit an issue here:\n"
                                          "https://github.com/datascienceinc/Skater/issues"))
 
         importances = divide_zerosafe(importances, (np.ones(importances.shape[0]) * importances.sum()))
@@ -241,15 +283,23 @@ class FeatureImportance(BaseGlobalInterpretation):
             importances.sort_values(ascending=True).plot(kind='barh', ax=ax, color=color)
         return f, ax
 
-
-def compute_importance(new_predictions, original_predictions, original_x, perturbed_x,
-                       method='output-variance', scaled=False):
+def compute_importance(new_predictions, original_predictions, training_labels, original_x, perturbed_x,
+                       method='output-variance', scaled=False, model_type='regression'):
     if method == 'output-variance':
         importance = compute_importance_via_output_variance(np.array(new_predictions),
                                                             np.array(original_predictions),
                                                             np.array(original_x),
                                                             np.array(perturbed_x),
                                                             scaled)
+    elif method == 'performance-decrease':
+        importance = compute_importance_via_performance_decrease(np.array(new_predictions),
+                                                                 np.array(original_predictions),
+                                                                 training_labels,
+                                                                 np.array(original_x),
+                                                                 np.array(perturbed_x),
+                                                                 model_type,
+                                                                 scaled)
+
     else:
         raise(KeyError("Unrecongized method for computing feature_importance: {}".format(method)))
     return importance
@@ -257,7 +307,7 @@ def compute_importance(new_predictions, original_predictions, original_x, pertur
 
 def compute_importance_via_output_variance(new_predictions, original_predictions,
                                            original_x, perturbed_x, scaled=True):
-    """Mean absolute error of predictions given perturbations in a feature"""
+    """Mean absolute change in predictions given perturbations in a feature"""
     changes_in_predictions = abs(new_predictions - original_predictions)
 
     if scaled:
@@ -266,7 +316,20 @@ def compute_importance_via_output_variance(new_predictions, original_predictions
     importance = np.mean(changes_in_predictions)
     return importance
 
+def compute_importance_via_performance_decrease(new_predictions, original_predictions, training_labels,
+                                                original_x, perturbed_x, model_type, scaled=True):
+
+    """Mean absolute error of predictions given perturbations in a feature"""
+    scorer1 = Scorer(new_predictions, training_labels.reshape(-1), model_type)
+    scorer2 = Scorer(original_predictions, training_labels, model_type)
+    score1 = scorer1.score()
+    score2 = scorer2.score()
+
+    return abs(min(score2 - score1, 0))
 
 def importance_scaler(values, original_x, perturbed_x):
     raise(NotImplementedError("We currently don't support scaling, we are researching the best"
                               "approaches to do so."))
+
+
+

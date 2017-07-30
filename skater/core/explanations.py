@@ -35,7 +35,7 @@ class Interpretation(object):
     interpreter.partial_dependence([feature_id1, feature_id2], regressor.predict)
     """
 
-    def __init__(self, training_data=None, feature_names=None, index=None,
+    def __init__(self, training_data=None, training_labels=None, feature_names=None, index=None,
                  log_level=30):
         """
         Attaches local and global interpretations
@@ -53,6 +53,10 @@ class Interpretation(object):
         self.partial_dependence = PartialDependence(self)
         self.feature_importance = FeatureImportance(self)
         self.data_set = None
+        self.training_labels = None
+        if training_labels is not None:
+            self.training_labels = DataManager(training_labels, index=index)
+
 
         if training_data is not None:
             self.load_data(training_data, feature_names=feature_names, index=index)

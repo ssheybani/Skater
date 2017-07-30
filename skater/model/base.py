@@ -80,6 +80,10 @@ class ModelType(object):
         """
         The way in which the submodule predicts values given an input
         """
+        if self.has_metadata is False:
+            self.has_metadata = True
+            examples = DataManager(*args, feature_names=self.feature_names)
+            self._build_model_metadata(examples)
         return self.transformer(self.output_formatter(self._execute(self.input_formatter(*args, **kwargs))))
 
 
@@ -233,7 +237,7 @@ class ModelType(object):
         self.logger.debug("Label shape: {}".format(len(_labels.shape)))
         output = self.one_hot_encoder.transform(_labels).todense()
         output = np.squeeze(np.asarray(output))
-        return DataManager(output, feature_names=self.label_encoder.classes_)[self.unique_values]
+        return DataManager(output, feature_names=self.label_encoder.classes_)[self.unique_values].data
 
 
     def transformer_func_factory(self, outputs):
@@ -304,7 +308,7 @@ class ModelType(object):
         if subset_of_classes is None:
             return self.predict(data)
         else:
-            return DataManager(self.predict(data), feature_names=self.target_names)[subset_of_classes]
+            return DataManager(self.predict(data), feature_names=self.target_names)[subset_of_classes].data
 
 
     @staticmethod
