@@ -159,7 +159,7 @@ class PartialDependence(BaseGlobalInterpretation):
     def partial_dependence(self, feature_ids, modelinstance, filter_classes=None, grid=None,
                            grid_resolution=30, n_jobs=-1, grid_range=None, sample=True,
                            sampling_strategy='random-choice', n_samples=1000,
-                           bin_count=50, samples_per_bin=10, return_metadata=False,
+                           bin_count=50, return_metadata=False,
                            progressbar=True):
 
         """
@@ -330,7 +330,6 @@ class PartialDependence(BaseGlobalInterpretation):
         data_sample = self.data_set.generate_sample(strategy=sampling_strategy,
                                                     sample=sample,
                                                     n_samples=n_samples,
-                                                    samples_per_bin=samples_per_bin,
                                                     bin_count=bin_count)
 
         _pdp_metadata = self._build_metadata_dict(modelinstance, feature_ids, self.data_set.feature_ids, filter_classes)
@@ -386,8 +385,8 @@ class PartialDependence(BaseGlobalInterpretation):
     def plot_partial_dependence(self, feature_ids, modelinstance, filter_classes=None,
                                 grid=None, grid_resolution=30, grid_range=None,
                                 n_jobs=-1, sample=True, sampling_strategy='random-choice',
-                                n_samples=1000, bin_count=50, samples_per_bin=10,
-                                with_variance=False, figsize=(16, 10), progressbar=True):
+                                n_samples=1000, bin_count=50, with_variance=False,
+                                figsize=(16, 10), progressbar=True):
         """
         Computes partial_dependence of a set of variables. Essentially approximates
         the partial partial_dependence of the predict_fn with respect to the variables
@@ -502,7 +501,6 @@ class PartialDependence(BaseGlobalInterpretation):
                                                       grid_range=grid_range, sample=sample,
                                                       sampling_strategy=sampling_strategy,
                                                       n_samples=n_samples, bin_count=bin_count,
-                                                      samples_per_bin=samples_per_bin,
                                                       n_jobs=n_jobs, return_metadata=True,
                                                       progressbar=progressbar)
 
@@ -518,7 +516,6 @@ class PartialDependence(BaseGlobalInterpretation):
                                                           grid_range=grid_range, sample=sample,
                                                           sampling_strategy=sampling_strategy,
                                                           n_samples=n_samples, bin_count=bin_count,
-                                                          samples_per_bin=samples_per_bin,
                                                           n_jobs=n_jobs, return_metadata=True,
                                                           progressbar=progressbar)
 
