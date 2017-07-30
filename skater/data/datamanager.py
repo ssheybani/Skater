@@ -258,20 +258,13 @@ class DataManager(object):
 
     def __setcolumn_ndarray__(self, i, newval):
         """if you passed in a pandas dataframe, it has columns which are strings."""
-        try:
-            if i in self.feature_ids:
-                idx = self.feature_ids.index(i)
-                self.data[:, idx] = newval
-            else:
-                self.data = add_column_numpy_array(self.data, newval)
-                self.feature_ids.append(i)
-        except:
-            self.logger.warn("data shape: {}".format(self.data.shape))
-            self.logger.warn("i: {}".format(i))
-            self.logger.warn("newval shape: {}".format(newval.shape))
-            self.logger.warn("newval: {}".format(newval))
-            raise ValueError("failed to set numpy column of")
 
+        if i in self.feature_ids:
+            idx = self.feature_ids.index(i)
+            self.data[:, idx] = newval
+        else:
+            self.data = add_column_numpy_array(self.data, newval)
+            self.feature_ids.append(i)
 
     def __getitem__(self, key):
         if issubclass(self.data_type, pd.DataFrame) or issubclass(self.data_type, pd.Series):
