@@ -299,7 +299,7 @@ class PartialDependence(BaseGlobalInterpretation):
         if not modelinstance.has_metadata:
             examples = self.data_set.generate_sample(strategy='random-choice',
                                                      sample=True,
-                                                     n_samples_from_dataset=10)
+                                                     n_samples=10)
             examples = DataManager(examples, feature_names=self.data_set.feature_ids)
             modelinstance._build_model_metadata(examples)
 
@@ -329,7 +329,7 @@ class PartialDependence(BaseGlobalInterpretation):
         # generate data
         data_sample = self.data_set.generate_sample(strategy=sampling_strategy,
                                                     sample=sample,
-                                                    n_samples_from_dataset=n_samples,
+                                                    n_samples=n_samples,
                                                     samples_per_bin=samples_per_bin,
                                                     bin_count=bin_count)
 
@@ -354,7 +354,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                     estimator_fn=predict_fn,
                                     grid_expanded=grid_expanded,
                                     pd_metadata=_pdp_metadata,
-                                    input_data=data_sample,
+                                    input_data=data_sample.data,
                                     filter_classes=filter_classes)
         arg_list = [i for i in range(grid_expanded.shape[0])]
         executor_instance = Pool(n_jobs)
