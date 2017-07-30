@@ -142,7 +142,7 @@ class DataManager(object):
         bins = np.linspace(*grid_range, num=grid_resolution).tolist()
         grid = []
         for feature_id in feature_ids:
-            data = self[feature_id]
+            data = self[feature_id].data
             info = self.feature_info[feature_id]
             # if a feature is categorical (non numeric) or
             # has a small number of unique values, we'll just
@@ -258,12 +258,19 @@ class DataManager(object):
 
     def __setcolumn_ndarray__(self, i, newval):
         """if you passed in a pandas dataframe, it has columns which are strings."""
-        if i in self.feature_ids:
-            idx = self.feature_ids.index(i)
-            self.data[:, idx] = newval
-        else:
-            self.data = add_column_numpy_array(self.data, newval)
-            self.feature_ids.append(i)
+        try:
+            if i in self.feature_ids:
+                idx = self.feature_ids.index(i)
+                self.data[:, idx] = newval
+            else:
+                self.data = add_column_numpy_array(self.data, newval)
+                self.feature_ids.append(i)
+        except:
+            self.logger.warn("data shape: {}".format(self.data.shape))
+            self.logger.warn("i: {}".format(i))
+            self.logger.warn("newval shape: {}".format(newval.shape))
+            self.logger.warn("newval: {}".format(newval))
+            raise ValueError("failed to set numpy column of")
 
 
     def __getitem__(self, key):
