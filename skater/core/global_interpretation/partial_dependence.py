@@ -300,7 +300,6 @@ class PartialDependence(BaseGlobalInterpretation):
             examples = self.data_set.generate_sample(strategy='random-choice',
                                                      sample=True,
                                                      n_samples=10)
-            examples = DataManager(examples, feature_names=self.data_set.feature_ids)
             modelinstance._build_model_metadata(examples)
 
         # if you dont pass a grid, build one.
