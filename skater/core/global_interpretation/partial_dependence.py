@@ -549,8 +549,6 @@ class PartialDependence(BaseGlobalInterpretation):
                           with_variance=False, plot_title=None,
                           disable_offset=True, figsize=(16, 10)):
 
-        sd_col =
-
         feature_columns = pd_metadata['feature_columns_for_pd']
         if pd_metadata['filtered_target_names'] is None:
             target_columns = pd_metadata['target_names']
