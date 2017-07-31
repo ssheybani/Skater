@@ -249,7 +249,7 @@ class FeatureImportance(BaseGlobalInterpretation):
         importances.sort_values(ascending=ascending).plot(kind='barh', ax=ax, color=color)
         return f, ax
 
-
+    @staticmethod
     def compute_feature_importance(feature_id, input_data, estimator_fn,
                                    original_predictions, feature_info,
                                    feature_names, training_labels=None,
