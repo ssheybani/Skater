@@ -353,7 +353,7 @@ class DataManager(object):
         self.logger.debug("Generating sample with args:\n {}".format(arg_dict))
 
         if not sample:
-            return self
+            return self.data
 
         if strategy == 'random-choice':
             idx = np.random.choice(self.index, size=n_samples, replace=replace)
