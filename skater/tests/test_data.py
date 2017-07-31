@@ -93,7 +93,7 @@ class TestData(unittest.TestCase):
         X_as_dataframe = pd.DataFrame(self.X, columns=self.feature_names, index=self.index)
         data_set = DataManager(X_as_dataframe,
                                log_level=self.log_level,
-                               index = self.index,
+                               index=self.index,
                                feature_names=self.feature_names)
 
         assert data_set.feature_ids == self.feature_names, "Feature Names from DataFrame " \

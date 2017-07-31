@@ -67,6 +67,3 @@ class StaticTypes(object):
     data_types = DataTypes
     unknown = 'unknown'
     not_applicable = 'not applicable'
-
-
-

@@ -23,15 +23,9 @@ class Scorer(object):
         self.labels = labels
         self.predictions = predictions
         self.model_type = model_type
-        #print(self.label_type)
-        #print(self.labels)
 
 
     def score(self, sample_weights=None):
-        # if sample_weights is not None:
-        #     print('samples weights: ', sample_weights.shape)
-        #     print('preds: ' ,self.predictions.shape)
-        #     print('labels: ', self.labels.shape)
         if self.model_type == StaticTypes.model_types.classifier:
             return log_loss(self.labels, self.predictions, sample_weight=sample_weights)
         elif self.model_type == StaticTypes.model_types.regressor:

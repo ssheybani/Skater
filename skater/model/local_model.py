@@ -100,7 +100,7 @@ class InMemoryModel(ModelType):
         predict_fn = partial(self._predict,
                              transformer=self.transformer,
                              predict_fn=self.prediction_fn,
-                             input_formatter = self.input_formatter,
+                             input_formatter=self.input_formatter,
                              output_formatter=self.output_formatter,
                              )
         return predict_fn

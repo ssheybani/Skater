@@ -170,7 +170,7 @@ class FeatureImportance(BaseGlobalInterpretation):
 
 
     def plot_feature_importance(self, predict_fn, filter_classes=None, ascending=True, ax=None, progressbar=True,
-                                n_jobs = -1, n_samples=5000, method='output-variance', use_scaling=False):
+                                n_jobs=-1, n_samples=5000, method='output-variance', use_scaling=False):
 
         """Computes feature importance of all features related to a model instance,
         then plots the results. Supports classification, multi-class classification, and regression.
@@ -304,13 +304,13 @@ class FeatureImportance(BaseGlobalInterpretation):
         new_predictions = estimator_fn(copy_of_data_set.values)
 
         importance = FeatureImportance.compute_importance(new_predictions,
-                                        original_predictions,
-                                        original_values,
-                                        samples,
-                                        training_labels,
-                                        method=method,
-                                        model_type=model_type,
-                                        scaled=scaled)
+                                                          original_predictions,
+                                                          original_values,
+                                                          samples,
+                                                          training_labels,
+                                                          method=method,
+                                                          model_type=model_type,
+                                                          scaled=scaled)
         return {feature_id: importance}
 
 
@@ -320,18 +320,18 @@ class FeatureImportance(BaseGlobalInterpretation):
                            model_type='regression'):
         if method == 'output-variance':
             importance = FeatureImportance._compute_importance_via_output_variance(np.array(new_predictions),
-                                                                np.array(original_predictions),
-                                                                np.array(original_x),
-                                                                np.array(perturbed_x),
-                                                                scaled)
+                                                                                   np.array(original_predictions),
+                                                                                   np.array(original_x),
+                                                                                   np.array(perturbed_x),
+                                                                                   scaled)
         elif method == 'performance-decrease':
             importance = FeatureImportance._compute_importance_via_performance_decrease(np.array(new_predictions),
-                                                                      np.array(original_predictions),
-                                                                      training_labels,
-                                                                      np.array(original_x),
-                                                                      np.array(perturbed_x),
-                                                                      model_type,
-                                                                      scaled)
+                                                                                        np.array(original_predictions),
+                                                                                        training_labels,
+                                                                                        np.array(original_x),
+                                                                                        np.array(perturbed_x),
+                                                                                        model_type,
+                                                                                        scaled)
 
         else:
             raise(KeyError("Unrecongized method for computing feature_importance: {}".format(method)))
@@ -339,7 +339,7 @@ class FeatureImportance(BaseGlobalInterpretation):
 
     @staticmethod
     def _compute_importance_via_output_variance(new_predictions, original_predictions,
-                                               original_x, perturbed_x, scaled=True):
+                                                original_x, perturbed_x, scaled=True):
         """Mean absolute change in predictions given perturbations in a feature"""
         changes_in_predictions = abs(new_predictions - original_predictions)
 
@@ -353,7 +353,7 @@ class FeatureImportance(BaseGlobalInterpretation):
 
     @staticmethod
     def _compute_importance_via_performance_decrease(new_predictions, original_predictions, training_labels,
-                                                    original_x, perturbed_x, model_type, scaled=True):
+                                                     original_x, perturbed_x, model_type, scaled=True):
 
         """Mean absolute error of predictions given perturbations in a feature"""
         if scaled:
@@ -377,8 +377,3 @@ class FeatureImportance(BaseGlobalInterpretation):
             scales = np.ones(perturbed_x.shape[0])
 
         return scales
-
-
-
-
-

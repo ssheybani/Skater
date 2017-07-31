@@ -366,6 +366,7 @@ class DataManager(object):
         elif strategy == 'uniform-over-similarity-ranks':
             sorted_index = self._build_metastore()['sorted_index']
             range_of_indices = list(range(len(sorted_index)))
+
             def aggregator(samples_per_bin, list_of_indicies):
                 n = samples_per_bin[aggregator.count]
                 result = str(np.random.choice(list_of_indicies, size=n).tolist())
@@ -410,4 +411,3 @@ class DataManager(object):
         self.index = index
         if self.data_type in (pd.DataFrame, pd.Series):
             self.data.index = index
-
