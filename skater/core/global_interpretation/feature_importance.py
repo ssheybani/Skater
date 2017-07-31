@@ -342,6 +342,8 @@ class FeatureImportance(BaseGlobalInterpretation):
                                                 original_x, perturbed_x, scaled=True):
         """Mean absolute change in predictions given perturbations in a feature"""
         changes_in_predictions = abs(new_predictions - original_predictions)
+        if len(changes_in_predictions.shape) == 1:
+            changes_in_predictions = changes_in_predictions[:, np.newaxis]
 
         if scaled:
             scales = FeatureImportance.importance_scaler(original_x, perturbed_x)
