@@ -95,13 +95,13 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data, fil
     if number_of_classes == 2 and filter_classes is None:
         target_column = target_columns[1]
         pd_dict[target_column] = mean_prediction[1]
-        pd_dict['sd_prediction'] = std_prediction[0]
-        pd_dict['sd_estimate'] = std_pdp[0]
+        pd_dict[PartialDependence._sd_names_['prediction']] = std_prediction[0]
+        pd_dict[PartialDependence._sd_names_['partial_dependence']] = std_pdp[0]
     else:
         for class_i in range(number_of_classes):
             pd_dict[target_columns[class_i]] = mean_prediction[class_i]
-        pd_dict['sd_prediction'] = std_prediction[0]
-        pd_dict['sd_estimate'] = std_pdp[0]
+        pd_dict[PartialDependence._sd_names_['prediction']] = std_prediction[0]
+        pd_dict[PartialDependence._sd_names_['partial_dependence']] = std_pdp[0]
 
     return pd_dict
 
@@ -117,10 +117,12 @@ class PartialDependence(BaseGlobalInterpretation):
 
     __all__ = ['partial_dependence', 'plot_partial_dependence']
 
-    def _build_metadata_dict(self, modelinstance, pd_feature_ids, data_feature_ids, filter_classes):
+    _sd_names_ = {'prediction':'sd_prediction', 'estimate': 'sd_estimate'}
+
+    def _build_metadata_dict(self, modelinstance, pd_feature_ids, data_feature_ids, filter_classes, variance_type):
 
         feature_columns = [self.feature_column_name_formatter(i) for i in pd_feature_ids]
-        sd_col = 'sd'
+        sd_col = PartialDependence._sd_names_[variance_type]
         if filter_classes is not None:
             filtered_target_names = [i for i in modelinstance.target_names if i in filter_classes]
         else:
@@ -164,7 +166,7 @@ class PartialDependence(BaseGlobalInterpretation):
                            grid_resolution=30, n_jobs=-1, grid_range=None, sample=True,
                            sampling_strategy='random-choice', n_samples=1000,
                            bin_count=50, return_metadata=False,
-                           progressbar=True):
+                           progressbar=True, variance_type='estimate'):
 
         """
         Approximates the partial dependence of the predict_fn with respect to the
@@ -222,6 +224,8 @@ class PartialDependence(BaseGlobalInterpretation):
             sampling_strategy = 'uniform-over-similarity-ranks'. If using
             sampling_strategy = 'uniform', use n_samples.
             total samples = bin_count * samples per bin.
+        variance_type: string
+
         return_metadata: boolean
 
         :Example:
@@ -340,7 +344,11 @@ class PartialDependence(BaseGlobalInterpretation):
                                                     n_samples=n_samples,
                                                     bin_count=bin_count)
 
-        _pdp_metadata = self._build_metadata_dict(modelinstance, feature_ids, self.data_set.feature_ids, filter_classes)
+        _pdp_metadata = self._build_metadata_dict(modelinstance,
+                                                  feature_ids,
+                                                  self.data_set.feature_ids,
+                                                  filter_classes,
+                                                  variance_type)
 
         self.interpreter.logger.debug("Shape of sampled data: {}".format(data_sample.shape))
         self.interpreter.logger.debug("Feature Ids: {}".format(feature_ids))
@@ -394,7 +402,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                 grid=None, grid_resolution=30, grid_range=None,
                                 n_jobs=-1, sample=True, sampling_strategy='random-choice',
                                 n_samples=1000, bin_count=50, with_variance=False,
-                                figsize=(16, 10), progressbar=True):
+                                figsize=(16, 10), progressbar=True, variance_type='estimate'):
         """
         Computes partial_dependence of a set of variables. Essentially approximates
         the partial partial_dependence of the predict_fn with respect to the variables
@@ -457,6 +465,10 @@ class PartialDependence(BaseGlobalInterpretation):
             3D pdp plots, let us know!
         plot_title(string):
             title for pdp plots
+        variance_type: string
+            if variance plotting is enabled, determines which variance to include.
+            estimate: the variance of the partial dependence estimates
+            prediction: the variances of the predictions at the given point
 
         Example
         --------
@@ -537,6 +549,8 @@ class PartialDependence(BaseGlobalInterpretation):
                           with_variance=False, plot_title=None,
                           disable_offset=True, figsize=(16, 10)):
 
+        sd_col =
+
         feature_columns = pd_metadata['feature_columns_for_pd']
         if pd_metadata['filtered_target_names'] is None:
             target_columns = pd_metadata['target_names']
@@ -582,8 +596,6 @@ class PartialDependence(BaseGlobalInterpretation):
             target_columns = [target_columns[-1]]
 
         for target_column in target_columns:
-            # if target_name is None:
-            #     raise ValueError("Could not parse class name from {}".format(mean_col))
             f, ax = pyplot.subplots(1, figsize=figsize)
             figure_list.append(f)
             axis_list.append(ax)
