@@ -91,7 +91,10 @@ class TestData(unittest.TestCase):
         Ensure DataManager(data) works when data is pd.DataFrame
         """
         X_as_dataframe = pd.DataFrame(self.X, columns=self.feature_names, index=self.index)
-        data_set = DataManager(X_as_dataframe, log_level=self.log_level)
+        data_set = DataManager(X_as_dataframe,
+                               log_level=self.log_level,
+                               index = self.index,
+                               feature_names=self.feature_names)
 
         assert data_set.feature_ids == self.feature_names, "Feature Names from DataFrame " \
                                                            "not loaded properly"

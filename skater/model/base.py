@@ -80,10 +80,6 @@ class ModelType(object):
         """
         The way in which the submodule predicts values given an input
         """
-        if self.has_metadata is False:
-            self.has_metadata = True
-            examples = DataManager(*args, feature_names=self.feature_names)
-            self._build_model_metadata(examples)
         return self.transformer(self.output_formatter(self._execute(self.input_formatter(*args, **kwargs))))
 
 
