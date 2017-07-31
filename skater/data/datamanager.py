@@ -206,7 +206,7 @@ class DataManager(object):
         for feature in self.feature_ids:
             x = self[feature]
             samples = self.generate_column_sample(feature, n_samples=10)
-            samples_are_numeric = map(StaticTypes.data_types.is_numeric, np.array(samples.data))
+            samples_are_numeric = map(StaticTypes.data_types.is_numeric, np.array(samples))
             is_numeric = all(samples_are_numeric)
             feature_info[feature] = {
                 'type': self.dtypes.loc[feature],
