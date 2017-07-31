@@ -96,7 +96,7 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data, fil
     if number_of_classes == 2 and filter_classes is None:
         target_column = target_columns[1]
         pd_dict[target_column] = mean_prediction[1]
-        pd_dict[PartialDependence._sd_names_['prediction']] = std_prediction[
+        pd_dict[PartialDependence._sd_names_['prediction']] = std_prediction[0]
         pd_dict[PartialDependence._sd_names_['estimate']] = std_pdp[0]
     else:
         for class_i in range(number_of_classes):
