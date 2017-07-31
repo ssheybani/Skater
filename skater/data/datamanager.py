@@ -142,7 +142,7 @@ class DataManager(object):
         bins = np.linspace(*grid_range, num=grid_resolution).tolist()
         grid = []
         for feature_id in feature_ids:
-            data = self[feature_id].data
+            data = self[feature_id]
             info = self.feature_info[feature_id]
             # if a feature is categorical (non numeric) or
             # has a small number of unique values, we'll just
