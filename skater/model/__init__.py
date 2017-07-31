@@ -7,5 +7,6 @@ to define how to type inference.
 
 from .local_model import InMemoryModel
 from .deployed_model import DeployedModel
+from .scorer import Scorer
 
-__all__ = ['InMemoryModel', 'DeployedModel']
+__all__ = ['InMemoryModel', 'DeployedModel', 'Scorer']
