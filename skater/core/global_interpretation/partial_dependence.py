@@ -75,6 +75,7 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data, fil
     predictions = estimator_fn(data_set.data)
     mean_prediction = np.mean(predictions, axis=0)
     std_prediction = np.std(predictions, axis=0)
+    std_pdp = std_prediction / np.sqrt(predictions.shape[0])
 
     # Todo: add static version of model.predict_subset_classes, use here
     if len(predictions.shape) == 1:
@@ -94,13 +95,13 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data, fil
     if number_of_classes == 2 and filter_classes is None:
         target_column = target_columns[1]
         pd_dict[target_column] = mean_prediction[1]
-        pd_dict['sd'] = std_prediction[0]
+        pd_dict['sd_prediction'] = std_prediction[0]
+        pd_dict['sd_estimate'] = std_pdp[0]
     else:
         for class_i in range(number_of_classes):
             pd_dict[target_columns[class_i]] = mean_prediction[class_i]
-        pd_dict['sd'] = std_prediction[0]
-
-    sys.stdout.flush()
+        pd_dict['sd_prediction'] = std_prediction[0]
+        pd_dict['sd_estimate'] = std_pdp[0]
 
     return pd_dict
 

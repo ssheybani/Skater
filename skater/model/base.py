@@ -139,7 +139,7 @@ class ModelType(object):
         """
         self.logger.debug("Beginning output checks")
 
-        if self.input_type in (None, pd.DataFrame):
+        if self.input_type in (pd.DataFrame, ):
             outputs = self.predict(dataset.data)
         elif self.input_type == np.ndarray:
             outputs = self.predict(dataset.data)
@@ -233,7 +233,7 @@ class ModelType(object):
         self.logger.debug("Label shape: {}".format(len(_labels.shape)))
         output = self.one_hot_encoder.transform(_labels).todense()
         output = np.squeeze(np.asarray(output))
-        return DataManager(output, feature_names=self.label_encoder.classes_)[self.unique_values].data
+        return DataManager(output, feature_names=self.label_encoder.classes_)[self.unique_values]
 
 
     def transformer_func_factory(self, outputs):
