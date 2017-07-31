@@ -345,6 +345,11 @@ class PartialDependence(BaseGlobalInterpretation):
                                                     n_samples=n_samples,
                                                     bin_count=bin_count)
 
+        assert type(data_sample) == self.data_set.data_type, "Something went wrong\n" \
+                                                             "Theres a type mismatch between\n" \
+                                                             "the sampled data and the origina\nl" \
+                                                             "training set. Check Skater.models\n"
+
         _pdp_metadata = self._build_metadata_dict(modelinstance,
                                                   feature_ids,
                                                   self.data_set.feature_ids,
