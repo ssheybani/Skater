@@ -80,6 +80,10 @@ class ModelType(object):
         """
         The way in which the submodule predicts values given an input
         """
+        if self.has_metadata == False:
+            self.has_metadata = True
+            examples = DataManager(*args)
+            self._build_model_metadata(examples)
         return self.transformer(self.output_formatter(self._execute(self.input_formatter(*args, **kwargs))))
 
 
@@ -139,7 +143,7 @@ class ModelType(object):
         """
         self.logger.debug("Beginning output checks")
 
-        if self.input_type in (pd.DataFrame, ):
+        if self.input_type in (pd.DataFrame, None):
             outputs = self.predict(dataset.data)
         elif self.input_type == np.ndarray:
             outputs = self.predict(dataset.data)
