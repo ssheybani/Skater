@@ -3,6 +3,7 @@ from sklearn.utils.multiclass import type_of_target
 
 from ..util.static_types import StaticTypes
 
+
 class Scorer(object):
     """Skater's model scorer"""
 

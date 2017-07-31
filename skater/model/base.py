@@ -80,7 +80,7 @@ class ModelType(object):
         """
         The way in which the submodule predicts values given an input
         """
-        if self.has_metadata == False:
+        if self.has_metadata is False:
             self.has_metadata = True
             examples = DataManager(*args)
             self._build_model_metadata(examples)

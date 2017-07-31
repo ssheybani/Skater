@@ -118,7 +118,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
     __all__ = ['partial_dependence', 'plot_partial_dependence']
 
-    _sd_names_ = {'prediction':'sd_prediction', 'estimate': 'sd_estimate'}
+    _sd_names_ = {'prediction': 'sd_prediction', 'estimate': 'sd_estimate'}
 
     def _build_metadata_dict(self, modelinstance, pd_feature_ids, data_feature_ids, filter_classes, variance_type):
 
