@@ -96,12 +96,12 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data, fil
         target_column = target_columns[1]
         pd_dict[target_column] = mean_prediction[1]
         pd_dict[PartialDependence._sd_names_['prediction']] = std_prediction[0]
-        pd_dict[PartialDependence._sd_names_['partial_dependence']] = std_pdp[0]
+        pd_dict[PartialDependence._sd_names_['estimate']] = std_pdp[0]
     else:
         for class_i in range(number_of_classes):
             pd_dict[target_columns[class_i]] = mean_prediction[class_i]
         pd_dict[PartialDependence._sd_names_['prediction']] = std_prediction[0]
-        pd_dict[PartialDependence._sd_names_['partial_dependence']] = std_pdp[0]
+        pd_dict[PartialDependence._sd_names_['estimate']] = std_pdp[0]
 
     return pd_dict
 
