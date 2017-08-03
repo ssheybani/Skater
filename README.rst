@@ -20,6 +20,10 @@ to help enable practitioners explain and interpret predictive "black boxes" in a
 .. image:: https://api.travis-ci.com/repositories/datascienceinc/Skater.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master
     :target: https://travis-ci.com/datascienceinc/Skater
     :alt: Build Status
+    
+.. image:: https://coveralls.io/repos/github/datascienceinc/Skater/badge.svg?branch=master
+    :target: https://coveralls.io/github/datascienceinc/Skater?branch=master
+    
 
 📖 Documentation
 ================
