@@ -72,9 +72,62 @@ class TestFeatureImportance(unittest.TestCase):
 
 
     def test_feature_importance(self):
-        importances = self.interpreter.feature_importance.feature_importance(self.regressor_predict_fn)
-        self.assertEquals(np.isclose(importances.sum(), 1), True)  # default grid resolution is 100
+        importances = self.interpreter.feature_importance.feature_importance(self.regressor_predict_fn,
+                                                                             progressbar=False)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
 
+
+    def test_feature_importance_progressbar(self):
+        importances = self.interpreter.feature_importance.feature_importance(self.regressor_predict_fn,
+                                                                             progressbar=True)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
+
+    def test_feature_importance_entropy_with_and_without_scaling(self):
+        importances = self.interpreter.feature_importance.feature_importance(self.regressor_predict_fn,
+                                                                             progressbar=True,
+                                                                             use_scaling=True)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
+
+        importances = self.interpreter.feature_importance.feature_importance(self.regressor_predict_fn,
+                                                                             progressbar=True,
+                                                                             use_scaling=False)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
+
+    def test_feature_importance_regression_via_preformance_decrease(self):
+        interpreter =  Interpretation(self.X, feature_names=self.features, training_labels=self.y)
+        importances = interpreter.feature_importance.feature_importance(self.regressor_predict_fn,
+                                                                        method='performance-decrease',
+                                                                        use_scaling=False)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
+
+        importances = interpreter.feature_importance.feature_importance(self.regressor_predict_fn,
+                                                                        method='performance-decrease',
+                                                                        use_scaling=True)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
+
+    def test_feature_importance_classifier_via_preformance_decrease(self):
+        interpreter =  Interpretation(self.X, feature_names=self.features, training_labels=self.y_as_int)
+        importances = interpreter.feature_importance.feature_importance(self.classifier_predict_fn,
+                                                                        method='performance-decrease',
+                                                                        use_scaling=False)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
+
+        importances = interpreter.feature_importance.feature_importance(self.classifier_predict_fn,
+                                                                        method='performance-decrease',
+                                                                        use_scaling=True)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
+
+    def test_feature_importance_classifier_proba_via_preformance_decrease(self):
+        interpreter =  Interpretation(self.X, feature_names=self.features, training_labels=self.y_as_int)
+        importances = interpreter.feature_importance.feature_importance(self.classifier_predict_proba_fn,
+                                                                        method='performance-decrease',
+                                                                        use_scaling=False)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
+
+        importances = interpreter.feature_importance.feature_importance(self.classifier_predict_proba_fn,
+                                                                        method='performance-decrease',
+                                                                        use_scaling=True)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
 
     def test_plot_feature_importance(self):
         self.interpreter.feature_importance.plot_feature_importance(self.regressor_predict_fn)

@@ -310,6 +310,13 @@ class TestPartialDependence(unittest.TestCase):
             self.fail("1D Partial dependence failed when passing long string name")
 
 
+    def test_pd_with_variance_type_prediction(self):
+        pdp_df = self.interpreter.partial_dependence.partial_dependence(self.features[:1],
+                                                                        self.classifier_predict_fn,
+                                                                        grid_resolution=10,
+                                                                        variance_type='prediction')
+
+
 
 
 if __name__ == '__main__':
