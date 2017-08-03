@@ -311,10 +311,19 @@ class TestPartialDependence(unittest.TestCase):
 
 
     def test_pd_with_variance_type_prediction(self):
-        pdp_df = self.interpreter.partial_dependence.partial_dependence(self.features[:1],
+        try:
+            self.interpreter.partial_dependence.partial_dependence(self.features[:1],
+                                                                   self.classifier_predict_fn,
+                                                                   grid_resolution=10,
+                                                                   variance_type='prediction')
+            self.interpreter.partial_dependence.plot_partial_dependence(self.features[:1],
                                                                         self.classifier_predict_fn,
                                                                         grid_resolution=10,
                                                                         variance_type='prediction')
+        except:
+            self.fail("pd with Variance Type=prediction failed")
+
+
 
 
 
