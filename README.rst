@@ -126,7 +126,7 @@ Testing
 1. If repo is cloned:
 ::
 
-    python skate/tests/all_tests.py
+    python skater/tests/all_tests.py
 
 2. If pip installed:
 ::
