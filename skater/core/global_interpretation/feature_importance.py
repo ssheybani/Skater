@@ -51,10 +51,13 @@ class FeatureImportance(BaseGlobalInterpretation):
         n_samples: int
             How many samples to use when computing importance.
         method: string
-            How to compute feature importance. performance-decrease requires Interpretation.training_labels
+            How to compute feature importance. conditional-permutation requires Interpretation.training_labels.
+            Note this choice should only rarely makes any significant differences
+
             output-variance: mean absolute value of changes in predictions, given perturbations.
-            performance-decrease: difference in log_loss or MAE of training_labels given perturbations.
-            Note this vary rarely makes any significant differences
+
+            conditional-permutation: difference in log_loss or MAE of training_labels given perturbations.
+
         use_scaling: bool
             Whether to weight the importance values by the stregth of the perturbations.
 
@@ -85,18 +88,14 @@ class FeatureImportance(BaseGlobalInterpretation):
             filter_classes = list(filter_classes)
             assert all([i in model_instance.target_names for i in filter_classes]), err_msg
 
-        if method == 'performance-decrease' and self.training_labels is None:
+        if method == 'conditional-permutation' and self.training_labels is None:
             raise FeatureImportanceError("If interpretation.training_labels are not set, you"
                                          "can only use feature importance methods that do "
                                          "not require ground truth labels")
-        elif method == 'performance-decrease':
+        elif method == 'conditional-permutation':
             training_labels = self.training_labels.data
         else:
             training_labels = None
-
-        if progressbar:
-            self.interpreter.logger.warn("Progress bars slow down runs by 10-20%. For slightly \n"
-                                         "faster runs, do progress_bar=False")
 
         if n_samples <= self.data_set.n_rows:
             inputs = self.data_set.generate_sample(strategy='random-choice',
@@ -107,15 +106,20 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         original_predictions = model_instance.predict(inputs)
         model_type = model_instance.model_type
+        n_jobs = None if n_jobs < 0 else n_jobs
+        predict_fn = model_instance._get_static_predictor()
+        executor_instance = Pool(n_jobs)
+        arg_list = self.data_set.feature_ids
 
         if progressbar:
+            self.interpreter.logger.warn("Progress bars slow down runs by 10-20%. For slightly \n"
+                                         "faster runs, do progress_bar=False")
             n_iter = len(self.data_set.feature_ids)
             p = ProgressBar(n_iter, units='features')
+            mapper = executor_instance.imap
+        else:
+            mapper = executor_instance.map
 
-        # prep for multiprocessing
-        predict_fn = model_instance._get_static_predictor()
-        n_jobs = None if n_jobs < 0 else n_jobs
-        arg_list = self.data_set.feature_ids
         fi_func = partial(FeatureImportance.compute_feature_importance,
                           input_data=inputs,
                           estimator_fn=predict_fn,
@@ -127,8 +131,6 @@ class FeatureImportance(BaseGlobalInterpretation):
                           model_type=model_type,
                           scaled=use_scaling)
 
-        executor_instance = Pool(n_jobs)
-        mapper = executor_instance.imap if progressbar else executor_instance.map
         importances = {}
         try:
             if n_jobs == 1:
@@ -197,9 +199,9 @@ class FeatureImportance(BaseGlobalInterpretation):
         n_samples: int
             How many samples to use when computing importance.
         method: string
-            How to compute feature importance. performance-decrease requires Interpretation.training_labels
+            How to compute feature importance. conditional-permutation requires Interpretation.training_labels
             output-variance: mean absolute value of changes in predictions, given perturbations.
-            performance-decrease: difference in log_loss or MAE of training_labels given perturbations.
+            conditional-permutation: difference in log_loss or MAE of training_labels given perturbations.
             Note this vary rarely makes any significant differences
         use_scaling: bool
             Whether to weight the importance values by the stregth of the perturbations.
@@ -275,7 +277,7 @@ class FeatureImportance(BaseGlobalInterpretation):
             ground truth labels. only required if method="perfomance decrease"
         method: string
             output-variance: importance based on entropy of prediction changes given perturbations
-            performance-decrease: importance based on difference in prediction scores given changes
+            conditional-permutation: importance based on difference in prediction scores given changes
                                   given perturbations
         model_type: string
             regression or classifition
@@ -324,14 +326,14 @@ class FeatureImportance(BaseGlobalInterpretation):
                                                                                    np.array(original_x),
                                                                                    np.array(perturbed_x),
                                                                                    scaled)
-        elif method == 'performance-decrease':
-            importance = FeatureImportance._compute_importance_via_performance_decrease(np.array(new_predictions),
-                                                                                        np.array(original_predictions),
-                                                                                        training_labels,
-                                                                                        np.array(original_x),
-                                                                                        np.array(perturbed_x),
-                                                                                        model_type,
-                                                                                        scaled)
+        elif method == 'conditional-permutation':
+            importance = FeatureImportance._compute_importance_via_conditional_permutation(np.array(new_predictions),
+                                                                                           np.array(original_predictions),
+                                                                                           training_labels,
+                                                                                           np.array(original_x),
+                                                                                           np.array(perturbed_x),
+                                                                                           model_type,
+                                                                                           scaled)
 
         else:
             raise(KeyError("Unrecongized method for computing feature_importance: {}".format(method)))
@@ -354,8 +356,8 @@ class FeatureImportance(BaseGlobalInterpretation):
 
 
     @staticmethod
-    def _compute_importance_via_performance_decrease(new_predictions, original_predictions, training_labels,
-                                                     original_x, perturbed_x, model_type, scaled=True):
+    def _compute_importance_via_conditional_permutation(new_predictions, original_predictions, training_labels,
+                                                        original_x, perturbed_x, model_type, scaled=True):
 
         """Mean absolute error of predictions given perturbations in a feature"""
         if scaled:

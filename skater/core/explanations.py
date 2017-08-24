@@ -54,9 +54,9 @@ class Interpretation(object):
         self.feature_importance = FeatureImportance(self)
         self.data_set = None
         self.training_labels = None
+
         if training_labels is not None:
             self.training_labels = DataManager(training_labels, index=index)
-
 
         if training_data is not None:
             self.load_data(training_data, feature_names=feature_names, index=index)

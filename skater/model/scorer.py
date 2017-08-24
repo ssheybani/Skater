@@ -19,6 +19,8 @@ class Scorer(object):
                                                         "predictions: {0}, labels: {1}".format(predictions.shape,
                                                                                                labels.shape)
         # continuous, binary, continuous multioutput, multiclass, multilabel-indicator
+        # see https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/utils/multiclass.py#L175
+        # for details
         self.prediction_type = type_of_target(predictions)
         self.label_type = type_of_target(labels)
         self.labels = labels

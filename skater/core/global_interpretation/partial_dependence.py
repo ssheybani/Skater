@@ -250,9 +250,6 @@ class PartialDependence(BaseGlobalInterpretation):
         >>> interpreter.partial_dependence.partial_dependence(features,model)
         """
 
-        if progressbar:
-            self.interpreter.logger.warn("Progress bars slow down runs by 10-20%. For slightly \n"
-                                         "faster runs, do progress_bar=False")
         if self.data_set is None:
             load_data_not_called_err_msg = "self.interpreter.data_set not found. \n" \
                                            "Please call Interpretation.load_data \n" \
@@ -380,8 +377,14 @@ class PartialDependence(BaseGlobalInterpretation):
         arg_list = [i for i in range(grid_expanded.shape[0])]
         executor_instance = Pool(n_jobs)
 
-        mapper = executor_instance.imap if progressbar else executor_instance.map
-        p = ProgressBar(len(arg_list), units='grid cells')
+        if progressbar:
+            self.interpreter.logger.warn("Progress bars slow down runs by 10-20%. For slightly \n"
+                                         "faster runs, do progress_bar=False")
+            mapper = executor_instance.imap
+            p = ProgressBar(len(arg_list), units='grid cells')
+        else:
+            mapper = executor_instance.map
+
         pd_list = []
         try:
             for pd_row in mapper(pd_func, arg_list):

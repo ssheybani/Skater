@@ -46,7 +46,7 @@ script:
   - coverage run skater/tests/all_tests.py
   - flake8 skater
 after_success:
-  - codecov
+  - coveralls
 branches:
   only:
     - master
