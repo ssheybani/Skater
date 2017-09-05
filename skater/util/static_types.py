@@ -9,6 +9,7 @@ class ModelTypes(object):
     classifier = 'classifier'
     unknown = 'unknown'
 
+    _valid_ = [regressor, classifier]
 
 class OutputTypes(object):
     """Stores values for output types, and keywords"""
@@ -18,6 +19,8 @@ class OutputTypes(object):
     iterable = 'iterable'
     numeric = 'numeric'
     unknown = 'unknown'
+
+    _valid_ = [float, int, string, iterable, numeric]
 
 
 class DataTypes(object):
