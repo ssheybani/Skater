@@ -10,6 +10,8 @@ from ..util.static_types import StaticTypes
 from ..util.logger import build_logger
 from ..util import exceptions
 from ..data import DataManager
+from .scorer import RSquared, CrossEntropy, MeanSquaredError, MeanAbsoluteError, ScorerFactory
+
 
 
 class ModelType(object):
@@ -86,6 +88,24 @@ class ModelType(object):
             self._build_model_metadata(examples)
         return self.transformer(self.output_formatter(self._execute(self.input_formatter(*args, **kwargs))))
 
+    @property
+    def scorers(self):
+        """
+
+        :param X:
+        :param y:
+        :param sample_weights:
+        :param scorer:
+        :return:
+        """
+        if not self.has_metadata:
+            raise NotImplementedError("The model needs metadata before "
+                                      "the scorer can be used. Please first"
+                                      "run model.predict(X) on a couple examples"
+                                      "first")
+        else:
+            scorers = ScorerFactory(self)
+            return scorers
 
     @abc.abstractmethod
     def _execute(self, *args, **kwargs):
