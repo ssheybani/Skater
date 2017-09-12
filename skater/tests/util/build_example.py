@@ -1,23 +1,25 @@
 import numpy as np
-
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+
 
 def build_X(N=1000, dim=3):
     return np.random.normal(0, 10, size=(N, dim))
 
+
 def build_y_regression(X, b):
     return np.dot(X, b)
+
 
 def build_y_classifier(X, b, n_classes=2):
     y = build_y_regression(X, b)
     N = len(X)
-    n_per_class = int(N/n_classes)
+    n_per_class = int(N / n_classes)
     sorted_inds = y.argsort()
 
     result = np.zeros(N)
 
     for i in range(n_classes):
-        inds = sorted_inds[i*n_per_class: (i+1)*n_per_class]
+        inds = sorted_inds[i * n_per_class: (i + 1) * n_per_class]
         result[inds] = i
 
     return np.array(result)

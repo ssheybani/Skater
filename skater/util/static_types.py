@@ -11,6 +11,7 @@ class ModelTypes(object):
 
     _valid_ = [regressor, classifier]
 
+
 class OutputTypes(object):
     """Stores values for output types, and keywords"""
     float = 'float'

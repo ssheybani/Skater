@@ -35,9 +35,10 @@ class Scorer(object):
     def check_model(cls, model):
 
         assert model.model_type in cls.model_types, "Scorer {0} not valid for models of type {1}, " \
-                                                     "only {2}".format(cls,
-                                                                       model.model_type,
-                                                                       cls.model_types)
+                                                    "only {2}".format(cls,
+                                                                      model.model_type,
+                                                                      cls.model_types)
+
     def __call__(self, y_true, y_predicted, sample_weight=None):
         self.check_model(self.model)
         self.check_data(y_true, y_predicted)
@@ -82,12 +83,13 @@ class RegressionScorer(Scorer):
             'outputs must have a shape attribute'
         assert hasattr(y_true, 'shape'), \
             'y_true must have a shape attribute'
-        assert (len(y_predicted.shape)==1) or (y_predicted.shape[1] == 1), \
+        assert (len(y_predicted.shape) == 1) or (y_predicted.shape[1] == 1), \
             "Regression outputs must be 1D, " \
             "got {}".format(y_predicted.shape)
-        assert (len(y_true.shape)==1) or (y_true.shape[1] == 1), \
+        assert (len(y_true.shape) == 1) or (y_true.shape[1] == 1), \
             "Regression outputs must be 1D, " \
             "got {}".format(y_true.shape)
+
 
 class ClassifierScorer(Scorer):
 
@@ -105,11 +107,6 @@ class ClassifierScorer(Scorer):
         assert hasattr(y_predicted, 'shape'), 'outputs must have a shape attribute'
         assert hasattr(y_true, 'shape'), 'y_true must have a shape attribute'
 
-        # assert y_true.shape == y_predicted.shape, "Labels and Predictions must have same shape for" \
-        #                                           "classification models. " \
-        #                                           "Labels Shape: {0} and " \
-        #                                           "Predictions Shape: {1}".format(y_true.shape, y_predicted.shape)
-
 
 ### Regression Scorers
 class MeanSquaredError(RegressionScorer):
@@ -117,15 +114,18 @@ class MeanSquaredError(RegressionScorer):
     def _score(y_true, y_predicted, sample_weight=None):
         return mean_squared_error(y_true, y_predicted, sample_weight=sample_weight)
 
+
 class MeanAbsoluteError(RegressionScorer):
     @staticmethod
     def _score(y_true, y_predicted, sample_weight=None):
         return mean_absolute_error(y_true, y_predicted, sample_weight=sample_weight)
 
+
 class RSquared(RegressionScorer):
     @staticmethod
     def _score(y_true, y_predicted, sample_weight=None):
         return r2_score(y_true, y_predicted, sample_weight=sample_weight)
+
 
 class CrossEntropy(ClassifierScorer):
 
@@ -140,6 +140,7 @@ class CrossEntropy(ClassifierScorer):
         """
         return log_loss(y_true, y_predicted, sample_weight=sample_weight)
 
+
 class F1(ClassifierScorer):
 
     @staticmethod
@@ -152,6 +153,7 @@ class F1(ClassifierScorer):
         :return:
         """
         return f1_score(y_true, y_predicted, sample_weight=sample_weight)
+
 
 class ScorerFactory(object):
     def __init__(self, model):
@@ -171,6 +173,3 @@ class ScorerFactory(object):
 
     def __call__(self, y_true, y_predicted, sample_weight=None):
         return self.default(y_true, y_predicted, sample_weight=sample_weight)
-
-
-
