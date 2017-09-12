@@ -152,7 +152,7 @@ class F1(ClassifierScorer):
         :param sample_weights:
         :return:
         """
-        return f1_score(y_true, y_predicted, sample_weight=sample_weight)
+        return f1_score(y_true, y_predicted, sample_weight=sample_weight, average='weighted')
 
 
 class ScorerFactory(object):
