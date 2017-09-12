@@ -23,8 +23,11 @@ def build_y_classifier(X, b, n_classes=2):
     return np.array(result)
 
 
-def build_X_y_model(N=1000, dim=3, model_type='classifier', n_classes=2):
-    beta = np.random.normal(0, 1, dim)
+def build_X_y_model(N=1000, dim=3, model_type='classifier', n_classes=2, beta=None):
+    if beta is None:
+        beta = np.random.normal(0, 1, dim)
+    else:
+        dim = len(beta)
     X = build_X(N, dim)
     if model_type == 'classifier':
         y = build_y_classifier(X, beta, n_classes=n_classes)

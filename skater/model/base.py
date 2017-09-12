@@ -216,7 +216,7 @@ class ModelType(object):
             exceptions.ModelError(err_msg)
 
         if self.target_names is None:
-            self.target_names = range(self.n_classes)
+            self.target_names = ["predicted_{}".format(i) for i in range(self.n_classes)]
 
         if self.unique_values is None and self.model_type == 'classifier' and self.probability is False:
             raise (exceptions.ModelError('If using classifier without probability scores, unique_values cannot '
@@ -227,9 +227,6 @@ class ModelType(object):
         reports = self.model_report(dataset.data)
         for report in reports:
             self.logger.debug(report)
-
-        if self.target_names is None:
-            self.target_names = range(self.n_classes)
 
         self.has_metadata = True
 

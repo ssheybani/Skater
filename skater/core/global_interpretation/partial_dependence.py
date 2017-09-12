@@ -141,7 +141,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
     @staticmethod
     def feature_column_name_formatter(columnname):
-        return "{}".format(columnname)
+        return columnname
 
     def _check_features(self, feature_ids):
         if StaticTypes.data_types.is_string(feature_ids) or StaticTypes.data_types.is_numeric(feature_ids):

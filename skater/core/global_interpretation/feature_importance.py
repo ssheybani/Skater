@@ -20,7 +20,7 @@ class FeatureImportance(BaseGlobalInterpretation):
     """
 
     def feature_importance(self, model_instance, ascending=True, filter_classes=None, n_jobs=-1,
-                           progressbar=True, n_samples=5000, method='output-variance',
+                           progressbar=True, n_samples=5000, method='output-variance', scorer='default',
                            use_scaling=False):
 
         """
@@ -129,7 +129,8 @@ class FeatureImportance(BaseGlobalInterpretation):
                           training_labels=training_labels,
                           method=method,
                           model_type=model_type,
-                          scaled=use_scaling)
+                          scaled=use_scaling,
+                          scorer = model_instance.scorers.default)
 
         importances = {}
         try:
@@ -256,7 +257,7 @@ class FeatureImportance(BaseGlobalInterpretation):
                                    original_predictions, feature_info,
                                    feature_names, training_labels=None,
                                    method='output-variance', model_type='regression',
-                                   scaled=False):
+                                   scaled=False, scorer=None):
         """Global function for computing column-wise importance
 
         Parameters
@@ -312,14 +313,15 @@ class FeatureImportance(BaseGlobalInterpretation):
                                                           training_labels,
                                                           method=method,
                                                           model_type=model_type,
-                                                          scaled=scaled)
+                                                          scaled=scaled,
+                                                          scorer=scorer)
         return {feature_id: importance}
 
 
     @staticmethod
     def compute_importance(new_predictions, original_predictions, original_x, perturbed_x,
                            training_labels, method='output-variance', scaled=False,
-                           model_type='regression'):
+                           model_type='regression', scorer=None):
         if method == 'output-variance':
             importance = FeatureImportance._compute_importance_via_output_variance(np.array(new_predictions),
                                                                                    np.array(original_predictions),
@@ -333,6 +335,7 @@ class FeatureImportance(BaseGlobalInterpretation):
                                                                                            np.array(original_x),
                                                                                            np.array(perturbed_x),
                                                                                            model_type,
+                                                                                           scorer,
                                                                                            scaled)
 
         else:
@@ -357,17 +360,16 @@ class FeatureImportance(BaseGlobalInterpretation):
 
     @staticmethod
     def _compute_importance_via_conditional_permutation(new_predictions, original_predictions, training_labels,
-                                                        original_x, perturbed_x, model_type, scaled=True):
+                                                        original_x, perturbed_x, model_type, scorer, scaled=True):
 
         """Mean absolute error of predictions given perturbations in a feature"""
         if scaled:
-            sample_weights = FeatureImportance.importance_scaler(original_x, perturbed_x)
+            sample_weight = FeatureImportance.importance_scaler(original_x, perturbed_x)
         else:
-            sample_weights = None
-        scorer1 = Scorer(new_predictions, training_labels.reshape(-1), model_type)
-        scorer2 = Scorer(original_predictions, training_labels.reshape(-1), model_type)
-        score1 = scorer1.score(sample_weights=sample_weights)
-        score2 = scorer2.score(sample_weights=sample_weights)
+            sample_weight = None
+
+        score1 = scorer(training_labels, new_predictions, sample_weight=sample_weight)
+        score2 = scorer(training_labels, original_predictions, sample_weight=sample_weight)
 
         return abs(min(score2 - score1, 0))
 

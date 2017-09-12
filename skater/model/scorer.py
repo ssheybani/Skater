@@ -38,11 +38,10 @@ class Scorer(object):
                                                      "only {2}".format(cls,
                                                                        model.model_type,
                                                                        cls.model_types)
-    def __call__(self, X, y, sample_weight=None):
+    def __call__(self, y_true, y_predicted, sample_weight=None):
         self.check_model(self.model)
-        y_predicted = self.model(X)
-        self.check_data(y, y_predicted)
-        formatted_y = self.model.transformer(self.model.output_formatter(y))
+        self.check_data(y_true, y_predicted)
+        formatted_y = self.model.transformer(self.model.output_formatter(y_true))
         return self._score(formatted_y, y_predicted, sample_weight=sample_weight)
 
     @staticmethod
@@ -170,8 +169,8 @@ class ScorerFactory(object):
             else:
                 self.default = self.f1
 
-    def __call__(self, X, y, sample_weight=None):
-        return self.default(X, y, sample_weight=sample_weight)
+    def __call__(self, y_true, y_predicted, sample_weight=None):
+        return self.default(y_true, y_predicted, sample_weight=sample_weight)
 
 
 
