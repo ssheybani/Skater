@@ -128,7 +128,7 @@ class FeatureImportance(BaseGlobalInterpretation):
                           training_labels=training_labels,
                           method=method,
                           scaled=use_scaling,
-                          scorer = model_instance.scorers.default)
+                          scorer=model_instance.scorers.default)
 
         importances = {}
         try:
