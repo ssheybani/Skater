@@ -63,6 +63,7 @@ class DataTypes(object):
         else:
             return StaticTypes.unknown
 
+
 class ScorerTypes(object):
     """Stores values for scorer types"""
     increasing = 'increasing'
@@ -77,5 +78,3 @@ class StaticTypes(object):
     scorer_types = ScorerTypes
     unknown = 'unknown'
     not_applicable = 'not applicable'
-
-

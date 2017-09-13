@@ -111,6 +111,7 @@ class ClassifierScorer(Scorer):
 # Regression Scorers
 class MeanSquaredError(RegressionScorer):
     type = StaticTypes.scorer_types.decreasing
+
     @staticmethod
     def _score(y_true, y_predicted, sample_weight=None):
         return mean_squared_error(y_true, y_predicted, sample_weight=sample_weight)
@@ -118,6 +119,7 @@ class MeanSquaredError(RegressionScorer):
 
 class MeanAbsoluteError(RegressionScorer):
     type = StaticTypes.scorer_types.decreasing
+
     @staticmethod
     def _score(y_true, y_predicted, sample_weight=None):
         return mean_absolute_error(y_true, y_predicted, sample_weight=sample_weight)
@@ -125,6 +127,7 @@ class MeanAbsoluteError(RegressionScorer):
 
 class RSquared(RegressionScorer):
     type = StaticTypes.scorer_types.increasing
+
     @staticmethod
     def _score(y_true, y_predicted, sample_weight=None):
         return r2_score(y_true, y_predicted, sample_weight=sample_weight)
@@ -132,6 +135,7 @@ class RSquared(RegressionScorer):
 
 class CrossEntropy(ClassifierScorer):
     type = StaticTypes.scorer_types.decreasing
+
     @staticmethod
     def _score(y_true, y_predicted, sample_weight=None):
         """
@@ -146,6 +150,7 @@ class CrossEntropy(ClassifierScorer):
 
 class F1(ClassifierScorer):
     type = StaticTypes.scorer_types.increasing
+
     @staticmethod
     def _score(y_true, y_predicted, sample_weight=None):
         """
@@ -165,7 +170,7 @@ class ScorerFactory(object):
             self.mean_squared_error = MeanSquaredError(model)
             self.mean_absolute_error = MeanAbsoluteError(model)
             self.rsquared = RSquared(model)
-            self.default = mean_absolute_error
+            self.default = self.mean_absolute_error
         elif model.model_type == StaticTypes.model_types.classifier:
             self.cross_entropy = CrossEntropy(model)
             self.f1 = F1(model)
@@ -173,6 +178,8 @@ class ScorerFactory(object):
                 self.default = self.cross_entropy
             else:
                 self.default = self.f1
+
+        self.type = self.default.type
 
     def __call__(self, y_true, y_predicted, sample_weight=None):
         return self.default(y_true, y_predicted, sample_weight=sample_weight)
