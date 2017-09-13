@@ -531,7 +531,8 @@ class PartialDependence(BaseGlobalInterpretation):
                                                       sampling_strategy=sampling_strategy,
                                                       n_samples=n_samples, bin_count=bin_count,
                                                       n_jobs=n_jobs, return_metadata=True,
-                                                      progressbar=progressbar)
+                                                      progressbar=progressbar,
+                                                      variance_type=variance_type)
 
             self.interpreter.logger.info("done computing pd, now plotting ...")
             ax = self._plot_pdp_from_df(pd_df, metadata, with_variance=with_variance, figsize=figsize)
@@ -546,7 +547,8 @@ class PartialDependence(BaseGlobalInterpretation):
                                                           sampling_strategy=sampling_strategy,
                                                           n_samples=n_samples, bin_count=bin_count,
                                                           n_jobs=n_jobs, return_metadata=True,
-                                                          progressbar=progressbar)
+                                                          progressbar=progressbar,
+                                                          variance_type=variance_type)
 
                 self.interpreter.logger.info("done computing pd, now plotting ...")
                 ax = self._plot_pdp_from_df(pd_df, metadata, with_variance=with_variance, figsize=figsize)
