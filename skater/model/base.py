@@ -10,6 +10,8 @@ from ..util.static_types import StaticTypes
 from ..util.logger import build_logger
 from ..util import exceptions
 from ..data import DataManager
+from .scorer import RSquared, CrossEntropy, MeanSquaredError, MeanAbsoluteError, ScorerFactory
+
 
 
 class ModelType(object):
@@ -80,8 +82,30 @@ class ModelType(object):
         """
         The way in which the submodule predicts values given an input
         """
+        if self.has_metadata is False:
+            self.has_metadata = True
+            examples = DataManager(*args)
+            self._build_model_metadata(examples)
         return self.transformer(self.output_formatter(self._execute(self.input_formatter(*args, **kwargs))))
 
+    @property
+    def scorers(self):
+        """
+
+        :param X:
+        :param y:
+        :param sample_weights:
+        :param scorer:
+        :return:
+        """
+        if not self.has_metadata:
+            raise NotImplementedError("The model needs metadata before "
+                                      "the scorer can be used. Please first"
+                                      "run model.predict(X) on a couple examples"
+                                      "first")
+        else:
+            scorers = ScorerFactory(self)
+            return scorers
 
     @abc.abstractmethod
     def _execute(self, *args, **kwargs):
@@ -139,7 +163,7 @@ class ModelType(object):
         """
         self.logger.debug("Beginning output checks")
 
-        if self.input_type in (None, pd.DataFrame):
+        if self.input_type in (pd.DataFrame, None):
             outputs = self.predict(dataset.data)
         elif self.input_type == np.ndarray:
             outputs = self.predict(dataset.data)
@@ -192,7 +216,7 @@ class ModelType(object):
             exceptions.ModelError(err_msg)
 
         if self.target_names is None:
-            self.target_names = range(self.n_classes)
+            self.target_names = ["predicted_{}".format(i) for i in range(self.n_classes)]
 
         if self.unique_values is None and self.model_type == 'classifier' and self.probability is False:
             raise (exceptions.ModelError('If using classifier without probability scores, unique_values cannot '
@@ -203,9 +227,6 @@ class ModelType(object):
         reports = self.model_report(dataset.data)
         for report in reports:
             self.logger.debug(report)
-
-        if self.target_names is None:
-            self.target_names = range(self.n_classes)
 
         self.has_metadata = True
 
@@ -304,7 +325,7 @@ class ModelType(object):
         if subset_of_classes is None:
             return self.predict(data)
         else:
-            return DataManager(self.predict(data), feature_names=self.target_names)[subset_of_classes]
+            return DataManager(self.predict(data), feature_names=self.target_names)[subset_of_classes].data
 
 
     @staticmethod

@@ -3,8 +3,9 @@
 from itertools import product, cycle
 import numpy as np
 import pandas as pd
-from pathos.multiprocessing import Pool
+from multiprocess import Pool
 import functools
+import sys
 
 from ...data import DataManager
 from .base import BaseGlobalInterpretation
@@ -74,11 +75,13 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data, fil
     predictions = estimator_fn(data_set.data)
     mean_prediction = np.mean(predictions, axis=0)
     std_prediction = np.std(predictions, axis=0)
+    std_pdp = std_prediction / np.sqrt(predictions.shape[0])
 
     # Todo: add static version of model.predict_subset_classes, use here
     if len(predictions.shape) == 1:
         mean_prediction = np.array([mean_prediction])
         std_prediction = np.array([std_prediction])
+        std_pdp = np.array([std_pdp])
 
     if filter_classes is not None:
         class_idx = [target_columns.index(i) for i in filter_classes]
@@ -93,11 +96,13 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data, fil
     if number_of_classes == 2 and filter_classes is None:
         target_column = target_columns[1]
         pd_dict[target_column] = mean_prediction[1]
-        pd_dict['sd'] = std_prediction[0]
+        pd_dict[PartialDependence._sd_names_['prediction']] = std_prediction[0]
+        pd_dict[PartialDependence._sd_names_['estimate']] = std_pdp[0]
     else:
         for class_i in range(number_of_classes):
             pd_dict[target_columns[class_i]] = mean_prediction[class_i]
-        pd_dict['sd'] = std_prediction[0]
+        pd_dict[PartialDependence._sd_names_['prediction']] = std_prediction[0]
+        pd_dict[PartialDependence._sd_names_['estimate']] = std_pdp[0]
 
     return pd_dict
 
@@ -113,10 +118,12 @@ class PartialDependence(BaseGlobalInterpretation):
 
     __all__ = ['partial_dependence', 'plot_partial_dependence']
 
-    def _build_metadata_dict(self, modelinstance, pd_feature_ids, data_feature_ids, filter_classes):
+    _sd_names_ = {'prediction': 'sd_prediction', 'estimate': 'sd_estimate'}
+
+    def _build_metadata_dict(self, modelinstance, pd_feature_ids, data_feature_ids, filter_classes, variance_type):
 
         feature_columns = [self.feature_column_name_formatter(i) for i in pd_feature_ids]
-        sd_col = 'sd'
+        sd_col = PartialDependence._sd_names_[variance_type]
         if filter_classes is not None:
             filtered_target_names = [i for i in modelinstance.target_names if i in filter_classes]
         else:
@@ -134,15 +141,15 @@ class PartialDependence(BaseGlobalInterpretation):
 
     @staticmethod
     def feature_column_name_formatter(columnname):
-        return "{}".format(columnname)
+        return columnname
 
     def _check_features(self, feature_ids):
         if StaticTypes.data_types.is_string(feature_ids) or StaticTypes.data_types.is_numeric(feature_ids):
             feature_ids = [feature_ids]
 
         if len(feature_ids) >= 3:
-            too_many_features_err_msg = "Pass in at most 2 features for pdp. If you have a " \
-                                        "use case where you'd like to look at 3 simultaneously" \
+            too_many_features_err_msg = "Pass in at most 2 features for pdp. If you have a \n" \
+                                        "use case where you'd like to look at 3 simultaneously \n" \
                                         ", please let us know."
             raise(exceptions.TooManyFeaturesError(too_many_features_err_msg))
 
@@ -159,8 +166,8 @@ class PartialDependence(BaseGlobalInterpretation):
     def partial_dependence(self, feature_ids, modelinstance, filter_classes=None, grid=None,
                            grid_resolution=30, n_jobs=-1, grid_range=None, sample=True,
                            sampling_strategy='random-choice', n_samples=1000,
-                           bin_count=50, samples_per_bin=10, return_metadata=False,
-                           progressbar=True):
+                           bin_count=50, return_metadata=False,
+                           progressbar=True, variance_type='estimate'):
 
         """
         Approximates the partial dependence of the predict_fn with respect to the
@@ -218,6 +225,8 @@ class PartialDependence(BaseGlobalInterpretation):
             sampling_strategy = 'uniform-over-similarity-ranks'. If using
             sampling_strategy = 'uniform', use n_samples.
             total samples = bin_count * samples per bin.
+        variance_type: string
+
         return_metadata: boolean
 
         :Example:
@@ -242,19 +251,19 @@ class PartialDependence(BaseGlobalInterpretation):
         """
 
         if self.data_set is None:
-            load_data_not_called_err_msg = "self.interpreter.data_set not found. " \
-                                           "Please call Interpretation.load_data " \
+            load_data_not_called_err_msg = "self.interpreter.data_set not found. \n" \
+                                           "Please call Interpretation.load_data \n" \
                                            "before running this method."
             raise(exceptions.DataSetNotLoadedError(load_data_not_called_err_msg))
 
         feature_ids = self._check_features(feature_ids)
 
         if filter_classes:
-            err_msg = "members of filter classes must be" \
-                      "members of modelinstance.classes." \
-                      "Expected members of: " \
+            err_msg = "members of filter classes must be \n" \
+                      "members of modelinstance.classes. \n" \
+                      "Expected members of: \n" \
                       "{0}\n" \
-                      "got: " \
+                      "got: \n" \
                       "{1}".format(modelinstance.target_names,
                                    filter_classes)
             filter_classes = list(filter_classes)
@@ -262,17 +271,17 @@ class PartialDependence(BaseGlobalInterpretation):
 
         # TODO: There might be a better place to do this check
         if not isinstance(modelinstance, ModelType):
-            raise(exceptions.ModelError("Incorrect estimator function used for computing partial dependence, try one "
-                                        "creating one with skater.model.local.InMemoryModel or"
+            raise(exceptions.ModelError("Incorrect estimator function used for computing partial dependence, try one \n"
+                                        "creating one with skater.model.local.InMemoryModel or \n"
                                         "skater.model.remote.DeployedModel"))
 
         if modelinstance.model_type == 'classifier' and modelinstance.probability is False:
 
             if modelinstance.unique_values is None:
-                raise(exceptions.ModelError('If using classifier without probability scores, unique_values cannot '
+                raise(exceptions.ModelError('If using classifier without probability scores, unique_values cannot \n'
                                             'be None'))
-            self.interpreter.logger.warn("Classifiers with probability scores can be explained "
-                                         "more granularly than those without scores. If a prediction method with "
+            self.interpreter.logger.warn("Classifiers with probability scores can be explained \n"
+                                         "more granularly than those without scores. If a prediction method with \n"
                                          "scores is available, use that instead.")
 
         # TODO: This we can change easily to functional style
@@ -282,8 +291,8 @@ class PartialDependence(BaseGlobalInterpretation):
                 missing_feature_ids.append(feature_id)
 
         if missing_feature_ids:
-            missing_feature_id_err_msg = "Features {0} not found in " \
-                                         "Interpretation.data_set.feature_ids" \
+            missing_feature_id_err_msg = "Features {0} not found in \n" \
+                                         "Interpretation.data_set.feature_ids \n" \
                                          "{1}".format(missing_feature_ids, self.data_set.feature_ids)
             raise(KeyError(missing_feature_id_err_msg))
 
@@ -299,7 +308,8 @@ class PartialDependence(BaseGlobalInterpretation):
         if not modelinstance.has_metadata:
             examples = self.data_set.generate_sample(strategy='random-choice',
                                                      sample=True,
-                                                     n_samples_from_dataset=10)
+                                                     n_samples=10)
+
             examples = DataManager(examples, feature_names=self.data_set.feature_ids)
             modelinstance._build_model_metadata(examples)
 
@@ -329,11 +339,19 @@ class PartialDependence(BaseGlobalInterpretation):
         # generate data
         data_sample = self.data_set.generate_sample(strategy=sampling_strategy,
                                                     sample=sample,
-                                                    n_samples_from_dataset=n_samples,
-                                                    samples_per_bin=samples_per_bin,
+                                                    n_samples=n_samples,
                                                     bin_count=bin_count)
 
-        _pdp_metadata = self._build_metadata_dict(modelinstance, feature_ids, self.data_set.feature_ids, filter_classes)
+        assert type(data_sample) == self.data_set.data_type, "Something went wrong\n" \
+                                                             "Theres a type mismatch between\n" \
+                                                             "the sampled data and the origina\nl" \
+                                                             "training set. Check Skater.models\n"
+
+        _pdp_metadata = self._build_metadata_dict(modelinstance,
+                                                  feature_ids,
+                                                  self.data_set.feature_ids,
+                                                  filter_classes,
+                                                  variance_type)
 
         self.interpreter.logger.debug("Shape of sampled data: {}".format(data_sample.shape))
         self.interpreter.logger.debug("Feature Ids: {}".format(feature_ids))
@@ -358,17 +376,23 @@ class PartialDependence(BaseGlobalInterpretation):
                                     filter_classes=filter_classes)
         arg_list = [i for i in range(grid_expanded.shape[0])]
         executor_instance = Pool(n_jobs)
-        p = ProgressBar(len(arg_list), units='grid cells')
+
+        if progressbar:
+            self.interpreter.logger.warn("Progress bars slow down runs by 10-20%. For slightly \n"
+                                         "faster runs, do progress_bar=False")
+            mapper = executor_instance.imap
+            p = ProgressBar(len(arg_list), units='grid cells')
+        else:
+            mapper = executor_instance.map
+
         pd_list = []
         try:
-            # pd_list = executor_instance.map(pd_func, arg_list)
-            for pd_row in executor_instance.map(pd_func, arg_list):
+            for pd_row in mapper(pd_func, arg_list):
                 if progressbar:
                     p.animate()
                 pd_list.append(pd_row)
         except:
-            self.interpreter.logger.debug("Multiprocessing failed, going single process")
-            # pd_list = map(pd_func, arg_list)
+            self.interpreter.logger.warn("Multiprocessing failed, going single process")
             for pd_row in map(pd_func, arg_list):
                 if progressbar:
                     p.animate()
@@ -386,8 +410,8 @@ class PartialDependence(BaseGlobalInterpretation):
     def plot_partial_dependence(self, feature_ids, modelinstance, filter_classes=None,
                                 grid=None, grid_resolution=30, grid_range=None,
                                 n_jobs=-1, sample=True, sampling_strategy='random-choice',
-                                n_samples=1000, bin_count=50, samples_per_bin=10,
-                                with_variance=False, figsize=(16, 10), progressbar=True):
+                                n_samples=1000, bin_count=50, with_variance=False,
+                                figsize=(16, 10), progressbar=True, variance_type='estimate'):
         """
         Computes partial_dependence of a set of variables. Essentially approximates
         the partial partial_dependence of the predict_fn with respect to the variables
@@ -450,6 +474,10 @@ class PartialDependence(BaseGlobalInterpretation):
             3D pdp plots, let us know!
         plot_title(string):
             title for pdp plots
+        variance_type: string
+            if variance plotting is enabled, determines which variance to include.
+            estimate: the variance of the partial dependence estimates
+            prediction: the variances of the predictions at the given point
 
         Example
         --------
@@ -502,9 +530,9 @@ class PartialDependence(BaseGlobalInterpretation):
                                                       grid_range=grid_range, sample=sample,
                                                       sampling_strategy=sampling_strategy,
                                                       n_samples=n_samples, bin_count=bin_count,
-                                                      samples_per_bin=samples_per_bin,
                                                       n_jobs=n_jobs, return_metadata=True,
-                                                      progressbar=progressbar)
+                                                      progressbar=progressbar,
+                                                      variance_type=variance_type)
 
             self.interpreter.logger.info("done computing pd, now plotting ...")
             ax = self._plot_pdp_from_df(pd_df, metadata, with_variance=with_variance, figsize=figsize)
@@ -518,9 +546,9 @@ class PartialDependence(BaseGlobalInterpretation):
                                                           grid_range=grid_range, sample=sample,
                                                           sampling_strategy=sampling_strategy,
                                                           n_samples=n_samples, bin_count=bin_count,
-                                                          samples_per_bin=samples_per_bin,
                                                           n_jobs=n_jobs, return_metadata=True,
-                                                          progressbar=progressbar)
+                                                          progressbar=progressbar,
+                                                          variance_type=variance_type)
 
                 self.interpreter.logger.info("done computing pd, now plotting ...")
                 ax = self._plot_pdp_from_df(pd_df, metadata, with_variance=with_variance, figsize=figsize)
@@ -577,8 +605,6 @@ class PartialDependence(BaseGlobalInterpretation):
             target_columns = [target_columns[-1]]
 
         for target_column in target_columns:
-            # if target_name is None:
-            #     raise ValueError("Could not parse class name from {}".format(mean_col))
             f, ax = pyplot.subplots(1, figsize=figsize)
             figure_list.append(f)
             axis_list.append(ax)

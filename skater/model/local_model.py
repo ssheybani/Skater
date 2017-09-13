@@ -72,7 +72,7 @@ class InMemoryModel(ModelType):
 
 
     @staticmethod
-    def _predict(data, predict_fn, input_formatter, output_formatter, transformer=None):
+    def _predict(data, predict_fn, input_formatter, output_formatter, transformer):
         """Static prediction function for multiprocessing usecases
 
         Parameters
@@ -96,14 +96,11 @@ class InMemoryModel(ModelType):
             return results
 
     def _get_static_predictor(self):
-        transformer = self.transformer
-        input_formatter = self.input_formatter
-        output_formatter = self.output_formatter
-        prediction_fn = self.prediction_fn
+
         predict_fn = partial(self._predict,
-                             transformer=transformer,
-                             predict_fn=prediction_fn,
-                             input_formatter=input_formatter,
-                             output_formatter=output_formatter,
+                             transformer=self.transformer,
+                             predict_fn=self.prediction_fn,
+                             input_formatter=self.input_formatter,
+                             output_formatter=self.output_formatter,
                              )
         return predict_fn

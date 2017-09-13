@@ -30,8 +30,9 @@ install:
 #  - pip install scipy
 #  - pip install matplotlib
 
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib pandas flake8
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib pandas flake8 coverage
   - source activate test-environment
+  - pip install codecov #not on conda
   - python setup.py install
   - python -c "import scipy"
   - python -c "import numpy"
@@ -42,8 +43,10 @@ before_script: # configure a headless display to test plot generation
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start
 script:
-  - python skater/tests/all_tests.py
+  - coverage run skater/tests/all_tests.py
   - flake8 skater
+after_success:
+  - coveralls
 branches:
   only:
     - master

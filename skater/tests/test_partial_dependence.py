@@ -84,7 +84,7 @@ class TestPartialDependence(unittest.TestCase):
         pdp_df = self.interpreter.partial_dependence.partial_dependence([self.features[0]],
                                                                         self.regressor_predict_fn,
                                                                         sample=True)
-        self.assertEquals(pdp_df.shape, (30, 3))  # default grid resolution is 30
+        self.assertEquals(pdp_df.shape, (30, 4))  # default grid resolution is 30
 
     def test_pd_with_categorical_features(self):
         interpreter = Interpretation(self.sample_x_categorical, feature_names=self.categorical_feature_names)
@@ -308,6 +308,22 @@ class TestPartialDependence(unittest.TestCase):
                                                               self.regressor_predict_fn)
         except:
             self.fail("1D Partial dependence failed when passing long string name")
+
+
+    def test_pd_with_variance_type_prediction(self):
+        try:
+            self.interpreter.partial_dependence.partial_dependence(self.features[:1],
+                                                                   self.classifier_predict_fn,
+                                                                   grid_resolution=10,
+                                                                   variance_type='prediction')
+            self.interpreter.partial_dependence.plot_partial_dependence(self.features[:1],
+                                                                        self.classifier_predict_fn,
+                                                                        grid_resolution=10,
+                                                                        variance_type='prediction')
+        except:
+            self.fail("pd with Variance Type=prediction failed")
+
+
 
 
 

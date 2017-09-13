@@ -105,7 +105,7 @@ def allocate_samples_to_bins(n_samples, ideal_bin_count=100):
         if remainer != 0:
             additional_samples_per_bin = distribute_samples(remainer, n_bins)
             samples_per_bin = samples_per_bin + additional_samples_per_bin
-    return n_bins, samples_per_bin
+    return n_bins, np.array(samples_per_bin).astype(int)
 
 
 def distribute_samples(n_samples, n_bins):
@@ -121,7 +121,7 @@ def distribute_samples(n_samples, n_bins):
         samples_per_bin[index] += 1
         index_counter += space_size
 
-    return samples_per_bin
+    return np.array(samples_per_bin).astype(int)
 
 
 def divide_zerosafe(a, b):

@@ -10,7 +10,7 @@ from functools import partial
 
 from skater.core.explanations import Interpretation
 from skater.util import exceptions
-from arg_parser import create_parser
+from skater.tests.arg_parser import create_parser
 from skater.model import InMemoryModel, DeployedModel
 
 
@@ -72,8 +72,72 @@ class TestFeatureImportance(unittest.TestCase):
 
 
     def test_feature_importance(self):
-        importances = self.interpreter.feature_importance.feature_importance(self.regressor_predict_fn)
-        self.assertEquals(np.isclose(importances.sum(), 1), True)  # default grid resolution is 100
+        importances = self.interpreter.feature_importance.feature_importance(self.regressor_predict_fn,
+                                                                             n_jobs=1,
+                                                                             progressbar=False)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
+
+        importances = self.interpreter.feature_importance.feature_importance(self.regressor_predict_fn,
+                                                                             n_jobs=2,
+                                                                             progressbar=False)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
+
+
+    def test_feature_importance_progressbar(self):
+        importances = self.interpreter.feature_importance.feature_importance(self.regressor_predict_fn,
+                                                                             progressbar=True)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
+
+
+    def test_feature_importance_entropy_with_and_without_scaling(self):
+        importances = self.interpreter.feature_importance.feature_importance(self.regressor_predict_fn,
+                                                                             progressbar=True,
+                                                                             use_scaling=True)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
+
+        importances = self.interpreter.feature_importance.feature_importance(self.regressor_predict_fn,
+                                                                             progressbar=True,
+                                                                             use_scaling=False)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
+
+
+    def test_feature_importance_regression_via_preformance_decrease(self):
+        interpreter = Interpretation(self.X, feature_names=self.features, training_labels=self.y)
+        importances = interpreter.feature_importance.feature_importance(self.regressor_predict_fn,
+                                                                        method='conditional-permutation',
+                                                                        use_scaling=False)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
+
+        importances = interpreter.feature_importance.feature_importance(self.regressor_predict_fn,
+                                                                        method='conditional-permutation',
+                                                                        use_scaling=True)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
+
+
+    def test_feature_importance_classifier_via_preformance_decrease(self):
+        interpreter = Interpretation(self.X, feature_names=self.features, training_labels=self.y_as_int)
+        importances = interpreter.feature_importance.feature_importance(self.classifier_predict_fn,
+                                                                        method='conditional-permutation',
+                                                                        use_scaling=False)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
+
+        importances = interpreter.feature_importance.feature_importance(self.classifier_predict_fn,
+                                                                        method='conditional-permutation',
+                                                                        use_scaling=True)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
+
+
+    def test_feature_importance_classifier_proba_via_preformance_decrease(self):
+        interpreter = Interpretation(self.X, feature_names=self.features, training_labels=self.y_as_int)
+        importances = interpreter.feature_importance.feature_importance(self.classifier_predict_proba_fn,
+                                                                        method='conditional-permutation',
+                                                                        use_scaling=False)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
+
+        importances = interpreter.feature_importance.feature_importance(self.classifier_predict_proba_fn,
+                                                                        method='conditional-permutation',
+                                                                        use_scaling=True)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
 
 
     def test_plot_feature_importance(self):
