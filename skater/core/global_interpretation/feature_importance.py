@@ -11,6 +11,7 @@ from ...util.plotting import COLORS
 from ...util.exceptions import *
 from ...util.dataops import divide_zerosafe
 from ...util.progressbar import ProgressBar
+from ...util.static_types import StaticTypes
 from ...model.scorer import Scorer
 
 
@@ -368,8 +369,8 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         score1 = scorer(training_labels, new_predictions, sample_weight=sample_weight)
         score2 = scorer(training_labels, original_predictions, sample_weight=sample_weight)
-
-        return abs(max(score2 - score1, 0))
+        multiple = 1 if scorer.type == StaticTypes.scorer_types.increasing else -1
+        return abs(max((score2 - score1) * multiple, 0))
 
 
     @staticmethod

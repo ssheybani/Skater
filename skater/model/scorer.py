@@ -108,27 +108,30 @@ class ClassifierScorer(Scorer):
         assert hasattr(y_true, 'shape'), 'y_true must have a shape attribute'
 
 
-### Regression Scorers
+# Regression Scorers
 class MeanSquaredError(RegressionScorer):
+    type = StaticTypes.scorer_types.decreasing
     @staticmethod
     def _score(y_true, y_predicted, sample_weight=None):
         return mean_squared_error(y_true, y_predicted, sample_weight=sample_weight)
 
 
 class MeanAbsoluteError(RegressionScorer):
+    type = StaticTypes.scorer_types.decreasing
     @staticmethod
     def _score(y_true, y_predicted, sample_weight=None):
         return mean_absolute_error(y_true, y_predicted, sample_weight=sample_weight)
 
 
 class RSquared(RegressionScorer):
+    type = StaticTypes.scorer_types.increasing
     @staticmethod
     def _score(y_true, y_predicted, sample_weight=None):
         return r2_score(y_true, y_predicted, sample_weight=sample_weight)
 
 
 class CrossEntropy(ClassifierScorer):
-
+    type = StaticTypes.scorer_types.decreasing
     @staticmethod
     def _score(y_true, y_predicted, sample_weight=None):
         """
@@ -142,7 +145,7 @@ class CrossEntropy(ClassifierScorer):
 
 
 class F1(ClassifierScorer):
-
+    type = StaticTypes.scorer_types.increasing
     @staticmethod
     def _score(y_true, y_predicted, sample_weight=None):
         """
