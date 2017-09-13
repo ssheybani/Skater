@@ -105,7 +105,6 @@ class FeatureImportance(BaseGlobalInterpretation):
             inputs = self.data_set.data
 
         original_predictions = model_instance.predict(inputs)
-        model_type = model_instance.model_type
         n_jobs = None if n_jobs < 0 else n_jobs
         predict_fn = model_instance._get_static_predictor()
         executor_instance = Pool(n_jobs)
@@ -128,7 +127,6 @@ class FeatureImportance(BaseGlobalInterpretation):
                           feature_names=self.data_set.feature_ids,
                           training_labels=training_labels,
                           method=method,
-                          model_type=model_type,
                           scaled=use_scaling,
                           scorer = model_instance.scorers.default)
 
@@ -256,7 +254,7 @@ class FeatureImportance(BaseGlobalInterpretation):
     def compute_feature_importance(feature_id, input_data, estimator_fn,
                                    original_predictions, feature_info,
                                    feature_names, training_labels=None,
-                                   method='output-variance', model_type='regression',
+                                   method='output-variance',
                                    scaled=False, scorer=None):
         """Global function for computing column-wise importance
 
@@ -302,6 +300,8 @@ class FeatureImportance(BaseGlobalInterpretation):
                                                               strategy='uniform-over-similarity-ranks')
         else:
             samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n, strategy='random-choice')
+
+
         copy_of_data_set[feature_id] = samples.reshape(-1)
 
         new_predictions = estimator_fn(copy_of_data_set.values)
@@ -312,7 +312,6 @@ class FeatureImportance(BaseGlobalInterpretation):
                                                           samples,
                                                           training_labels,
                                                           method=method,
-                                                          model_type=model_type,
                                                           scaled=scaled,
                                                           scorer=scorer)
         return {feature_id: importance}
@@ -321,7 +320,7 @@ class FeatureImportance(BaseGlobalInterpretation):
     @staticmethod
     def compute_importance(new_predictions, original_predictions, original_x, perturbed_x,
                            training_labels, method='output-variance', scaled=False,
-                           model_type='regression', scorer=None):
+                           scorer=None):
         if method == 'output-variance':
             importance = FeatureImportance._compute_importance_via_output_variance(np.array(new_predictions),
                                                                                    np.array(original_predictions),
@@ -334,7 +333,6 @@ class FeatureImportance(BaseGlobalInterpretation):
                                                                                            training_labels,
                                                                                            np.array(original_x),
                                                                                            np.array(perturbed_x),
-                                                                                           model_type,
                                                                                            scorer,
                                                                                            scaled)
 
@@ -360,7 +358,7 @@ class FeatureImportance(BaseGlobalInterpretation):
 
     @staticmethod
     def _compute_importance_via_conditional_permutation(new_predictions, original_predictions, training_labels,
-                                                        original_x, perturbed_x, model_type, scorer, scaled=True):
+                                                        original_x, perturbed_x, scorer, scaled=True):
 
         """Mean absolute error of predictions given perturbations in a feature"""
         if scaled:
@@ -371,7 +369,7 @@ class FeatureImportance(BaseGlobalInterpretation):
         score1 = scorer(training_labels, new_predictions, sample_weight=sample_weight)
         score2 = scorer(training_labels, original_predictions, sample_weight=sample_weight)
 
-        return abs(min(score2 - score1, 0))
+        return abs(max(score2 - score1, 0))
 
 
     @staticmethod
