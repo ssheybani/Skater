@@ -31,7 +31,7 @@ class TestModel(unittest.TestCase):
         X, y = X[15:40], y[15:40]
         model = KNeighborsClassifier(weights='distance', p=2, n_neighbors=10).fit(X, y)
         skater_model = InMemoryModel(model.predict_proba, examples=X, probability=True)
-        assert skater_model.probability == True
+        assert skater_model.probability is True
         assert skater_model.model_type == StaticTypes.model_types.classifier
 
 
