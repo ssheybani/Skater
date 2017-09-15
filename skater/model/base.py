@@ -26,9 +26,16 @@ class ModelType(object):
     """
     __metaclass__ = abc.ABCMeta
 
-
-    def __init__(self, log_level=30, target_names=None, examples=None, feature_names=None, unique_values=None,
-                 input_formatter=None, output_formatter=None):
+    def __init__(self,
+                 log_level=30,
+                 target_names=None,
+                 examples=None,
+                 feature_names=None,
+                 unique_values=None,
+                 input_formatter=None,
+                 output_formatter=None,
+                 model_type=None,
+                 probability=None):
         """
         Base model class for wrapping prediction functions. Common methods
         involve output type inference in requiring predict methods
@@ -50,15 +57,28 @@ class ModelType(object):
             model_type: string
 
         """
+
+        self._check_model_type(model_type)
+        self._check_probability(probability)
+
         self._log_level = log_level
         self.logger = build_logger(log_level, __name__)
         self.examples = None
-        self.model_type = StaticTypes.unknown
+
         self.output_var_type = StaticTypes.unknown
         self.output_shape = StaticTypes.unknown
         self.n_classes = StaticTypes.unknown
         self.input_shape = StaticTypes.unknown
-        self.probability = StaticTypes.unknown
+        if probability is None:
+            self.probability = StaticTypes.unknown
+        else:
+            self.probability = probability
+
+        if model_type is None:
+            self.model_type = StaticTypes.unknown
+        else:
+            self.model_type = model_type
+
         self.transformer = self.identity_function
         self.label_encoder = LabelEncoder()
         self.one_hot_encoder = OneHotEncoder()
@@ -67,6 +87,7 @@ class ModelType(object):
         self.unique_values = unique_values
         self.input_formatter = input_formatter or self.identity_function
         self.output_formatter = output_formatter or self.identity_function
+
         self.has_metadata = False
 
         if examples is not None:
@@ -78,6 +99,20 @@ class ModelType(object):
             self.logger.warn("No examples provided, cannot infer model type")
 
 
+    def _check_model_type(self, model_type):
+        __types__ = [None,
+                     StaticTypes.model_types.classifier,
+                     StaticTypes.model_types.regressor]
+        assert model_type in __types__, \
+            "Expected model_type {0}, got {1}".format(__types__, model_type)
+
+
+    def _check_probability(self, probability):
+        __types__ = [None, True, False]
+        assert probability in __types__, \
+            "Expected model_type {0}, got {1}".format(__types__, probability)
+
+
     def predict(self, *args, **kwargs):
         """
         The way in which the submodule predicts values given an input
@@ -87,6 +122,7 @@ class ModelType(object):
             examples = DataManager(*args)
             self._build_model_metadata(examples)
         return self.transformer(self.output_formatter(self._execute(self.input_formatter(*args, **kwargs))))
+
 
     @property
     def scorers(self):
@@ -146,6 +182,18 @@ class ModelType(object):
         else:
             return np.array(examples)
 
+    def _if_no_prob(self, value):
+        if self.probability == StaticTypes.unknown:
+            return value
+        else:
+            return self.probability
+
+    def _if_no_model(self, value):
+        if self.model_type == StaticTypes.unknown:
+            return value
+        else:
+            return self.model_type
+
 
     def _build_model_metadata(self, dataset):
         """
@@ -184,29 +232,37 @@ class ModelType(object):
             self.output_type = False
 
         if self.output_type == 'continuous':
-            self.model_type = StaticTypes.model_types.regressor
+            # 1D array of continuous values
+            self.model_type = self._if_no_model(StaticTypes.model_types.regressor)
             self.n_classes = 1
             self.probability = StaticTypes.not_applicable
 
         elif self.output_type == 'multiclass':
-            self.model_type = StaticTypes.model_types.classifier
-            self.probability = False
+            # 2D array of 1s and 0, exclusive
+            self.model_type = self._if_no_model(StaticTypes.model_types.classifier)
+            self.probability = self._if_no_prob(False)
             self.n_classes = len(np.unique(outputs))
 
         elif self.output_type == 'continuous-multioutput':
-            self.model_type = StaticTypes.model_types.classifier
-            self.probability = True
+            # 2D array of continuous values
+            self.model_type = self._if_no_model(StaticTypes.model_types.classifier)
+            self.probability = self._if_no_prob(True)
             self.n_classes = outputs.shape[1]
 
         elif self.output_type == 'binary':
-            self.model_type = StaticTypes.model_types.classifier
-            self.probability = False
+            # 2D array of 1s and 0, non exclusive
+            self.model_type = self._if_no_model(StaticTypes.model_types.classifier)
+            self.probability = self._if_no_prob(False)
             self.n_classes = 2
 
         elif self.output_type == 'multilabel-indicator':
-            self.model_type = StaticTypes.model_types.classifier
-            self.probability = False
+            # 2D array of 1s and 0, non exclusive
+            self.model_type = self._if_no_model(StaticTypes.model_types.classifier)
+            self.probability = self._if_no_prob(False)
             self.n_classes = outputs.shape[1]
+
+            if self.probability:
+                self.output_type = 'continuous-multioutput'
 
         else:
             err_msg = "Could not infer model type"
@@ -229,7 +285,6 @@ class ModelType(object):
             self.logger.debug(report)
 
         self.has_metadata = True
-
 
     def predict_function_transformer(self, output):
         """
