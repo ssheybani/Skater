@@ -10,9 +10,17 @@ class InMemoryModel(ModelType):
     This model can be called directly from memory
     """
 
-    def __init__(self, prediction_fn, input_formatter=None,
-                 output_formatter=None, target_names=None,
-                 unique_values=None, examples=None, log_level=30):
+    def __init__(self,
+                 prediction_fn,
+                 input_formatter=None,
+                 output_formatter=None,
+                 target_names=None,
+                 feature_names=None,
+                 unique_values=None,
+                 examples=None,
+                 model_type=None,
+                 probability=None,
+                 log_level=30):
         """This model can be called directly from memory
 
         Parameters
@@ -31,7 +39,10 @@ class InMemoryModel(ModelType):
             and convert them to numpy arrays or dataframes.
 
         target_names: array type
-            optional names of classes that describe model outputs.
+            (optional) names of classes that describe model outputs.
+
+        feature_names: array type
+            (optional) Names of features the model consumes.
 
         unique_values: array type
             The set of possible output values. Only use on classifier models that
@@ -44,6 +55,14 @@ class InMemoryModel(ModelType):
 
         examples: numpy.array or pandas.dataframe
             optional examples to use to make inferences about the function.
+
+        model_type: None, "classifier", "regressor"
+            Indicates which type of model is being used. If left as None, will try to infer based on the
+            signature of the output type.
+
+        probability: None, True, False
+            If using a classifier, indicates whether probabilities are provided
+            (as opposed to indicators/labels).
 
         log_level: int
             config setting to see model logs. 10 is a good value for seeing debug messages.
@@ -61,7 +80,11 @@ class InMemoryModel(ModelType):
                                             examples=examples,
                                             unique_values=unique_values,
                                             input_formatter=input_formatter,
-                                            output_formatter=output_formatter)
+                                            output_formatter=output_formatter,
+                                            feature_names=feature_names,
+                                            model_type=model_type,
+                                            probability=probability,
+                                            )
 
 
     def _execute(self, *args, **kwargs):

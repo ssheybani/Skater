@@ -8,10 +8,18 @@ from .base import ModelType
 
 class DeployedModel(ModelType):
     """Model that gets predictions from a deployed model"""
-    def __init__(self, uri, input_formatter, output_formatter,
-                 target_names=None, unique_values=None,
-                 examples=None, feature_names=None,
-                 request_kwargs={}, log_level=30):
+    def __init__(self,
+                 uri,
+                 input_formatter,
+                 output_formatter,
+                 request_kwargs={},
+                 target_names=None,
+                 feature_names=None,
+                 unique_values=None,
+                 examples=None,
+                 model_type=None,
+                 probability=None,
+                 log_level=30):
         """This model can be called by making http requests
         to the passed in uri.
 
@@ -30,8 +38,17 @@ class DeployedModel(ModelType):
             results to interpretation objects. This usually should take
             request objects and convert them to array types.
 
+        request_kwargs: dict
+            any additional request headers that need to be passed, such as api
+            keys, content types, etc.
+
         target_names: array type
-            see skater.model.Model for details
+            (optional) The names of the target variable/classes. There should be as many
+            names as there are outputs per prediction. Defaults to Predicted Value for
+            regression and Class 1...n for classification.
+
+        feature_names: array type
+            (optional) Names of features the model consumes.
 
         unique_values: array type
             The set of possible output values. Only use on classifier models that
@@ -45,9 +62,13 @@ class DeployedModel(ModelType):
         examples:
             optional examples to use to make inferences about the function.
 
-        request_kwargs: dict
-            any additional request headers that need to be passed, such as api
-            keys, content types, etc.
+        model_type: None, "classifier", "regressor"
+            Indicates which type of model is being used. If left as None, will try to infer based on the
+            signature of the output type.
+
+        probability: None, True, False
+            If using a classifier, indicates whether probabilities are provided
+            (as opposed to indicators/labels).
 
         log_level: int
             see skater.model.Model for details
@@ -62,7 +83,10 @@ class DeployedModel(ModelType):
                                             output_formatter=output_formatter,
                                             log_level=log_level,
                                             unique_values=unique_values,
-                                            feature_names=feature_names)
+                                            feature_names=feature_names,
+                                            model_type=model_type,
+                                            probability=probability,
+                                            )
 
 
     def _execute(self, data):
