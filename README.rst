@@ -38,7 +38,7 @@ to help enable practitioners explain and interpret predictive "black boxes" in a
 .. _Installing: https://datascienceinc.github.io/Skater/install.html
 .. _Tutorial: https://datascienceinc.github.io/Skater/tutorial.html
 .. _API Reference: https://datascienceinc.github.io/Skater/api.html
-.. _Contributing: https://github.com/datascienceinc/Skater/blob/readme/CONTRIBUTING.rst
+.. _Contributing: https://github.com/datascienceinc/Skater/blob/master/CONTRIBUTING.rst
 
 💬 Feedback/Questions
 ==========================
