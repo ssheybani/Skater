@@ -143,6 +143,20 @@ class TestFeatureImportance(unittest.TestCase):
     def test_plot_feature_importance(self):
         self.interpreter.feature_importance.plot_feature_importance(self.regressor_predict_fn)
 
+    def test_issue_192(self):
+        """
+        https://github.com/datascienceinc/Skater/issues/192
+        We should be able to sample the data and use training labels.
+        :return:
+        """
+        interpreter = Interpretation(self.X, feature_names=self.features, training_labels=self.y_as_int)
+        importances = interpreter.feature_importance.feature_importance(self.classifier_predict_proba_fn,
+                                                                        n_samples= len(self.X) - 1,
+                                                                        method='conditional-permutation',
+                                                                        use_scaling=True)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
+
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestFeatureImportance)

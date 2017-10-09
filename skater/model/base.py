@@ -79,14 +79,14 @@ class ModelType(object):
         else:
             self.model_type = model_type
 
-        self.transformer = self.identity_function
+        self.transformer = identity_function
         self.label_encoder = LabelEncoder()
         self.one_hot_encoder = OneHotEncoder()
         self.target_names = target_names
         self.feature_names = feature_names
         self.unique_values = unique_values
-        self.input_formatter = input_formatter or self.identity_function
-        self.output_formatter = output_formatter or self.identity_function
+        self.input_formatter = input_formatter or identity_function
+        self.output_formatter = output_formatter or identity_function
 
         self.has_metadata = False
 
@@ -212,13 +212,13 @@ class ModelType(object):
         self.logger.debug("Beginning output checks")
 
         if self.input_type in (pd.DataFrame, None):
-            outputs = self.predict(dataset.data)
+            outputs = self.predict(dataset.X)
         elif self.input_type == np.ndarray:
-            outputs = self.predict(dataset.data)
+            outputs = self.predict(dataset.X)
         else:
             raise ValueError("Unrecognized input type: {}".format(self.input_type))
 
-        self.input_shape = dataset.data.shape
+        self.input_shape = dataset.X.shape
         self.output_shape = outputs.shape
 
         ndim = len(outputs.shape)
@@ -266,7 +266,7 @@ class ModelType(object):
 
         else:
             err_msg = "Could not infer model type"
-            self.logger.debug("Inputs: {}".format(dataset.data))
+            self.logger.debug("Inputs: {}".format(dataset.X))
             self.logger.debug("Outputs: {}".format(outputs))
             self.logger.debug("sklearn response: {}".format(self.output_type))
             exceptions.ModelError(err_msg)
@@ -280,7 +280,7 @@ class ModelType(object):
 
         self.transformer = self.transformer_func_factory(outputs)
 
-        reports = self.model_report(dataset.data)
+        reports = self.model_report(dataset.X)
         for report in reports:
             self.logger.debug(report)
 
@@ -342,7 +342,7 @@ class ModelType(object):
             self.one_hot_encoder.fit(labels)
             return self.predict_function_transformer
         else:
-            return lambda x: x
+            return identity_function
 
 
     def model_report(self, examples):
@@ -380,9 +380,9 @@ class ModelType(object):
         if subset_of_classes is None:
             return self.predict(data)
         else:
-            return DataManager(self.predict(data), feature_names=self.target_names)[subset_of_classes].data
+            return DataManager(self.predict(data), feature_names=self.target_names)[subset_of_classes].X
 
 
-    @staticmethod
-    def identity_function(x):
-        return x
+
+def identity_function(x):
+    return x

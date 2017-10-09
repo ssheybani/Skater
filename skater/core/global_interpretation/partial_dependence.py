@@ -72,7 +72,7 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data, fil
         data_set[feature_id] = new_row[feature_idx]
 
     # generate statistics for the new predictions
-    predictions = estimator_fn(data_set.data)
+    predictions = estimator_fn(data_set.X)
     mean_prediction = np.mean(predictions, axis=0)
     std_prediction = np.std(predictions, axis=0)
     std_pdp = std_prediction / np.sqrt(predictions.shape[0])

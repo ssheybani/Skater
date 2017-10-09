@@ -165,7 +165,6 @@ class F1(ClassifierScorer):
 
 class ScorerFactory(object):
     def __init__(self, model):
-
         if model.model_type == StaticTypes.model_types.regressor:
             self.mean_squared_error = MeanSquaredError(model)
             self.mean_absolute_error = MeanAbsoluteError(model)
@@ -181,5 +180,11 @@ class ScorerFactory(object):
 
         self.type = self.default.type
 
+
     def __call__(self, y_true, y_predicted, sample_weight=None):
         return self.default(y_true, y_predicted, sample_weight=sample_weight)
+
+
+    def get_static_default_scorer(self, scorer_type='default'):
+        assert scorer_type in self.__dict__, "Scorer type {} not recognized".format(scorer_type)
+        return self.__dict__[scorer_type]._score

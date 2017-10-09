@@ -28,8 +28,56 @@ class DataManager(object):
     __attribute_keys__ = [_n_rows, _dim, _feature_info, _dtypes]
     __datatypes__ = (pd.DataFrame, pd.Series, np.ndarray)
 
+    def _check_X(self, X):
+        if not isinstance(X, self.__datatypes__):
+            err_msg = 'Invalid Data: expected data to be a numpy array or pandas dataframe but got ' \
+                      '{}'.format(type(X))
+            raise(exceptions.DataSetError(err_msg))
+        ndim = len(X.shape)
+        self.logger.debug("__init__ data.shape: {}".format(X.shape))
 
-    def __init__(self, data, feature_names=None, index=None, log_level=30):
+        if ndim == 1:
+            X = X[:, np.newaxis]
+
+        elif ndim >= 3:
+            err_msg = "Invalid Data: expected data to be 1 or 2 dimensions, " \
+                      "Data.shape: {}".format(ndim)
+            raise(exceptions.DataSetError(err_msg))
+        return X
+
+    def _check_y(self, y, X):
+        """
+        convert y to ndarray
+
+        If y is a dataframe:
+            return df.values as ndarray
+        if y is a series
+            return series.values as ndarray
+        if y is ndarray:
+            return self
+        if y is a list:
+            return as ndarray
+        :param y:
+        :param X:
+        :return:
+        """
+
+        if y is None:
+            return None
+
+        assert len(X) == len(y), \
+            "len(X) = {0} does not equal len(y) = {1}".format(len(X), len(y))
+
+        if isinstance(y, (pd.DataFrame, pd.Series)):
+            return y.values
+        elif isinstance(y, np.ndarray):
+            return y
+        elif isinstance(y, list):
+            return np.array(y)
+        else:
+            raise ValueError("Unrecognized type for y: {}".format(type(y)))
+
+    def __init__(self, X, y=None, feature_names=None, index=None, log_level=30):
         """
         The abstraction around using, accessing, sampling data for interpretation purposes.
         Used by interpretation objects to grab data, collect samples, and handle
@@ -37,8 +85,10 @@ class DataManager(object):
 
         Parameters
         ----------
-            data: 1D/2D numpy array, or pandas DataFrame
+            X: 1D/2D numpy array, or pandas DataFrame
                 raw data
+            y: 1D/2D numpy array, or pandas DataFrame
+                ground truth labels for X
             feature_names: iterable of feature names
                 Optional keyword containing names of features.
             index: iterable of row names
@@ -50,40 +100,23 @@ class DataManager(object):
         self._log_level = log_level
         self.logger = build_logger(log_level, __name__)
 
-        if not isinstance(data, self.__datatypes__):
-            err_msg = 'Invalid Data: expected data to be a numpy array or pandas dataframe but got ' \
-                      '{}'.format(type(data))
-            raise(exceptions.DataSetError(err_msg))
-
-        ndim = len(data.shape)
-        self.logger.debug("__init__ data.shape: {}".format(data.shape))
-
-        if ndim == 1:
-            data = data[:, np.newaxis]
-
-        elif ndim >= 3:
-            err_msg = "Invalid Data: expected data to be 1 or 2 dimensions, " \
-                      "Data.shape: {}".format(ndim)
-            raise(exceptions.DataSetError(err_msg))
-
-        self.data_type = type(data)
-        self.data = data
+        self.X = self._check_X(X)
+        self.y = self._check_y(y, self.X)
+        self.data_type = type(X)
         self.metastore = None
 
-        self.logger.debug("after transform data.shape: {}".format(self.data.shape))
+        self.logger.debug("after transform X.shape: {}".format(self.X.shape))
 
-        if isinstance(self.data, pd.DataFrame):
+        if isinstance(self.X, pd.DataFrame):
             if feature_names is None:
-                feature_names = self.data.columns.values
+                feature_names = self.X.columns.values
             if index is None:
                 index = range(self.n_rows)
-            self.data.index = index
+            self.X.index = index
 
-
-
-        elif isinstance(self.data, np.ndarray):
+        elif isinstance(self.X, np.ndarray):
             if feature_names is None:
-                feature_names = range(self.data.shape[1])
+                feature_names = range(self.X.shape[1])
             if index is None:
                 index = range(self.n_rows)
 
@@ -166,29 +199,29 @@ class DataManager(object):
 
 
     def _calculate_n_rows(self):
-        return self.data.shape[0]
+        return self.X.shape[0]
 
 
     def _calculate_dim(self):
-        return self.data.shape[1]
+        return self.X.shape[1]
 
     @property
     def values(self):
         if self.data_type == pd.DataFrame:
-            result = self.data.values
+            result = self.X.values
         else:
-            result = self.data
+            result = self.X
         return result
 
 
     @property
     def dtypes(self):
-        return pd.DataFrame(self.data, columns=self.feature_ids, index=self.index).dtypes
+        return pd.DataFrame(self.X, columns=self.feature_ids, index=self.index).dtypes
 
 
     @property
     def shape(self):
-        return self.data.shape
+        return self.X.shape
 
 
     @property
@@ -224,17 +257,17 @@ class DataManager(object):
 
     def _build_metastore(self):
 
-        medians = np.median(self.data, axis=0).reshape(1, self.dim)
+        medians = np.median(self.X, axis=0).reshape(1, self.dim)
 
         # how far each data point is from the global median
-        dists = cosine_distances(self.data, Y=medians).reshape(-1)
+        dists = cosine_distances(self.X, Y=medians).reshape(-1)
 
         sorted_index = [self.index[i] for i in dists.argsort()]
 
         return {'sorted_index': sorted_index}
 
     def __repr__(self):
-        return self.data.__repr__()
+        return self.X.__repr__()
 
     def __iter__(self):
         for i in self.feature_ids:
@@ -253,7 +286,7 @@ class DataManager(object):
 
     def __setcolumn_pandas__(self, i, newval):
         """if you passed in a pandas dataframe, it has columns which are strings."""
-        self.data[i] = newval
+        self.X[i] = newval
 
 
     def __setcolumn_ndarray__(self, i, newval):
@@ -261,9 +294,9 @@ class DataManager(object):
 
         if i in self.feature_ids:
             idx = self.feature_ids.index(i)
-            self.data[:, idx] = newval
+            self.X[:, idx] = newval
         else:
-            self.data = add_column_numpy_array(self.data, newval)
+            self.X = add_column_numpy_array(self.X, newval)
             self.feature_ids.append(i)
 
     def __getitem__(self, key):
@@ -276,16 +309,16 @@ class DataManager(object):
 
     def __getitem_pandas__(self, i):
         """if you passed in a pandas dataframe, it has columns which are strings."""
-        return self.data[i]
+        return self.X[i]
 
     def __getitem_ndarray__(self, i):
         """if you passed in a pandas dataframe, it has columns which are strings."""
         if StaticTypes.data_types.return_data_type(i) == StaticTypes.output_types.iterable:
             idx = [self.feature_ids.index(j) for j in i]
-            return self.data[:, idx]
+            return self.X[:, idx]
         elif StaticTypes.data_types.is_string(i) or StaticTypes.data_types.is_numeric(i):
             idx = self.feature_ids.index(i)
-            return self.data[:, idx]
+            return self.X[:, idx]
         else:
             raise(ValueError("Unrecongized index type: {}. This should not happen, "
                              "submit a issue here: "
@@ -308,16 +341,16 @@ class DataManager(object):
             i = [self.index.index(i) for i in idx]
         else:
             i = [self.index[idx]]
-        return self.data.iloc[i]
+        return self.X.iloc[i]
 
 
     def __getrows_ndarray__(self, idx):
         """if you passed in a pandas dataframe, it has columns which are strings."""
         i = [self.index.index(i) for i in idx]
-        return self.data[i]
+        return self.X[i]
 
 
-    def generate_sample(self, sample=True, strategy='random-choice', n_samples=1000,
+    def generate_sample(self, sample=True, include_y=False, strategy='random-choice', n_samples=1000,
                         replace=True, bin_count=50):
         """
         Method for generating data from the dataset.
@@ -341,6 +374,8 @@ class DataManager(object):
 
         """
 
+        __strategy_types__ = ['random-choice','uniform-from-percentile','uniform-over-similarity-ranks']
+
         bin_count, samples_per_bin = allocate_samples_to_bins(n_samples, ideal_bin_count=bin_count)
         arg_dict = {
             'sample': sample,
@@ -353,12 +388,10 @@ class DataManager(object):
         self.logger.debug("Generating sample with args:\n {}".format(arg_dict))
 
         if not sample:
-            return self.data
+            idx = self.index
 
         if strategy == 'random-choice':
             idx = np.random.choice(self.index, size=n_samples, replace=replace)
-            return self.__getrows__(idx)
-
 
         elif strategy == 'uniform-from-percentile':
             raise(NotImplementedError("We havent coded this yet."))
@@ -380,8 +413,16 @@ class DataManager(object):
             cuts = pd.Series(cuts).reset_index()
             indices = cuts.groupby(0)['index'].aggregate(agg).apply(lambda x: ast.literal_eval(x)).values
             indices = flatten(indices)
-            indices = [self.index[i] for i in indices]
-            return self.__getrows__(indices)
+            idx = [self.index[i] for i in indices]
+        else:
+            raise ValueError("Strategy {0} not recognized, currently supported strategies: {1}".format(
+                strategy,
+                __strategy_types__
+            ))
+        if include_y:
+            return self.__getrows__(idx), self._labels_by_index(idx)
+        else:
+            return self.__getrows__(idx)
 
 
     def generate_column_sample(self, feature_id, *args, **kwargs):
@@ -410,4 +451,16 @@ class DataManager(object):
     def set_index(self, index):
         self.index = index
         if self.data_type in (pd.DataFrame, pd.Series):
-            self.data.index = index
+            self.X.index = index
+
+    def _labels_by_index(self, data_index):
+        """
+        Method for grabbing labels associated with given indices.
+        :param data_index:
+        :return:
+        """
+        # we coerce self.index to a list, so this is fine:
+        numeric_index = [self.index.index(i) for i in data_index]
+
+        # do we need to coerce labels to a particular data type?
+        return self.y[data_index]
