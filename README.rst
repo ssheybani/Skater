@@ -21,7 +21,7 @@ to help enable practitioners explain and interpret predictive "black boxes" in a
     :target: https://travis-ci.com/datascienceinc/Skater
     :alt: Build Status
 
-    
+
 
 📖 Documentation
 ================
@@ -109,7 +109,7 @@ The code below illustrates a typical workflow with the Skater package.
     #partial dependence
     from skater.core.explanations import Interpretation
     from skater.model import InMemoryModel
-    i = Interpretation(X, feature_names = feature_names)
+    i = Interpretation(X, feature_names=feature_names)
     model = InMemoryModel(regressor.predict, examples = X)
     i.partial_dependence.plot_partial_dependence([feature_names[0], feature_names[1]],
                                                 model)
