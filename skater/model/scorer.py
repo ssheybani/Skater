@@ -164,6 +164,11 @@ class F1(ClassifierScorer):
 
 
 class ScorerFactory(object):
+    """
+    The idea is that we initialize the object with the model,
+    but also provide an api for retrieving a static scoring function
+    after checking that things are ok.
+    """
     def __init__(self, model):
         if model.model_type == StaticTypes.model_types.regressor:
             self.mean_squared_error = MeanSquaredError(model)
@@ -187,4 +192,6 @@ class ScorerFactory(object):
 
     def get_static_default_scorer(self, scorer_type='default'):
         assert scorer_type in self.__dict__, "Scorer type {} not recognized".format(scorer_type)
-        return self.__dict__[scorer_type]._score
+        scorer = self.__dict__[scorer_type]._score
+        scorer.type = self.__dict__[scorer_type].type
+        return scorer
