@@ -46,10 +46,9 @@ class TestFeatureImportance(unittest.TestCase):
         self.sample_feature_name = [str(i) for i in range(self.sample_x.shape[1])]
 
         if debug:
-            self.interpreter = Interpretation(log_level='DEBUG')
+            self.interpreter = Interpretation(training_data=self.X, feature_names=self.features, log_level='DEBUG')
         else:
-            self.interpreter = Interpretation()  # default level is 'WARNING'
-        self.interpreter.load_data(self.X, feature_names=self.features)
+            self.interpreter = Interpretation(training_data=self.X, feature_names=self.features)  # default level is 'WARNING'
 
         self.regressor = LinearRegression()
         self.regressor.fit(self.X, self.y)

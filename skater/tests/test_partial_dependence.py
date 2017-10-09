@@ -48,10 +48,9 @@ class TestPartialDependence(unittest.TestCase):
         self.sample_feature_name = [str(i) for i in range(self.sample_x.shape[1])]
 
         if debug:
-            self.interpreter = Interpretation(log_level='DEBUG')
+            self.interpreter = Interpretation(self.X, feature_names=self.features, log_level='DEBUG')
         else:
-            self.interpreter = Interpretation()  # default level is 'WARNING'
-        self.interpreter.load_data(self.X, feature_names=self.features)
+            self.interpreter = Interpretation(self.X, feature_names=self.features)  # default level is 'WARNING'
 
         self.regressor = LinearRegression()
         self.regressor.fit(self.X, self.y)
@@ -110,8 +109,7 @@ class TestPartialDependence(unittest.TestCase):
         clf = GradientBoostingClassifier(n_estimators=10, random_state=1)
         clf.fit(self.sample_x, self.sample_y)
         classifier_predict_fn = InMemoryModel(clf.predict_proba, examples=self.sample_x)
-        interpreter = Interpretation()
-        interpreter.load_data(np.array(self.sample_x), self.sample_feature_name)
+        interpreter = Interpretation(training_data=np.array(self.sample_x), feature_names=self.sample_feature_name)
         pdp_df = interpreter.partial_dependence.partial_dependence(['0'],
                                                                    classifier_predict_fn,
                                                                    grid_resolution=5,
@@ -135,8 +133,7 @@ class TestPartialDependence(unittest.TestCase):
         clf = GradientBoostingClassifier(n_estimators=10, random_state=1)
         clf.fit(iris.data, iris.target)
         classifier_predict_fn = InMemoryModel(clf.predict_proba, examples=iris.data)
-        interpreter = Interpretation()
-        interpreter.load_data(iris.data, iris.feature_names)
+        interpreter = Interpretation(training_data=iris.data, feature_names=iris.feature_names)
         pdp_df = interpreter.partial_dependence.partial_dependence([iris.feature_names[0]], classifier_predict_fn,
                                                                    grid_resolution=25, sample=True)
 
@@ -152,8 +149,8 @@ class TestPartialDependence(unittest.TestCase):
         clf = svm.SVC(probability=True)
         clf.fit(iris.data, iris.target)
         classifier_predict_fn = InMemoryModel(clf.predict_proba, examples=iris.data)
-        interpreter = Interpretation()
-        interpreter.load_data(iris.data, iris.feature_names)
+        interpreter = Interpretation(training_data=iris.data, feature_names=iris.feature_names)
+
         pdp_df = interpreter.partial_dependence.partial_dependence([iris.feature_names[0]], classifier_predict_fn,
                                                                    grid_resolution=25, sample=True)
         self.assertIn(expected_feature_name,
@@ -177,13 +174,6 @@ class TestPartialDependence(unittest.TestCase):
         self.interpreter.logger.debug("Regressor coef shape: {}".format(regressor.coef_.shape))
         coef = regressor.coef_[0]
         self.assertTrue(abs(coef - self.B[0]) < epsilon, True)
-
-
-    def test_pdp_inputs(self):
-        clf = GradientBoostingClassifier(n_estimators=10, random_state=1)
-        clf.fit(self.sample_x, self.sample_y)
-        interpreter = Interpretation()
-        self.assertRaisesRegexp(Exception, "Invalid Data", interpreter.load_data, None, self.sample_feature_name)
 
 
     def test_2D_pdp(self):
