@@ -374,7 +374,7 @@ class DataManager(object):
 
         """
 
-        __strategy_types__ = ['random-choice','uniform-from-percentile','uniform-over-similarity-ranks']
+        __strategy_types__ = ['random-choice', 'uniform-from-percentile', 'uniform-over-similarity-ranks']
 
         bin_count, samples_per_bin = allocate_samples_to_bins(n_samples, ideal_bin_count=bin_count)
         arg_dict = {
@@ -463,4 +463,4 @@ class DataManager(object):
         numeric_index = [self.index.index(i) for i in data_index]
 
         # do we need to coerce labels to a particular data type?
-        return self.y[data_index]
+        return self.y[numeric_index]

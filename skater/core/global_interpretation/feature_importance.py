@@ -91,7 +91,7 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         if n_samples <= self.data_set.n_rows:
             inputs, labels = self.data_set.generate_sample(strategy='random-choice',
-                                                           include_y = True,
+                                                           include_y=True,
                                                            sample=True,
                                                            n_samples=n_samples)
         else:
@@ -331,6 +331,7 @@ def _compute_importance_via_output_variance(new_predictions, original_prediction
     importance = np.mean(changes_in_predictions)
     return importance
 
+
 def _compute_importance_via_conditional_permutation(new_predictions, original_predictions, training_labels,
                                                     original_x, perturbed_x, scorer, scaled=True):
 
@@ -364,7 +365,7 @@ def compute_importance(new_predictions, original_predictions, original_x, pertur
                                                              np.array(original_predictions),
                                                              np.array(original_x),
                                                              np.array(perturbed_x),
-                                                                               scaled)
+                                                             scaled)
     elif method == 'conditional-permutation':
         importance = _compute_importance_via_conditional_permutation(np.array(new_predictions),
                                                                      np.array(original_predictions),
