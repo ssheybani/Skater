@@ -17,10 +17,12 @@ Skater to learn about the models internal decision policies.
 The package was originally developed by Aaron Kramer, Pramit Choudhary and internal DataScience Team at DataScience.com
 to help enable practitioners explain and interpret predictive "black boxes" in a human interpretable way.
 
-.. image:: https://api.travis-ci.com/repositories/datascienceinc/Skater.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master
+.. image:: https://travis-ci.org/datascienceinc/Skater.svg?branch=master
     :target: https://travis-ci.com/datascienceinc/Skater
     :alt: Build Status
 
+.. image:: https://coveralls.io/repos/github/datascienceinc/Skater/badge.svg?branch=master
+    :target: https://coveralls.io/github/datascienceinc/Skater?branch=master
 
 
 📖 Documentation
