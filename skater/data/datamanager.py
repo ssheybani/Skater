@@ -45,6 +45,7 @@ class DataManager(object):
             raise(exceptions.DataSetError(err_msg))
         return X
 
+
     def _check_y(self, y, X):
         """
         convert y to ndarray

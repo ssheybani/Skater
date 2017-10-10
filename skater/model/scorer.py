@@ -159,7 +159,7 @@ class F1(ClassifierScorer):
         :param sample_weights:
         :return:
         """
-        if len(y_predicted.shape)==2:
+        if len(y_predicted.shape) == 2:
             preds = y_predicted.argmax(axis=1)
         else:
             preds = y_predicted
@@ -194,8 +194,24 @@ class ScorerFactory(object):
         return self.default(y_true, y_predicted, sample_weight=sample_weight)
 
 
-    def get_static_default_scorer(self, scorer_type='default'):
-        assert scorer_type in self.__dict__, "Scorer type {} not recognized".format(scorer_type)
+    def get_scorer_function(self, scorer_type='default'):
+        """
+        Returns a scoring function as a pure function.
+
+        Parameters
+        ----------
+
+        scorer_type: string
+            Specifies which scorer to use. Default value 'default' returns f1 for classifiers that return labels,
+            cross_entropy for classifiers that return probabilities, and mean absolute error for regressors.
+
+
+        Returns
+        -------
+            .score staticmethod of skater.model.scorer.Scorer object.
+        """
+        assert scorer_type in self.__dict__, "Scorer type {} not recognized " \
+                                             "or allowed for model type".format(scorer_type)
         scorer = self.__dict__[scorer_type]._score
         scorer.type = self.__dict__[scorer_type].type
         return scorer

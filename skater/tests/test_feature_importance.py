@@ -157,11 +157,10 @@ class TestFeatureImportance(unittest.TestCase):
         """
         interpreter = Interpretation(self.X, feature_names=self.features, training_labels=self.y_as_int)
         importances = interpreter.feature_importance.feature_importance(self.classifier_predict_proba_fn,
-                                                                        n_samples =len(self.X) - 1,
+                                                                        n_samples=len(self.X) - 1,
                                                                         method='conditional-permutation',
                                                                         use_scaling=True)
         self.assertEquals(np.isclose(importances.sum(), 1), True)
-
 
 
 if __name__ == '__main__':

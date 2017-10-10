@@ -12,12 +12,6 @@ from ..util import exceptions
 from ..data import DataManager
 from .scorer import RSquared, CrossEntropy, MeanSquaredError, MeanAbsoluteError, ScorerFactory
 
-def one_hot_encode(data, classes):
-    label_encoder = LabelEncoder()
-    # kind of a hack. sklearn assumes the encoder it fit if
-    # it has a .classes_ attribute
-    # but this is quicker than going through the data
-    label_encoder.classes_ = classes
 
 class ModelType(object):
     """What is a model? A model needs to make predictions, so a means of
@@ -191,11 +185,13 @@ class ModelType(object):
         else:
             return np.array(examples)
 
+
     def _if_no_prob(self, value):
         if self.probability == StaticTypes.unknown:
             return value
         else:
             return self.probability
+
 
     def _if_no_model(self, value):
         if self.model_type == StaticTypes.unknown:
@@ -295,31 +291,6 @@ class ModelType(object):
 
         self.has_metadata = True
 
-    def predict_function_transformer(self, output):
-        """
-        Call this method when model returns a 1D array of
-        predicted classes. The output is one hot encoded version.
-
-        Parameters
-        ----------
-        output: array type
-            The output of the pre-formatted predict function
-
-        Returns
-        ----------
-        output: numpy.ndarray
-            The one hot encoded outputs of predict_fn
-        """
-
-        _labels = self.label_encoder.transform(output)[:, np.newaxis]
-        # target_names = label_encoder.classes_.tolist()
-
-        self.logger.debug("Using transforming function. Found {} classes".format(len(self.label_encoder.classes_)))
-        self.logger.debug("Label shape: {}".format(len(_labels.shape)))
-        output = self.one_hot_encoder.transform(_labels).todense()
-        output = np.squeeze(np.asarray(output))
-        return DataManager(output, feature_names=self.label_encoder.classes_)[self.unique_values]
-
 
     def transformer_func_factory(self, outputs):
         """
@@ -407,7 +378,6 @@ class ModelType(object):
             return self.predict(data)
         else:
             return DataManager(self.predict(data), feature_names=self.target_names)[subset_of_classes].X
-
 
 
 def identity_function(x):

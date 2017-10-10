@@ -107,7 +107,7 @@ class FeatureImportance(BaseGlobalInterpretation):
         predict_fn = model_instance._get_static_predictor()
         executor_instance = Pool(n_jobs)
         arg_list = self.data_set.feature_ids
-        scorer = model_instance.scorers.get_static_default_scorer(scorer_type=scorer_type)
+        scorer = model_instance.scorers.get_scorer_function(scorer_type=scorer_type)
 
         if progressbar:
             self.interpreter.logger.warn("Progress bars slow down runs by 10-20%. For slightly \n"
@@ -340,10 +340,6 @@ def _compute_importance_via_conditional_permutation(new_predictions, original_pr
         sample_weight = importance_scaler(original_x, perturbed_x)
     else:
         sample_weight = None
-    print("using scorer: {}".format(type(scorer)))
-    print("training labels: shape: {0}, first row: {1}".format(training_labels.shape, training_labels[0]))
-    print("new_predictions: shape: {0}, first row: {1}".format(new_predictions.shape, new_predictions[0]))
-    print("original_predictions: shape: {0}, first row: {1}".format(original_predictions.shape, original_predictions[0]))
 
     score1 = scorer(training_labels, new_predictions, sample_weight=sample_weight)
     score2 = scorer(training_labels, original_predictions, sample_weight=sample_weight)
