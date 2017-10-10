@@ -46,7 +46,6 @@ before_script: # configure a headless display to test plot generation
 script:
   - coverage run skater/tests/all_tests.py
   - flake8 skater
-  - coverage run --source=skater setup.py test
 after_success:
   - coveralls
 branches:
