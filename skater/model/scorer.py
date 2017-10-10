@@ -42,8 +42,8 @@ class Scorer(object):
     def __call__(self, y_true, y_predicted, sample_weight=None):
         self.check_model(self.model)
         self.check_data(y_true, y_predicted)
-        formatted_y = self.model.transformer(self.model.output_formatter(y_true))
-        return self._score(formatted_y, y_predicted, sample_weight=sample_weight)
+        # formatted_y = self.model.transformer(self.model.output_formatter(y_true))
+        return self._score(y_true, y_predicted, sample_weight=sample_weight)
 
     @staticmethod
     @abstractmethod
@@ -61,7 +61,6 @@ class Scorer(object):
     @abstractmethod
     def check_data(y_true, y_predicted):
         pass
-
 
 
 class RegressionScorer(Scorer):
@@ -156,11 +155,16 @@ class F1(ClassifierScorer):
         """
 
         :param X: Dense X of probabilities, or binary indicator
-        :param y:
+        :param y: indicator
         :param sample_weights:
         :return:
         """
-        return f1_score(y_true, y_predicted, sample_weight=sample_weight, average='weighted')
+        if len(y_predicted.shape)==2:
+            preds = y_predicted.argmax(axis=1)
+        else:
+            preds = y_predicted
+
+        return f1_score(y_true, preds, sample_weight=sample_weight, average='weighted')
 
 
 class ScorerFactory(object):

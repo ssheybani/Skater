@@ -2,7 +2,7 @@
 
 import abc
 import numpy as np
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+from sklearn.preprocessing import LabelEncoder, label_binarize
 from sklearn.utils.multiclass import type_of_target
 import pandas as pd
 
@@ -12,7 +12,12 @@ from ..util import exceptions
 from ..data import DataManager
 from .scorer import RSquared, CrossEntropy, MeanSquaredError, MeanAbsoluteError, ScorerFactory
 
-
+def one_hot_encode(data, classes):
+    label_encoder = LabelEncoder()
+    # kind of a hack. sklearn assumes the encoder it fit if
+    # it has a .classes_ attribute
+    # but this is quicker than going through the data
+    label_encoder.classes_ = classes
 
 class ModelType(object):
     """What is a model? A model needs to make predictions, so a means of
@@ -23,6 +28,11 @@ class ModelType(object):
         We want to make inferences about the format of the output.
         We want to able to map model outputs to some smaller, universal set of output types.
         We want to infer whether the model is real valued, or classification (n classes?)
+
+    # Todos:
+    * check unique_vals are unique
+    * check that if probability=False, predictions arent continuous
+
     """
     __metaclass__ = abc.ABCMeta
 
@@ -81,7 +91,6 @@ class ModelType(object):
 
         self.transformer = identity_function
         self.label_encoder = LabelEncoder()
-        self.one_hot_encoder = OneHotEncoder()
         self.target_names = target_names
         self.feature_names = feature_names
         self.unique_values = unique_values
@@ -334,13 +343,30 @@ class ModelType(object):
         # and only if the model does not return probabilities. If unknown, should be true
         if self.model_type == StaticTypes.model_types.classifier and not self.probability:
             # fit label encoder
+            # unique_values could ints/strings, etc.
             artificial_samples = np.array(self.unique_values)
             self.logger.debug("Label encoder fit on examples of shape: {}".format(outputs.shape))
-            self.label_encoder.fit(artificial_samples)
-            labels = self.label_encoder.transform(artificial_samples)[:, np.newaxis]
-            self.logger.debug("Onehot encoder fit on examples of shape: {}".format(labels.shape))
-            self.one_hot_encoder.fit(labels)
-            return self.predict_function_transformer
+
+            def check_classes(classes):
+                if len(classes) > 2:
+                    return classes
+                elif len(classes) == 2:
+                    # to get 2 columns from label_binarize, we need
+                    # to pretend we have at least 3 classes.
+                    # adding will preserve type of underlying classes
+                    fake_class = classes[0] + classes[1]
+                    return np.concatenate((classes, np.array([fake_class])))
+                else:
+                    raise ValueError("Less than 2 classes found in unique_classes")
+
+            # defining this as a closure so it can be executed
+            # outside the class
+            def transformer(output):
+                # numeric index of original classes.
+                idx = list(range(len(artificial_samples)))
+                classes = check_classes(artificial_samples)
+                return label_binarize(output, classes)[:, idx]
+            return transformer
         else:
             return identity_function
 

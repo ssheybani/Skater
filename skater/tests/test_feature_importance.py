@@ -56,12 +56,19 @@ class TestFeatureImportance(unittest.TestCase):
 
         self.classifier = LogisticRegression()
         self.classifier.fit(self.X, self.y_as_int)
-        self.classifier_predict_fn = InMemoryModel(self.classifier.predict, examples=self.X, unique_values=self.classifier.classes_)
-        self.classifier_predict_proba_fn = InMemoryModel(self.classifier.predict_proba, examples=self.X)
+        self.classifier_predict_fn = InMemoryModel(self.classifier.predict,
+                                                   examples=self.X,
+                                                   unique_values=self.classifier.classes_,
+                                                   probability=False)
+        self.classifier_predict_proba_fn = InMemoryModel(self.classifier.predict_proba,
+                                                         examples=self.X,
+                                                         probability=True)
 
         self.string_classifier = LogisticRegression()
         self.string_classifier.fit(self.X, self.y_as_string)
-        self.string_classifier_predict_fn = InMemoryModel(self.string_classifier.predict_proba, examples=self.X)
+        self.string_classifier_predict_fn = InMemoryModel(self.string_classifier.predict_proba,
+                                                          examples=self.X,
+                                                          probability=True)
 
 
 
@@ -150,7 +157,7 @@ class TestFeatureImportance(unittest.TestCase):
         """
         interpreter = Interpretation(self.X, feature_names=self.features, training_labels=self.y_as_int)
         importances = interpreter.feature_importance.feature_importance(self.classifier_predict_proba_fn,
-                                                                        n_samples=len(self.X) - 1,
+                                                                        n_samples =len(self.X) - 1,
                                                                         method='conditional-permutation',
                                                                         use_scaling=True)
         self.assertEquals(np.isclose(importances.sum(), 1), True)
