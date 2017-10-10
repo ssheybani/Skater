@@ -332,9 +332,8 @@ def compute_feature_importance(feature_id, input_data, estimator_fn,
     return {feature_id: importance}
 
 
-
 def _compute_importance_via_prediction_variance(new_predictions, original_predictions,
-                                            original_x, perturbed_x, scaled=True):
+                                                original_x, perturbed_x, scaled=True):
     """Mean absolute change in predictions given perturbations in a feature"""
     changes_in_predictions = abs(new_predictions - original_predictions)
     if len(changes_in_predictions.shape) == 1:
@@ -378,10 +377,10 @@ def compute_importance(new_predictions, original_predictions, original_x, pertur
                        scorer=None):
     if method == 'prediction-variance':
         importance = _compute_importance_via_prediction_variance(np.array(new_predictions),
-                                                             np.array(original_predictions),
-                                                             np.array(original_x),
-                                                             np.array(perturbed_x),
-                                                             scaled)
+                                                                 np.array(original_predictions),
+                                                                 np.array(original_x),
+                                                                 np.array(perturbed_x),
+                                                                 scaled)
     elif method == 'model-scoring':
         importance = _compute_importance_via_model_scoring(np.array(new_predictions),
                                                            np.array(original_predictions),
