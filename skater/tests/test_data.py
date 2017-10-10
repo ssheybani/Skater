@@ -49,7 +49,7 @@ class TestData(unittest.TestCase):
         data_set = DataManager(self.X,
                                feature_names=self.feature_names,
                                index=self.index)
-        assert_array_equal(data_set.data, self.X)
+        assert_array_equal(data_set.X, self.X)
 
 
     def test_1d_numpy_array(self):
@@ -65,7 +65,7 @@ class TestData(unittest.TestCase):
                                feature_names=feature_names,
                                index=self.index,
                                log_level=self.log_level)
-        assert_array_equal(data_set.data, array_1d)
+        assert_array_equal(data_set.X, array_1d)
         assert data_set.feature_ids == feature_names
 
 
@@ -82,7 +82,7 @@ class TestData(unittest.TestCase):
                                feature_names=feature_names,
                                index=self.index,
                                log_level=self.log_level)
-        assert_array_equal(data_set.data, array_2d)
+        assert_array_equal(data_set.X, array_2d)
         assert data_set.feature_ids == feature_names
 
 
@@ -99,7 +99,7 @@ class TestData(unittest.TestCase):
         assert data_set.feature_ids == self.feature_names, "Feature Names from DataFrame " \
                                                            "not loaded properly"
         assert data_set.index == self.index, "Index from DataFrame not loaded properly"
-        assert_array_equal(data_set.data, self.X)
+        assert_array_equal(data_set.X, self.X)
 
 
     def test_generate_grid_1_variable(self):

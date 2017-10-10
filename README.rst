@@ -21,7 +21,7 @@ to help enable practitioners explain and interpret predictive "black boxes" in a
     :target: https://travis-ci.com/datascienceinc/Skater
     :alt: Build Status
 
-    
+
 
 📖 Documentation
 ================

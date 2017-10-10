@@ -42,8 +42,8 @@ class Scorer(object):
     def __call__(self, y_true, y_predicted, sample_weight=None):
         self.check_model(self.model)
         self.check_data(y_true, y_predicted)
-        formatted_y = self.model.transformer(self.model.output_formatter(y_true))
-        return self._score(formatted_y, y_predicted, sample_weight=sample_weight)
+        # formatted_y = self.model.transformer(self.model.output_formatter(y_true))
+        return self._score(y_true, y_predicted, sample_weight=sample_weight)
 
     @staticmethod
     @abstractmethod
@@ -61,7 +61,6 @@ class Scorer(object):
     @abstractmethod
     def check_data(y_true, y_predicted):
         pass
-
 
 
 class RegressionScorer(Scorer):
@@ -156,16 +155,25 @@ class F1(ClassifierScorer):
         """
 
         :param X: Dense X of probabilities, or binary indicator
-        :param y:
+        :param y: indicator
         :param sample_weights:
         :return:
         """
-        return f1_score(y_true, y_predicted, sample_weight=sample_weight, average='weighted')
+        if len(y_predicted.shape) == 2:
+            preds = y_predicted.argmax(axis=1)
+        else:
+            preds = y_predicted
+
+        return f1_score(y_true, preds, sample_weight=sample_weight, average='weighted')
 
 
 class ScorerFactory(object):
+    """
+    The idea is that we initialize the object with the model,
+    but also provide an api for retrieving a static scoring function
+    after checking that things are ok.
+    """
     def __init__(self, model):
-
         if model.model_type == StaticTypes.model_types.regressor:
             self.mean_squared_error = MeanSquaredError(model)
             self.mean_absolute_error = MeanAbsoluteError(model)
@@ -181,5 +189,29 @@ class ScorerFactory(object):
 
         self.type = self.default.type
 
+
     def __call__(self, y_true, y_predicted, sample_weight=None):
         return self.default(y_true, y_predicted, sample_weight=sample_weight)
+
+
+    def get_scorer_function(self, scorer_type='default'):
+        """
+        Returns a scoring function as a pure function.
+
+        Parameters
+        ----------
+
+        scorer_type: string
+            Specifies which scorer to use. Default value 'default' returns f1 for classifiers that return labels,
+            cross_entropy for classifiers that return probabilities, and mean absolute error for regressors.
+
+
+        Returns
+        -------
+            .score staticmethod of skater.model.scorer.Scorer object.
+        """
+        assert scorer_type in self.__dict__, "Scorer type {} not recognized " \
+                                             "or allowed for model type".format(scorer_type)
+        scorer = self.__dict__[scorer_type]._score
+        scorer.type = self.__dict__[scorer_type].type
+        return scorer

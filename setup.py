@@ -41,7 +41,7 @@ def setup_package():
             'pandas>=0.19',
             'ds-lime>=0.1.1.21',
             'requests',
-            'pathos==0.2.0',
+            'multiprocess',
             'dill>=0.2.6'],
         extras_require ={'all':'matplotlib'},
         )

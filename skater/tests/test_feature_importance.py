@@ -46,10 +46,9 @@ class TestFeatureImportance(unittest.TestCase):
         self.sample_feature_name = [str(i) for i in range(self.sample_x.shape[1])]
 
         if debug:
-            self.interpreter = Interpretation(log_level='DEBUG')
+            self.interpreter = Interpretation(training_data=self.X, feature_names=self.features, log_level='DEBUG')
         else:
-            self.interpreter = Interpretation()  # default level is 'WARNING'
-        self.interpreter.load_data(self.X, feature_names=self.features)
+            self.interpreter = Interpretation(training_data=self.X, feature_names=self.features)  # default level is 'WARNING'
 
         self.regressor = LinearRegression()
         self.regressor.fit(self.X, self.y)
@@ -57,12 +56,19 @@ class TestFeatureImportance(unittest.TestCase):
 
         self.classifier = LogisticRegression()
         self.classifier.fit(self.X, self.y_as_int)
-        self.classifier_predict_fn = InMemoryModel(self.classifier.predict, examples=self.X, unique_values=self.classifier.classes_)
-        self.classifier_predict_proba_fn = InMemoryModel(self.classifier.predict_proba, examples=self.X)
+        self.classifier_predict_fn = InMemoryModel(self.classifier.predict,
+                                                   examples=self.X,
+                                                   unique_values=self.classifier.classes_,
+                                                   probability=False)
+        self.classifier_predict_proba_fn = InMemoryModel(self.classifier.predict_proba,
+                                                         examples=self.X,
+                                                         probability=True)
 
         self.string_classifier = LogisticRegression()
         self.string_classifier.fit(self.X, self.y_as_string)
-        self.string_classifier_predict_fn = InMemoryModel(self.string_classifier.predict_proba, examples=self.X)
+        self.string_classifier_predict_fn = InMemoryModel(self.string_classifier.predict_proba,
+                                                          examples=self.X,
+                                                          probability=True)
 
 
 
@@ -104,12 +110,12 @@ class TestFeatureImportance(unittest.TestCase):
     def test_feature_importance_regression_via_preformance_decrease(self):
         interpreter = Interpretation(self.X, feature_names=self.features, training_labels=self.y)
         importances = interpreter.feature_importance.feature_importance(self.regressor_predict_fn,
-                                                                        method='conditional-permutation',
+                                                                        method='model-scoring',
                                                                         use_scaling=False)
         self.assertEquals(np.isclose(importances.sum(), 1), True)
 
         importances = interpreter.feature_importance.feature_importance(self.regressor_predict_fn,
-                                                                        method='conditional-permutation',
+                                                                        method='model-scoring',
                                                                         use_scaling=True)
         self.assertEquals(np.isclose(importances.sum(), 1), True)
 
@@ -117,12 +123,12 @@ class TestFeatureImportance(unittest.TestCase):
     def test_feature_importance_classifier_via_preformance_decrease(self):
         interpreter = Interpretation(self.X, feature_names=self.features, training_labels=self.y_as_int)
         importances = interpreter.feature_importance.feature_importance(self.classifier_predict_fn,
-                                                                        method='conditional-permutation',
+                                                                        method='model-scoring',
                                                                         use_scaling=False)
         self.assertEquals(np.isclose(importances.sum(), 1), True)
 
         importances = interpreter.feature_importance.feature_importance(self.classifier_predict_fn,
-                                                                        method='conditional-permutation',
+                                                                        method='model-scoring',
                                                                         use_scaling=True)
         self.assertEquals(np.isclose(importances.sum(), 1), True)
 
@@ -130,18 +136,31 @@ class TestFeatureImportance(unittest.TestCase):
     def test_feature_importance_classifier_proba_via_preformance_decrease(self):
         interpreter = Interpretation(self.X, feature_names=self.features, training_labels=self.y_as_int)
         importances = interpreter.feature_importance.feature_importance(self.classifier_predict_proba_fn,
-                                                                        method='conditional-permutation',
+                                                                        method='model-scoring',
                                                                         use_scaling=False)
         self.assertEquals(np.isclose(importances.sum(), 1), True)
 
         importances = interpreter.feature_importance.feature_importance(self.classifier_predict_proba_fn,
-                                                                        method='conditional-permutation',
+                                                                        method='model-scoring',
                                                                         use_scaling=True)
         self.assertEquals(np.isclose(importances.sum(), 1), True)
 
 
     def test_plot_feature_importance(self):
         self.interpreter.feature_importance.plot_feature_importance(self.regressor_predict_fn)
+
+    def test_feature_importance_sampling(self):
+        """
+        https://github.com/datascienceinc/Skater/issues/192
+        We should be able to sample the data and use training labels.
+        :return:
+        """
+        interpreter = Interpretation(self.X, feature_names=self.features, training_labels=self.y_as_int)
+        importances = interpreter.feature_importance.feature_importance(self.classifier_predict_proba_fn,
+                                                                        n_samples=len(self.X) - 1,
+                                                                        method='model-scoring',
+                                                                        use_scaling=True)
+        self.assertEquals(np.isclose(importances.sum(), 1), True)
 
 
 if __name__ == '__main__':

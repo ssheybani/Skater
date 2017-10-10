@@ -53,16 +53,13 @@ class Interpretation(object):
         self.partial_dependence = PartialDependence(self)
         self.feature_importance = FeatureImportance(self)
         self.data_set = None
-        self.training_labels = None
-
-        if training_labels is not None:
-            self.training_labels = DataManager(training_labels, index=index)
-
-        if training_data is not None:
-            self.load_data(training_data, feature_names=feature_names, index=index)
+        self.load_data(training_data,
+                       training_labels=training_labels,
+                       feature_names=feature_names,
+                       index=index)
 
 
-    def load_data(self, training_data, feature_names=None, index=None):
+    def load_data(self, training_data, training_labels=None, feature_names=None, index=None):
         """
         Creates a DataSet object from inputs, ties to interpretation object.
         This will be exposed to all submodules.
@@ -86,9 +83,10 @@ class Interpretation(object):
 
         self.logger.info("Loading Data")
         self.data_set = DataManager(training_data,
+                                    y=training_labels,
                                     feature_names=feature_names,
                                     index=index,
                                     log_level=self._log_level)
         self.logger.info("Data loaded")
-        self.logger.debug("Data shape: {}".format(self.data_set.data.shape))
-        self.logger.debug("Dataset Feature_ids: {}".format(self.data_set.feature_ids))
+        self.logger.info("Data shape: {}".format(self.data_set.X.shape))
+        self.logger.info("Dataset Feature_ids: {}".format(self.data_set.feature_ids))

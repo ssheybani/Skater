@@ -33,6 +33,7 @@ install:
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib pandas flake8 coverage
   - source activate test-environment
   - pip install codecov #not on conda
+  - pip install coveralls
   - python setup.py install
   - python -c "import scipy"
   - python -c "import numpy"

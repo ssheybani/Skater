@@ -21,7 +21,7 @@ class FeatureImportance(BaseGlobalInterpretation):
     """
 
     def feature_importance(self, model_instance, ascending=True, filter_classes=None, n_jobs=-1,
-                           progressbar=True, n_samples=5000, method='output-variance', scorer='default',
+                           progressbar=True, n_samples=5000, method='prediction-variance', scorer_type='default',
                            use_scaling=False):
 
         """
@@ -52,15 +52,20 @@ class FeatureImportance(BaseGlobalInterpretation):
         n_samples: int
             How many samples to use when computing importance.
         method: string
-            How to compute feature importance. conditional-permutation requires Interpretation.training_labels.
+            How to compute feature importance. 'model-scoring' requires Interpretation.training_labels.
             Note this choice should only rarely makes any significant differences
-
-            output-variance: mean absolute value of changes in predictions, given perturbations.
-
-            conditional-permutation: difference in log_loss or MAE of training_labels given perturbations.
-
+            prediction-variance: mean absolute value of changes in predictions, given perturbations.
+            model-scoring: difference in log_loss or MAE of training_labels given perturbations.
+        scorer_type: string
+            only used when method='model-scoring', and in this case defines which scoring function to use.
+            Default value is 'default', which evaluates to:
+                regressors: mean absolute error
+                classifiers with probabilities: cross entropy
+                classifiers without probabilities: f1 score
+            See Skater.model.scorers for details.
         use_scaling: bool
-            Whether to weight the importance values by the stregth of the perturbations.
+            Whether to weight the importance values by the strength of the perturbations.
+            Generally doesn't effect results unless n_samples is very small.
 
         Returns
         -------
@@ -89,27 +94,25 @@ class FeatureImportance(BaseGlobalInterpretation):
             filter_classes = list(filter_classes)
             assert all([i in model_instance.target_names for i in filter_classes]), err_msg
 
-        if method == 'conditional-permutation' and self.training_labels is None:
-            raise FeatureImportanceError("If interpretation.training_labels are not set, you"
+        if n_samples <= self.data_set.n_rows:
+            inputs, labels = self.data_set.generate_sample(strategy='random-choice',
+                                                           include_y=True,
+                                                           sample=True,
+                                                           n_samples=n_samples)
+        else:
+            inputs, labels = self.data_set.X, self.data_set.y
+
+        if method == 'model-scoring' and labels is None:
+            raise FeatureImportanceError("If labels are not set, you"
                                          "can only use feature importance methods that do "
                                          "not require ground truth labels")
-        elif method == 'conditional-permutation':
-            training_labels = self.training_labels.data
-        else:
-            training_labels = None
-
-        if n_samples <= self.data_set.n_rows:
-            inputs = self.data_set.generate_sample(strategy='random-choice',
-                                                   sample=True,
-                                                   n_samples=n_samples)
-        else:
-            inputs = self.data_set.data
 
         original_predictions = model_instance.predict(inputs)
         n_jobs = None if n_jobs < 0 else n_jobs
         predict_fn = model_instance._get_static_predictor()
         executor_instance = Pool(n_jobs)
         arg_list = self.data_set.feature_ids
+        scorer = model_instance.scorers.get_scorer_function(scorer_type=scorer_type)
 
         if progressbar:
             self.interpreter.logger.warn("Progress bars slow down runs by 10-20%. For slightly \n"
@@ -120,16 +123,16 @@ class FeatureImportance(BaseGlobalInterpretation):
         else:
             mapper = executor_instance.map
 
-        fi_func = partial(FeatureImportance.compute_feature_importance,
+        fi_func = partial(compute_feature_importance,
                           input_data=inputs,
                           estimator_fn=predict_fn,
                           original_predictions=original_predictions,
                           feature_info=self.data_set.feature_info,
                           feature_names=self.data_set.feature_ids,
-                          training_labels=training_labels,
+                          training_labels=labels,
                           method=method,
                           scaled=use_scaling,
-                          scorer=model_instance.scorers.default)
+                          scorer=scorer)
 
         importances = {}
         try:
@@ -171,15 +174,16 @@ class FeatureImportance(BaseGlobalInterpretation):
         return importances
 
 
-    def plot_feature_importance(self, predict_fn, filter_classes=None, ascending=True, ax=None, progressbar=True,
-                                n_jobs=-1, n_samples=5000, method='output-variance', use_scaling=False):
+    def plot_feature_importance(self, modelinstance, filter_classes=None, ascending=True, ax=None, progressbar=True,
+                                n_jobs=-1, n_samples=5000, method='prediction-variance', scorer_type='default',
+                                use_scaling=False):
 
         """Computes feature importance of all features related to a model instance,
         then plots the results. Supports classification, multi-class classification, and regression.
 
         Parameters
         ----------
-        predict_fn: skater.model.model.Model subtype
+        modelinstance: skater.model.model.Model subtype
             estimator "prediction" function to explain the predictive model. Could be probability scores
             or target values
         filter_classes: array type
@@ -199,12 +203,20 @@ class FeatureImportance(BaseGlobalInterpretation):
         n_samples: int
             How many samples to use when computing importance.
         method: string
-            How to compute feature importance. conditional-permutation requires Interpretation.training_labels
-            output-variance: mean absolute value of changes in predictions, given perturbations.
-            conditional-permutation: difference in log_loss or MAE of training_labels given perturbations.
+            How to compute feature importance. 'model-scoring' requires Interpretation.training_labels
+            prediction-variance: mean absolute value of changes in predictions, given perturbations.
+            model-scoring: difference in log_loss or MAE of training_labels given perturbations.
             Note this vary rarely makes any significant differences
+        scorer_type: string
+            only used when method='model-scoring', and in this case defines which scoring function to use.
+            Default value is 'default', which evaluates to:
+                regressors: mean absolute error
+                classifiers with probabilities: cross entropy
+                classifiers without probabilities: f1 score
+            See Skater.model.scorers for details.
         use_scaling: bool
-            Whether to weight the importance values by the stregth of the perturbations.
+            Whether to weight the importance values by the strength of the perturbations.
+            Generally doesn't effect results unless n_samples is very small.
 
 
         Returns
@@ -233,12 +245,13 @@ class FeatureImportance(BaseGlobalInterpretation):
         except RuntimeError:
             raise (MatplotlibDisplayError("Matplotlib unable to open display"))
 
-        importances = self.feature_importance(predict_fn,
+        importances = self.feature_importance(modelinstance,
                                               filter_classes=filter_classes,
                                               progressbar=progressbar,
                                               n_samples=n_samples,
                                               n_jobs=n_jobs,
                                               method=method,
+                                              scorer_type=scorer_type,
                                               use_scaling=use_scaling)
 
         if ax is None:
@@ -251,134 +264,132 @@ class FeatureImportance(BaseGlobalInterpretation):
         importances.sort_values(ascending=ascending).plot(kind='barh', ax=ax, color=color)
         return f, ax
 
-    @staticmethod
-    def compute_feature_importance(feature_id, input_data, estimator_fn,
-                                   original_predictions, feature_info,
-                                   feature_names, training_labels=None,
-                                   method='output-variance',
-                                   scaled=False, scorer=None):
-        """Global function for computing column-wise importance
 
-        Parameters
-        ----------
-        feature_id: hashable
-            which feature for which to compute importance
-        input_data:
-            training data (or sample)
-        estimator_fn: callable
-            prediction function
-        original_predictions: array type
-            predicted values before perturbation
-        feature_info: dict
-            from skater.data.DataManager.feature_info
-        feature_names: array type
-            list of feature names
-        training_labels: array type
-            ground truth labels. only required if method="perfomance decrease"
-        method: string
-            output-variance: importance based on entropy of prediction changes given perturbations
-            conditional-permutation: importance based on difference in prediction scores given changes
-                                  given perturbations
-        model_type: string
-            regression or classifition
-        scaled: bool
-            Whether to weight the importance values by the stregth of the perturbations.
+def compute_feature_importance(feature_id, input_data, estimator_fn,
+                               original_predictions, feature_info,
+                               feature_names, training_labels=None,
+                               method='prediction-variance',
+                               scaled=False, scorer=None):
+    """Global function for computing column-wise importance
 
-        Returns
-        ----------
-        importance: dict
-            {feature id: importance value}
-        """
+    Parameters
+    ----------
+    feature_id: hashable
+        which feature for which to compute importance
+    input_data:
+        training data (or sample)
+    estimator_fn: callable
+        prediction function
+    original_predictions: array type
+        predicted values before perturbation
+    feature_info: dict
+        from skater.data.DataManager.feature_info
+    feature_names: array type
+        list of feature names
+    training_labels: array type
+        ground truth labels. only required if method="perfomance decrease"
+    method: string
+        prediction-variance: importance based on changes in predictions caused by
+                             changing values of the feature space.
+        model-scoring:       importance based on differences in prediction scores/cost
+                             functions caused by changing values of the feature space.
+    model_type: string
+        regression or classification
+    scaled: bool
+        Whether to weight the importance values by the stregth of the perturbations.
 
-        copy_of_data_set = DataManager(input_data.copy(), feature_names=feature_names)
-        n = copy_of_data_set.n_rows
+    Returns
+    ----------
+    importance: dict
+        {feature id: importance value}
+    """
 
-        original_values = copy_of_data_set[feature_id]
+    copy_of_data_set = DataManager(input_data.copy(), feature_names=feature_names)
+    n = copy_of_data_set.n_rows
 
-        # collect perturbations
-        if feature_info[feature_id]['numeric']:
-            samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n,
-                                                              strategy='uniform-over-similarity-ranks')
-        else:
-            samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n, strategy='random-choice')
+    original_values = copy_of_data_set[feature_id]
 
-
-        copy_of_data_set[feature_id] = samples.reshape(-1)
-
-        new_predictions = estimator_fn(copy_of_data_set.values)
-
-        importance = FeatureImportance.compute_importance(new_predictions,
-                                                          original_predictions,
-                                                          original_values,
-                                                          samples,
-                                                          training_labels,
-                                                          method=method,
-                                                          scaled=scaled,
-                                                          scorer=scorer)
-        return {feature_id: importance}
+    # collect perturbations
+    if feature_info[feature_id]['numeric']:
+        samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n,
+                                                          strategy='uniform-over-similarity-ranks')
+    else:
+        samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n, strategy='random-choice')
 
 
-    @staticmethod
-    def compute_importance(new_predictions, original_predictions, original_x, perturbed_x,
-                           training_labels, method='output-variance', scaled=False,
-                           scorer=None):
-        if method == 'output-variance':
-            importance = FeatureImportance._compute_importance_via_output_variance(np.array(new_predictions),
-                                                                                   np.array(original_predictions),
-                                                                                   np.array(original_x),
-                                                                                   np.array(perturbed_x),
-                                                                                   scaled)
-        elif method == 'conditional-permutation':
-            importance = FeatureImportance._compute_importance_via_conditional_permutation(np.array(new_predictions),
-                                                                                           np.array(original_predictions),
-                                                                                           training_labels,
-                                                                                           np.array(original_x),
-                                                                                           np.array(perturbed_x),
-                                                                                           scorer,
-                                                                                           scaled)
+    copy_of_data_set[feature_id] = samples.reshape(-1)
 
-        else:
-            raise(KeyError("Unrecongized method for computing feature_importance: {}".format(method)))
-        return importance
+    new_predictions = estimator_fn(copy_of_data_set.values)
 
-    @staticmethod
-    def _compute_importance_via_output_variance(new_predictions, original_predictions,
+    importance = compute_importance(new_predictions,
+                                    original_predictions,
+                                    original_values,
+                                    samples,
+                                    training_labels,
+                                    method=method,
+                                    scaled=scaled,
+                                    scorer=scorer)
+    return {feature_id: importance}
+
+
+def _compute_importance_via_prediction_variance(new_predictions, original_predictions,
                                                 original_x, perturbed_x, scaled=True):
-        """Mean absolute change in predictions given perturbations in a feature"""
-        changes_in_predictions = abs(new_predictions - original_predictions)
-        if len(changes_in_predictions.shape) == 1:
-            changes_in_predictions = changes_in_predictions[:, np.newaxis]
+    """Mean absolute change in predictions given perturbations in a feature"""
+    changes_in_predictions = abs(new_predictions - original_predictions)
+    if len(changes_in_predictions.shape) == 1:
+        changes_in_predictions = changes_in_predictions[:, np.newaxis]
 
-        if scaled:
-            scales = FeatureImportance.importance_scaler(original_x, perturbed_x)
-            changes_in_predictions = np.sum(changes_in_predictions, axis=1) * scales
+    if scaled:
+        scales = importance_scaler(original_x, perturbed_x)
+        changes_in_predictions = np.sum(changes_in_predictions, axis=1) * scales
 
-        importance = np.mean(changes_in_predictions)
-        return importance
-
-
-    @staticmethod
-    def _compute_importance_via_conditional_permutation(new_predictions, original_predictions, training_labels,
-                                                        original_x, perturbed_x, scorer, scaled=True):
-
-        """Mean absolute error of predictions given perturbations in a feature"""
-        if scaled:
-            sample_weight = FeatureImportance.importance_scaler(original_x, perturbed_x)
-        else:
-            sample_weight = None
-
-        score1 = scorer(training_labels, new_predictions, sample_weight=sample_weight)
-        score2 = scorer(training_labels, original_predictions, sample_weight=sample_weight)
-        multiple = 1 if scorer.type == StaticTypes.scorer_types.increasing else -1
-        return abs(max((score2 - score1) * multiple, 0))
+    importance = np.mean(changes_in_predictions)
+    return importance
 
 
-    @staticmethod
-    def importance_scaler(original_x, perturbed_x):
-        perturbed_x = perturbed_x.reshape(original_x.shape)
+def _compute_importance_via_model_scoring(new_predictions, original_predictions, training_labels,
+                                          original_x, perturbed_x, scorer, scaled=True):
 
-        scales = abs(perturbed_x - original_x) / (max(original_x) - min(original_x))
-        if sum(scales == 0):
-            scales = np.ones(perturbed_x.shape[0])
+    """Mean absolute error of predictions given perturbations in a feature"""
+    if scaled:
+        sample_weight = importance_scaler(original_x, perturbed_x)
+    else:
+        sample_weight = None
 
-        return scales
+    score1 = scorer(training_labels, new_predictions, sample_weight=sample_weight)
+    score2 = scorer(training_labels, original_predictions, sample_weight=sample_weight)
+    multiple = 1 if scorer.type == StaticTypes.scorer_types.increasing else -1
+    return abs(max((score2 - score1) * multiple, 0))
+
+
+def importance_scaler(original_x, perturbed_x):
+    perturbed_x = perturbed_x.reshape(original_x.shape)
+
+    scales = abs(perturbed_x - original_x) / (max(original_x) - min(original_x))
+    if sum(scales == 0):
+        scales = np.ones(perturbed_x.shape[0])
+
+    return scales
+
+
+def compute_importance(new_predictions, original_predictions, original_x, perturbed_x,
+                       training_labels, method='prediction-variance', scaled=False,
+                       scorer=None):
+    if method == 'prediction-variance':
+        importance = _compute_importance_via_prediction_variance(np.array(new_predictions),
+                                                                 np.array(original_predictions),
+                                                                 np.array(original_x),
+                                                                 np.array(perturbed_x),
+                                                                 scaled)
+    elif method == 'model-scoring':
+        importance = _compute_importance_via_model_scoring(np.array(new_predictions),
+                                                           np.array(original_predictions),
+                                                           training_labels,
+                                                           np.array(original_x),
+                                                           np.array(perturbed_x),
+                                                           scorer,
+                                                           scaled)
+
+    else:
+        raise(KeyError("Unrecongized method for computing feature_importance: {}".format(method)))
+    return importance

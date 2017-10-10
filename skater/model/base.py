@@ -2,7 +2,7 @@
 
 import abc
 import numpy as np
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+from sklearn.preprocessing import LabelEncoder, label_binarize
 from sklearn.utils.multiclass import type_of_target
 import pandas as pd
 
@@ -11,7 +11,6 @@ from ..util.logger import build_logger
 from ..util import exceptions
 from ..data import DataManager
 from .scorer import RSquared, CrossEntropy, MeanSquaredError, MeanAbsoluteError, ScorerFactory
-
 
 
 class ModelType(object):
@@ -23,6 +22,11 @@ class ModelType(object):
         We want to make inferences about the format of the output.
         We want to able to map model outputs to some smaller, universal set of output types.
         We want to infer whether the model is real valued, or classification (n classes?)
+
+    # Todos:
+    * check unique_vals are unique
+    * check that if probability=False, predictions arent continuous
+
     """
     __metaclass__ = abc.ABCMeta
 
@@ -79,14 +83,13 @@ class ModelType(object):
         else:
             self.model_type = model_type
 
-        self.transformer = self.identity_function
+        self.transformer = identity_function
         self.label_encoder = LabelEncoder()
-        self.one_hot_encoder = OneHotEncoder()
         self.target_names = target_names
         self.feature_names = feature_names
         self.unique_values = unique_values
-        self.input_formatter = input_formatter or self.identity_function
-        self.output_formatter = output_formatter or self.identity_function
+        self.input_formatter = input_formatter or identity_function
+        self.output_formatter = output_formatter or identity_function
 
         self.has_metadata = False
 
@@ -182,11 +185,13 @@ class ModelType(object):
         else:
             return np.array(examples)
 
+
     def _if_no_prob(self, value):
         if self.probability == StaticTypes.unknown:
             return value
         else:
             return self.probability
+
 
     def _if_no_model(self, value):
         if self.model_type == StaticTypes.unknown:
@@ -212,13 +217,13 @@ class ModelType(object):
         self.logger.debug("Beginning output checks")
 
         if self.input_type in (pd.DataFrame, None):
-            outputs = self.predict(dataset.data)
+            outputs = self.predict(dataset.X)
         elif self.input_type == np.ndarray:
-            outputs = self.predict(dataset.data)
+            outputs = self.predict(dataset.X)
         else:
             raise ValueError("Unrecognized input type: {}".format(self.input_type))
 
-        self.input_shape = dataset.data.shape
+        self.input_shape = dataset.X.shape
         self.output_shape = outputs.shape
 
         ndim = len(outputs.shape)
@@ -266,7 +271,7 @@ class ModelType(object):
 
         else:
             err_msg = "Could not infer model type"
-            self.logger.debug("Inputs: {}".format(dataset.data))
+            self.logger.debug("Inputs: {}".format(dataset.X))
             self.logger.debug("Outputs: {}".format(outputs))
             self.logger.debug("sklearn response: {}".format(self.output_type))
             exceptions.ModelError(err_msg)
@@ -280,36 +285,11 @@ class ModelType(object):
 
         self.transformer = self.transformer_func_factory(outputs)
 
-        reports = self.model_report(dataset.data)
+        reports = self.model_report(dataset.X)
         for report in reports:
             self.logger.debug(report)
 
         self.has_metadata = True
-
-    def predict_function_transformer(self, output):
-        """
-        Call this method when model returns a 1D array of
-        predicted classes. The output is one hot encoded version.
-
-        Parameters
-        ----------
-        output: array type
-            The output of the pre-formatted predict function
-
-        Returns
-        ----------
-        output: numpy.ndarray
-            The one hot encoded outputs of predict_fn
-        """
-
-        _labels = self.label_encoder.transform(output)[:, np.newaxis]
-        # target_names = label_encoder.classes_.tolist()
-
-        self.logger.debug("Using transforming function. Found {} classes".format(len(self.label_encoder.classes_)))
-        self.logger.debug("Label shape: {}".format(len(_labels.shape)))
-        output = self.one_hot_encoder.transform(_labels).todense()
-        output = np.squeeze(np.asarray(output))
-        return DataManager(output, feature_names=self.label_encoder.classes_)[self.unique_values]
 
 
     def transformer_func_factory(self, outputs):
@@ -334,15 +314,32 @@ class ModelType(object):
         # and only if the model does not return probabilities. If unknown, should be true
         if self.model_type == StaticTypes.model_types.classifier and not self.probability:
             # fit label encoder
+            # unique_values could ints/strings, etc.
             artificial_samples = np.array(self.unique_values)
             self.logger.debug("Label encoder fit on examples of shape: {}".format(outputs.shape))
-            self.label_encoder.fit(artificial_samples)
-            labels = self.label_encoder.transform(artificial_samples)[:, np.newaxis]
-            self.logger.debug("Onehot encoder fit on examples of shape: {}".format(labels.shape))
-            self.one_hot_encoder.fit(labels)
-            return self.predict_function_transformer
+
+            def check_classes(classes):
+                if len(classes) > 2:
+                    return classes
+                elif len(classes) == 2:
+                    # to get 2 columns from label_binarize, we need
+                    # to pretend we have at least 3 classes.
+                    # adding will preserve type of underlying classes
+                    fake_class = classes[0] + classes[1]
+                    return np.concatenate((classes, np.array([fake_class])))
+                else:
+                    raise ValueError("Less than 2 classes found in unique_classes")
+
+            # defining this as a closure so it can be executed
+            # outside the class
+            def transformer(output):
+                # numeric index of original classes.
+                idx = list(range(len(artificial_samples)))
+                classes = check_classes(artificial_samples)
+                return label_binarize(output, classes)[:, idx]
+            return transformer
         else:
-            return lambda x: x
+            return identity_function
 
 
     def model_report(self, examples):
@@ -380,9 +377,8 @@ class ModelType(object):
         if subset_of_classes is None:
             return self.predict(data)
         else:
-            return DataManager(self.predict(data), feature_names=self.target_names)[subset_of_classes].data
+            return DataManager(self.predict(data), feature_names=self.target_names)[subset_of_classes].X
 
 
-    @staticmethod
-    def identity_function(x):
-        return x
+def identity_function(x):
+    return x
