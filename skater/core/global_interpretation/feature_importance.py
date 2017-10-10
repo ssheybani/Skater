@@ -21,7 +21,7 @@ class FeatureImportance(BaseGlobalInterpretation):
     """
 
     def feature_importance(self, model_instance, ascending=True, filter_classes=None, n_jobs=-1,
-                           progressbar=True, n_samples=5000, method='output-variance', scorer_type='default',
+                           progressbar=True, n_samples=5000, method='prediction-variance', scorer_type='default',
                            use_scaling=False):
 
         """
@@ -52,15 +52,20 @@ class FeatureImportance(BaseGlobalInterpretation):
         n_samples: int
             How many samples to use when computing importance.
         method: string
-            How to compute feature importance. conditional-permutation requires Interpretation.training_labels.
+            How to compute feature importance. 'model-scoring' requires Interpretation.training_labels.
             Note this choice should only rarely makes any significant differences
-
-            output-variance: mean absolute value of changes in predictions, given perturbations.
-
-            conditional-permutation: difference in log_loss or MAE of training_labels given perturbations.
-
+            prediction-variance: mean absolute value of changes in predictions, given perturbations.
+            model-scoring: difference in log_loss or MAE of training_labels given perturbations.
+        scorer_type: string
+            only used when method='model-scoring', and in this case defines which scoring function to use.
+            Default value is 'default', which evaluates to:
+                regressors: mean absolute error
+                classifiers with probabilities: cross entropy
+                classifiers without probabilities: f1 score
+            See Skater.model.scorers for details.
         use_scaling: bool
-            Whether to weight the importance values by the stregth of the perturbations.
+            Whether to weight the importance values by the strength of the perturbations.
+            Generally doesn't effect results unless n_samples is very small.
 
         Returns
         -------
@@ -97,7 +102,7 @@ class FeatureImportance(BaseGlobalInterpretation):
         else:
             inputs, labels = self.data_set.X, self.data_set.y
 
-        if method == 'conditional-permutation' and labels is None:
+        if method == 'model-scoring' and labels is None:
             raise FeatureImportanceError("If labels are not set, you"
                                          "can only use feature importance methods that do "
                                          "not require ground truth labels")
@@ -170,7 +175,8 @@ class FeatureImportance(BaseGlobalInterpretation):
 
 
     def plot_feature_importance(self, modelinstance, filter_classes=None, ascending=True, ax=None, progressbar=True,
-                                n_jobs=-1, n_samples=5000, method='output-variance', use_scaling=False):
+                                n_jobs=-1, n_samples=5000, method='prediction-variance', scorer_type='default',
+                                use_scaling=False):
 
         """Computes feature importance of all features related to a model instance,
         then plots the results. Supports classification, multi-class classification, and regression.
@@ -197,12 +203,20 @@ class FeatureImportance(BaseGlobalInterpretation):
         n_samples: int
             How many samples to use when computing importance.
         method: string
-            How to compute feature importance. conditional-permutation requires Interpretation.training_labels
-            output-variance: mean absolute value of changes in predictions, given perturbations.
-            conditional-permutation: difference in log_loss or MAE of training_labels given perturbations.
+            How to compute feature importance. 'model-scoring' requires Interpretation.training_labels
+            prediction-variance: mean absolute value of changes in predictions, given perturbations.
+            model-scoring: difference in log_loss or MAE of training_labels given perturbations.
             Note this vary rarely makes any significant differences
+        scorer_type: string
+            only used when method='model-scoring', and in this case defines which scoring function to use.
+            Default value is 'default', which evaluates to:
+                regressors: mean absolute error
+                classifiers with probabilities: cross entropy
+                classifiers without probabilities: f1 score
+            See Skater.model.scorers for details.
         use_scaling: bool
-            Whether to weight the importance values by the stregth of the perturbations.
+            Whether to weight the importance values by the strength of the perturbations.
+            Generally doesn't effect results unless n_samples is very small.
 
 
         Returns
@@ -237,6 +251,7 @@ class FeatureImportance(BaseGlobalInterpretation):
                                               n_samples=n_samples,
                                               n_jobs=n_jobs,
                                               method=method,
+                                              scorer_type=scorer_type,
                                               use_scaling=use_scaling)
 
         if ax is None:
@@ -253,7 +268,7 @@ class FeatureImportance(BaseGlobalInterpretation):
 def compute_feature_importance(feature_id, input_data, estimator_fn,
                                original_predictions, feature_info,
                                feature_names, training_labels=None,
-                               method='output-variance',
+                               method='prediction-variance',
                                scaled=False, scorer=None):
     """Global function for computing column-wise importance
 
@@ -274,11 +289,12 @@ def compute_feature_importance(feature_id, input_data, estimator_fn,
     training_labels: array type
         ground truth labels. only required if method="perfomance decrease"
     method: string
-        output-variance: importance based on entropy of prediction changes given perturbations
-        conditional-permutation: importance based on difference in prediction scores given changes
-                              given perturbations
+        prediction-variance: importance based on changes in predictions caused by
+                             changing values of the feature space.
+        model-scoring:       importance based on differences in prediction scores/cost
+                             functions caused by changing values of the feature space.
     model_type: string
-        regression or classifition
+        regression or classification
     scaled: bool
         Whether to weight the importance values by the stregth of the perturbations.
 
@@ -317,7 +333,7 @@ def compute_feature_importance(feature_id, input_data, estimator_fn,
 
 
 
-def _compute_importance_via_output_variance(new_predictions, original_predictions,
+def _compute_importance_via_prediction_variance(new_predictions, original_predictions,
                                             original_x, perturbed_x, scaled=True):
     """Mean absolute change in predictions given perturbations in a feature"""
     changes_in_predictions = abs(new_predictions - original_predictions)
@@ -332,8 +348,8 @@ def _compute_importance_via_output_variance(new_predictions, original_prediction
     return importance
 
 
-def _compute_importance_via_conditional_permutation(new_predictions, original_predictions, training_labels,
-                                                    original_x, perturbed_x, scorer, scaled=True):
+def _compute_importance_via_model_scoring(new_predictions, original_predictions, training_labels,
+                                          original_x, perturbed_x, scorer, scaled=True):
 
     """Mean absolute error of predictions given perturbations in a feature"""
     if scaled:
@@ -358,22 +374,22 @@ def importance_scaler(original_x, perturbed_x):
 
 
 def compute_importance(new_predictions, original_predictions, original_x, perturbed_x,
-                       training_labels, method='output-variance', scaled=False,
+                       training_labels, method='prediction-variance', scaled=False,
                        scorer=None):
-    if method == 'output-variance':
-        importance = _compute_importance_via_output_variance(np.array(new_predictions),
+    if method == 'prediction-variance':
+        importance = _compute_importance_via_prediction_variance(np.array(new_predictions),
                                                              np.array(original_predictions),
                                                              np.array(original_x),
                                                              np.array(perturbed_x),
                                                              scaled)
-    elif method == 'conditional-permutation':
-        importance = _compute_importance_via_conditional_permutation(np.array(new_predictions),
-                                                                     np.array(original_predictions),
-                                                                     training_labels,
-                                                                     np.array(original_x),
-                                                                     np.array(perturbed_x),
-                                                                     scorer,
-                                                                     scaled)
+    elif method == 'model-scoring':
+        importance = _compute_importance_via_model_scoring(np.array(new_predictions),
+                                                           np.array(original_predictions),
+                                                           training_labels,
+                                                           np.array(original_x),
+                                                           np.array(perturbed_x),
+                                                           scorer,
+                                                           scaled)
 
     else:
         raise(KeyError("Unrecongized method for computing feature_importance: {}".format(method)))

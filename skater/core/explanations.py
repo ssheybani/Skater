@@ -88,5 +88,5 @@ class Interpretation(object):
                                     index=index,
                                     log_level=self._log_level)
         self.logger.info("Data loaded")
-        self.logger.debug("Data shape: {}".format(self.data_set.X.shape))
-        self.logger.debug("Dataset Feature_ids: {}".format(self.data_set.feature_ids))
+        self.logger.info("Data shape: {}".format(self.data_set.X.shape))
+        self.logger.info("Dataset Feature_ids: {}".format(self.data_set.feature_ids))

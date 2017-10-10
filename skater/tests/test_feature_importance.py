@@ -110,12 +110,12 @@ class TestFeatureImportance(unittest.TestCase):
     def test_feature_importance_regression_via_preformance_decrease(self):
         interpreter = Interpretation(self.X, feature_names=self.features, training_labels=self.y)
         importances = interpreter.feature_importance.feature_importance(self.regressor_predict_fn,
-                                                                        method='conditional-permutation',
+                                                                        method='model-scoring',
                                                                         use_scaling=False)
         self.assertEquals(np.isclose(importances.sum(), 1), True)
 
         importances = interpreter.feature_importance.feature_importance(self.regressor_predict_fn,
-                                                                        method='conditional-permutation',
+                                                                        method='model-scoring',
                                                                         use_scaling=True)
         self.assertEquals(np.isclose(importances.sum(), 1), True)
 
@@ -123,12 +123,12 @@ class TestFeatureImportance(unittest.TestCase):
     def test_feature_importance_classifier_via_preformance_decrease(self):
         interpreter = Interpretation(self.X, feature_names=self.features, training_labels=self.y_as_int)
         importances = interpreter.feature_importance.feature_importance(self.classifier_predict_fn,
-                                                                        method='conditional-permutation',
+                                                                        method='model-scoring',
                                                                         use_scaling=False)
         self.assertEquals(np.isclose(importances.sum(), 1), True)
 
         importances = interpreter.feature_importance.feature_importance(self.classifier_predict_fn,
-                                                                        method='conditional-permutation',
+                                                                        method='model-scoring',
                                                                         use_scaling=True)
         self.assertEquals(np.isclose(importances.sum(), 1), True)
 
@@ -136,12 +136,12 @@ class TestFeatureImportance(unittest.TestCase):
     def test_feature_importance_classifier_proba_via_preformance_decrease(self):
         interpreter = Interpretation(self.X, feature_names=self.features, training_labels=self.y_as_int)
         importances = interpreter.feature_importance.feature_importance(self.classifier_predict_proba_fn,
-                                                                        method='conditional-permutation',
+                                                                        method='model-scoring',
                                                                         use_scaling=False)
         self.assertEquals(np.isclose(importances.sum(), 1), True)
 
         importances = interpreter.feature_importance.feature_importance(self.classifier_predict_proba_fn,
-                                                                        method='conditional-permutation',
+                                                                        method='model-scoring',
                                                                         use_scaling=True)
         self.assertEquals(np.isclose(importances.sum(), 1), True)
 
@@ -149,7 +149,7 @@ class TestFeatureImportance(unittest.TestCase):
     def test_plot_feature_importance(self):
         self.interpreter.feature_importance.plot_feature_importance(self.regressor_predict_fn)
 
-    def test_issue_192(self):
+    def test_feature_importance_sampling(self):
         """
         https://github.com/datascienceinc/Skater/issues/192
         We should be able to sample the data and use training labels.
@@ -158,7 +158,7 @@ class TestFeatureImportance(unittest.TestCase):
         interpreter = Interpretation(self.X, feature_names=self.features, training_labels=self.y_as_int)
         importances = interpreter.feature_importance.feature_importance(self.classifier_predict_proba_fn,
                                                                         n_samples=len(self.X) - 1,
-                                                                        method='conditional-permutation',
+                                                                        method='model-scoring',
                                                                         use_scaling=True)
         self.assertEquals(np.isclose(importances.sum(), 1), True)
 
