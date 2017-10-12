@@ -14,7 +14,7 @@ as you can obtain inputs, and use a function to obtain outputs, you can use
 Skater to learn about the models internal decision policies.
 
 
-The package was originally developed by Aaron Kramer, Pramit Choudhary and internal DataScience Team at DataScience.com
+The package was originally developed at DataScience.com by Aaron Kramer, Pramit Choudhary and internal DataScience Team 
 to help enable practitioners explain and interpret predictive "black boxes" in a human interpretable way.
 
 .. image:: https://travis-ci.org/datascienceinc/Skater.svg?branch=master
@@ -126,12 +126,10 @@ Testing
 ~~~~~~~
 1. If repo is cloned:
 ::
-
     python skater/tests/all_tests.py
 
 2. If pip installed:
 ::
-
     python -c "from skater.tests.all_tests import run_tests; run_tests()"
 
 
