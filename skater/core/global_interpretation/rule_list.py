@@ -10,13 +10,14 @@ class SBRL():
         self.r_sbrl = importr('sbrl')
         self.model = None
 
+
     def fit(self, X, y, **kwargs):
         """
         Parameters:
             X: pandas.DataFrame object, used to fit the model.
                  It must not have a column named 'label'
-            y:
-            **kwarg key word arguments including the following keys:
+            y: pandas.Series, 1-D array to store ground truth labels
+            **kwarg: key word arguments including the following keys:
             'iters':    default 30000
             'pos_sign': default "1"
             'neg_sign': default "0"
