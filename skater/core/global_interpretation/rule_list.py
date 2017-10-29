@@ -2,12 +2,13 @@
 # Referencing the work done by Professor Cynthia/Hongyuy/Others with modifications
 
 from rpy2.robjects.packages import importr
-from rpy2.robjects import pandas2ri, ro
+from rpy2.robjects import pandas2ri
+import rpy2.robjects as ro
 import numpy as np
 pandas2ri.activate()
 
 
-class SBRL():
+class SBRL(object):
     def __init__(self):
         self.r_sbrl = importr('sbrl')
         self.model = None
