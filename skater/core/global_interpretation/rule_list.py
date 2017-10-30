@@ -4,7 +4,6 @@
 from rpy2.robjects.packages import importr
 from rpy2.robjects import pandas2ri
 import rpy2.robjects as ro
-import numpy as np
 pandas2ri.activate()
 
 
@@ -14,7 +13,7 @@ class SBRL(object):
         self.model = None
         self.as_factor = ro.r['as.factor']
         self.s_apply = ro.r['sapply']
-        self.as_factor = ro.r['data.frame']
+        self.r_frame = ro.r['data.frame']
 
 
     def fit(self, X, y_true, **kwargs):
@@ -38,7 +37,7 @@ class SBRL(object):
         """
         data = X.assign(label=y_true)
         data_as_r_frame = self.r_frame(self.s_apply(data, self.as_factor))
-        self.model = self.r_sbrl.sbrl(pandas2ri.py2ri(data_as_r_frame), **kwargs)
+        self.model = self.r_sbrl.sbrl(data_as_r_frame, **kwargs)
         return self.model
 
 
@@ -49,9 +48,25 @@ class SBRL(object):
             `type`  whether the prediction is discrete or probabilistic.
             return a numpy.ndarray of shape (#datapoints, 2), the probability for each observations
         """
-        results = self.r_sbrl.predict_sbrl(self.model, pandas2ri.py2ri(X))
-        return np.asarray(map(pandas2ri.ri2py, results)).transpose()
+        data_as_r_frame = self.r_frame(self.s_apply(X, self.as_factor))
+        results = self.r_sbrl.predict_sbrl(self.model, data_as_r_frame)
+        return pandas2ri.ri2py_dataframe(results).T
 
 
-    def print_model(self):
+    def print_model_(self):
         self.r_sbrl.print_sbrl(self.model)
+
+
+    def access_learned_rules(self, rule_indexes):
+        if not isinstance(rule_indexes, str):
+            raise TypeError('Expected type string {} provided'.format(type(rule_indexes)))
+
+        # Convert model properties into a readable python dict
+        result_dict = dict(zip(self.model.names, map(list,list(self.model))))
+        # Enable the ability to access single or multiple sequential model learned decisions
+        indexes = [int(v) for v in rule_indexes.split(':')]
+
+        rules_result = lambda rules: result_dict['rulenames'][indexes[0]:indexes[1]] if rule_indexes.find(':') > -1\
+            else result_dict['rulenames'][indexes[0]]
+
+        return rules_result(self.model)

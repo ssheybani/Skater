@@ -5,9 +5,11 @@ from skater.core.global_interpretation.rule_list import SBRL
 
 class TestRuleList(unittest.TestCase):
 
-    def setup(self):
+    def setUp(self):
         self.sbrl_inst = SBRL()
-        self.input_data = pd.read_csv('data/sample.csv')
+        self.kwargs = {"iters":50000, "pos_sign":1, "neg_sign":0, "rule_minlen":3,
+                  "rule_maxlen":6, "minsupport_pos":0.10, "minsupport_neg":0.10, "eta":1.0, "nchain":40, "lambda":12}
+        self.input_data = pd.read_csv('skater/tests/data/sample_data.csv')
         # data transformation and cleaning ...
         self.input_data["Sex"] = self.input_data["Sex"].astype('category')
         self.input_data["Sex_Encoded"] = self.input_data["Sex"].cat.codes
@@ -21,9 +23,15 @@ class TestRuleList(unittest.TestCase):
 
 
     def test_model_build(self):
-        self.sbrl_inst.fit(self.input_data, self.y)
+        self.sbrl_inst.fit(self.input_data, self.y, **self.kwargs)
         result_score = self.sbrl_inst.predict_prob(self.input_data)
-        print(result_score.shape)
+        self.assertEquals(result_score.shape, (77, 2))
+
+
+    def test_model_output(self):
+        self.sbrl_inst.fit(self.input_data, self.y, **self.kwargs)
+        result = self.sbrl_inst.access_learned_rules('23:25')
+        self.assertEquals(len(result), 2)
 
 
 if __name__ == '__main__':
