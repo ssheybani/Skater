@@ -449,10 +449,12 @@ class DataManager(object):
                          index=self.index)
         return dm.generate_sample(*args, **kwargs)
 
+
     def set_index(self, index):
         self.index = index
         if self.data_type in (pd.DataFrame, pd.Series):
             self.X.index = index
+
 
     def _labels_by_index(self, data_index):
         """

@@ -48,3 +48,8 @@ def display_in_html(text, scores, fname='testfile', metainf='', pos_clr_name='Bl
     htmlstr += u'</div></body>'
     with codecs.open('%s.html' % fname, 'w', encoding='utf8') as f:
         f.write(htmlstr)
+
+
+def show_in_notebook():
+    from IPython.core.display import display, HTML
+    return HTML('./rendered.html')
