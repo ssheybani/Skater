@@ -3,7 +3,6 @@
 import numpy as np
 import pandas as pd
 import re
-from functools import map
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
@@ -28,26 +27,30 @@ def relevance_wt_transformer(raw_txt, wts_as_dict):
     if isinstance(wts_as_dict, dict):
         max_wt = np.max(np.abs(list(wts_as_dict.values())))
         wts_as_dict = {word: wts_as_dict[word]/max_wt for word in wts_as_dict}
-
-        # Clean up the raw word for irregularities
-        cleaned_words = list(map(cleaner, raw_txt.split()))
         # transform dict into list of tuples (word, relevance_wts)
-        relevance_wts = [ (word, wts_as_dict[word]) if word in wts_as_dict else (word, None)
-                          for word in cleaned_words ]
+        relevance_wts = []
+        for word in raw_txt.split():
+            # Clean up the raw word for irregularities
+            word_cleaned = cleaner(word)
+            if word_cleaned in wts_as_dict:
+                relevance_wts.append((word, wts_as_dict[word_cleaned]))
+            else:
+                relevance_wts.append((word, None))
     return relevance_wts
 
 
 def vectorize_as_tf_idf(data):
     tfidf_vec = TfidfVectorizer(sublinear_tf=True, max_df=0.5,
                     stop_words='english')
-    return tfidf_vec.fit_transform(data)
+    X = tfidf_vec.fit_transform(data)
+    return tfidf_vec, X
 
 
 def feature_names(vectorizer_inst):
     return vectorizer_inst.get_feature_names()
 
 
-def _top_k_tfidf_features(each_row, features, top_k=25):
+def __top_k_tfidf_features(each_row, features, top_k=25):
     """ Computes top 'k' tf-idf values in a row.
 
     Parameters
@@ -68,7 +71,7 @@ def _top_k_tfidf_features(each_row, features, top_k=25):
     return df
 
 
-def topk_tfidf_features_in_doc(data, features, top_k=20):
+def topk_tfidf_features_in_doc(data, features, top_k=25):
     """ Compute top tf-idf features for each document in the corpus
 
     Returns
@@ -76,13 +79,12 @@ def topk_tfidf_features_in_doc(data, features, top_k=20):
     pandas.DataFrame with columns 'features', 'tf_idf'
     """
     row = np.squeeze(data.toarray())
-    return _top_k_tfidf_features(row, features, top_k)
+    return __top_k_tfidf_features(row, features, top_k)
+
+dataframe_to_dict = lambda key_column_name, value_column_name, df: df.set_index(key_column_name).to_dict()[value_column_name]
 
 
-tf_idf_relevance_wts_dict = lambda df: df.set_index('features').to_dict()['tf_idf']
-
-
-def _topk_tfidf_features_overall(data, features, min_tfidf=0.1, top_n=25):
+def __topk_tfidf_features_overall(data, features, min_tfidf=0.1, top_n=25):
     """Return the top n features that on average are most important amongst documents in rows
         indentified by indices in grp_ids.
     """
@@ -90,14 +92,14 @@ def _topk_tfidf_features_overall(data, features, min_tfidf=0.1, top_n=25):
 
     d[d < min_tfidf] = 0
     tfidf_means = np.mean(d, axis=0)
-    return _top_k_tfidf_features(tfidf_means, features, top_n)
+    return __top_k_tfidf_features(tfidf_means, features, top_n)
 
 
-def topk_tfidf_features_by_class(Xtr, y, features, class_index, min_tfidf=0.1, top_n=25, ):
+def topk_tfidf_features_by_class(Xtr, y, features, class_index, min_tfidf=0.1, top_n=25):
     """
     """
     labels = np.unique(y)
     ids_by_class = list(map(lambda label: np.where(y==label), labels))
-    feature_df = _topk_tfidf_features_overall(Xtr, features, ids_by_class[class_index], min_tfidf=min_tfidf, top_n=top_n)
+    feature_df = __topk_tfidf_features_overall(Xtr, features, ids_by_class[class_index], min_tfidf=min_tfidf, top_n=top_n)
     feature_df.label = ids_by_class[class_index]
     return feature_df

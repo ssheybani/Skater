@@ -1,8 +1,10 @@
-import matplotlib as mpl
 from matplotlib.cm import get_cmap
-import matplotlib.pyplot as plt
+from skater.core.local_interpretation.text_interpreter import __
+import matplotlib as mpl
+import codecs
 
-def display_in_html(text, scores, fname='testfile', metainf='', pos_clr_name='Blues',
+
+def display_in_html(text, feature_relevance_wts, fname='rendered', metainf='', pos_clr_name='Blues',
          neg_clr_name='Reds', highlight_oov=False):
     """
     Reference: http://matplotlib.org/examples/color/colormaps_reference.html
@@ -24,22 +26,20 @@ def display_in_html(text, scores, fname='testfile', metainf='', pos_clr_name='Bl
     if metainf:
         htmlstr += '%s\n\n' % metainf
     resttext = text
-    for word, score in scores:
+    for word, wts in feature_relevance_wts:
         # was anything before the identified word? add it unchanged to the html
         htmlstr += resttext[:resttext.find(word)]
         # cut off the identified word
         resttext = resttext[resttext.find(word) + len(word):]
         # get the colorcode of the word
         rgbac = (1., 1., 0.)  # for unknown words
-        if highlight_oov:
-            alpha = 0.3
-        else:
-            alpha = 0.
-        if score is not None:
-            if score < 0:
-                rgbac = cmap_neg(norm(-score))
+        alpha = 0.3 if highlight_oov else 0.
+
+        if wts is not None:
+            if wts < 0:
+                rgbac = cmap_neg(norm(-wts))
             else:
-                rgbac = cmap_pos(norm(score))
+                rgbac = cmap_pos(norm(wts))
             alpha = 0.5
         htmlstr += u'<span style="background-color: rgba(%i, %i, %i, %.1f)">%s</span>' \
                    % (round(255 * rgbac[0]), round(255 * rgbac[1]), round(255 * rgbac[2]), alpha, word)
@@ -50,6 +50,6 @@ def display_in_html(text, scores, fname='testfile', metainf='', pos_clr_name='Bl
         f.write(htmlstr)
 
 
-def show_in_notebook():
+def show_in_notebook(file_name='rendered'):
     from IPython.core.display import display, HTML
-    return HTML('./rendered.html')
+    return HTML('./{}.html'.format(file_name))
