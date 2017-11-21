@@ -28,6 +28,7 @@ def relevance_wt_transformer(raw_txt, wts_as_dict):
         max_wt = np.max(np.abs(list(wts_as_dict.values())))
         wts_as_dict = {word: wts_as_dict[word]/max_wt for word in wts_as_dict}
         # transform dict into list of tuples (word, relevance_wts)
+        # TODO look into removing the below occurring side effect
         relevance_wts = []
         for word in raw_txt.split():
             # Clean up the raw word for irregularities
@@ -81,6 +82,8 @@ def topk_tfidf_features_in_doc(data, features, top_k=25):
     row = np.squeeze(data.toarray())
     return __top_k_tfidf_features(row, features, top_k)
 
+
+# Lamda for converting dataframe to a dictionary
 dataframe_to_dict = lambda key_column_name, value_column_name, df: df.set_index(key_column_name).to_dict()[value_column_name]
 
 
