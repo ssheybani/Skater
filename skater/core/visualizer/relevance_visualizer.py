@@ -3,6 +3,8 @@ from skater.core.local_interpretation.text_interpreter import relevance_wt_trans
 from wordcloud import (WordCloud, get_single_color_func)
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
 
 import codecs
 
@@ -55,6 +57,7 @@ def display_in_html(text, feature_relevance_wts, font_size='10pt', file_name='re
 
 
 class _GroupedColorFunc(object):
+    # Reference: https://github.com/amueller/word_cloud/blob/master/examples/colored_by_group.py
     """Create a color function object which assigns DIFFERENT SHADES of
        specified colors to certain words based on the color to words mapping.
        Uses wordcloud.get_single_color_func
@@ -91,7 +94,7 @@ class _GroupedColorFunc(object):
 
 
 def generate_word_cloud(relevant_feature_wts, pos_clr_name='blue',
-                        neg_clr_name='red', threshold=0.1):
+                        neg_clr_name='red', threshold=0.1, mask_filename=None):
     # Prepare a color map to word aggregated on threshold
     color_mapping = {pos_clr_name: [], neg_clr_name: []}
     color_map_append = lambda key, value: color_mapping[key].append(value)
@@ -107,9 +110,11 @@ def generate_word_cloud(relevant_feature_wts, pos_clr_name='blue',
 
     default_color = 'yellow'
     grouped_color_func = _GroupedColorFunc(color_mapping, default_color)
+
+    mask_file = np.array(Image.open(mask_filename)) if mask_filename is not None else mask_filename
     # TODO extend support for Word Cloud params
-    wc = WordCloud(background_color="white", max_words=len(relevant_feature_wts), width=900,
-                   height=600, mask=None, color_func=grouped_color_func)
+    wc = WordCloud(background_color="white", random_state=0, max_words=len(relevant_feature_wts), width=900,
+                   height=600, mask=mask_file, color_func=grouped_color_func)
     wc.generate_from_frequencies(relevant_feature_wts)
     plt.imshow(wc)
     plt.axis("off")

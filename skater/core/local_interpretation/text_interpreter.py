@@ -47,11 +47,11 @@ def vectorize_as_tf_idf(data):
     return tfidf_vec, X
 
 
-def feature_names(vectorizer_inst):
+def get_feature_names(vectorizer_inst):
     return vectorizer_inst.get_feature_names()
 
 
-def __top_k_tfidf_features(each_row, features, top_k=25):
+def top_k_tfidf_features(each_row, features, top_k=25):
     """ Computes top 'k' tf-idf values in a row.
 
     Parameters
@@ -80,29 +80,49 @@ def topk_tfidf_features_in_doc(data, features, top_k=25):
     pandas.DataFrame with columns 'features', 'tf_idf'
     """
     row = np.squeeze(data.toarray())
-    return __top_k_tfidf_features(row, features, top_k)
+    return top_k_tfidf_features(row, features, top_k)
 
 
-# Lamda for converting dataframe to a dictionary
+# Lamda for converting data-frame to a dictionary
 dataframe_to_dict = lambda key_column_name, value_column_name, df: df.set_index(key_column_name).to_dict()[value_column_name]
 
 
-def __topk_tfidf_features_overall(data, features, min_tfidf=0.1, top_n=25):
-    """Return the top n features that on average are most important amongst documents in rows
-        indentified by indices in grp_ids.
+def _topk_tfidf_features_overall(data, feature_list, min_tfidf=0.1, top_n=25):
+    """
     """
     d = data.toarray()
-
     d[d < min_tfidf] = 0
     tfidf_means = np.mean(d, axis=0)
-    return __top_k_tfidf_features(tfidf_means, features, top_n)
+    return top_k_tfidf_features(tfidf_means, feature_list, top_n)
 
 
-def topk_tfidf_features_by_class(Xtr, y, features, class_index, min_tfidf=0.1, top_n=25):
+def topk_tfidf_features_by_class(X, y, feature_names, class_index, min_tfidf=0.1, top_n=25):
     """
     """
     labels = np.unique(y)
     ids_by_class = list(map(lambda label: np.where(y==label), labels))
-    feature_df = __topk_tfidf_features_overall(Xtr, features, ids_by_class[class_index], min_tfidf=min_tfidf, top_n=top_n)
+    feature_df = _topk_tfidf_features_overall(X[ids_by_class[class_index]], feature_names, min_tfidf, top_n)
     feature_df.label = ids_by_class[class_index]
     return feature_df
+
+
+def single_layer_lrp(estimator, class_label_index, features_by_class, feature_names, total_features, top_k):
+    # Reference:
+    # Franziska Horn, Leila Arras, Grégoire Montavon, Klaus-Robert Müller, Wojciech Samek. 2017
+    # Exploring text datasets by visualizing relevant words (https://arxiv.org/abs/1707.05261)
+
+    # Currently, support for estimator
+    coef_list = list(estimator.coef_[class_label_index])
+    feature_coef_df = pd.DataFrame(np.column_stack([feature_names, coef_list]),
+                                   columns=['features', 'coef_wts'])
+
+    merged_df = pd.merge(feature_coef_df, features_by_class, on='features')
+    merged_df['coef_wts'] = merged_df['coef_wts'].astype('float64')
+    merged_df['tf_idf'] = merged_df['tf_idf'].astype('float64')
+
+    merged_df['coef_tfidf_wts'] = merged_df['coef_wts']*merged_df['tf_idf'] + \
+                                  float(estimator.intercept_[class_label_index]/total_features)
+
+    top_feature_df = merged_df.nlargest(top_k, 'coef_tfidf_wts')[['features', 'coef_tfidf_wts']]
+    top_feature_df_dict = dataframe_to_dict('features', 'coef_tfidf_wts', top_feature_df)
+    return merged_df, top_feature_df, top_feature_df_dict
