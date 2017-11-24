@@ -9,7 +9,7 @@ from PIL import Image
 import codecs
 
 
-def display_in_html(text, feature_relevance_wts, font_size='10pt', file_name='rendered', metainf='',
+def build_html(text, feature_relevance_wts, font_size='10pt', file_name='rendered', metainf='',
                     pos_clr_name='Blues', neg_clr_name='Reds', highlight_oov=False):
     """
     Reference: http://matplotlib.org/examples/color/colormaps_reference.html

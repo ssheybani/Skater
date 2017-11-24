@@ -37,6 +37,8 @@ def relevance_wt_transformer(raw_txt, wts_as_dict):
                 relevance_wts.append((word, wts_as_dict[word_cleaned]))
             else:
                 relevance_wts.append((word, None))
+    else:
+        raise Exception('relevance wts currently needs to be as dict')
     return relevance_wts
 
 
@@ -87,13 +89,22 @@ def topk_tfidf_features_in_doc(data, features, top_k=25):
 dataframe_to_dict = lambda key_column_name, value_column_name, df: df.set_index(key_column_name).to_dict()[value_column_name]
 
 
-def _topk_tfidf_features_overall(data, feature_list, min_tfidf=0.1, top_n=25):
+def _topk_tfidf_features_overall(data, feature_list, min_tfidf=0.1, summarizer_type='mean', top_n=25):
     """
     """
     d = data.toarray()
     d[d < min_tfidf] = 0
-    tfidf_means = np.mean(d, axis=0)
-    return top_k_tfidf_features(tfidf_means, feature_list, top_n)
+    summarizer_default = lambda x: np.sum(x, axis=0)
+    summarizer_mean = lambda x: np.mean(x, axis=0)
+    summarizer_median = lambda x: np.median(x, axis=0)
+    choice_dict = {
+        'sum': summarizer_default,
+        'mean': summarizer_mean,
+        'median': summarizer_median
+    }
+    select_type = lambda choice_type: choice_dict[choice_type]
+    tfidf_summarized = select_type(summarizer_type)(d)
+    return top_k_tfidf_features(tfidf_summarized, feature_list, top_n)
 
 
 def topk_tfidf_features_by_class(X, y, feature_names, class_index, min_tfidf=0.1, top_n=25):
@@ -106,23 +117,46 @@ def topk_tfidf_features_by_class(X, y, feature_names, class_index, min_tfidf=0.1
     return feature_df
 
 
-def single_layer_lrp(estimator, class_label_index, features_by_class, feature_names, total_features, top_k):
+def _single_layer_lrp(feature_coef_df, bias, features_by_class, top_k):
     # Reference:
     # Franziska Horn, Leila Arras, Grégoire Montavon, Klaus-Robert Müller, Wojciech Samek. 2017
     # Exploring text datasets by visualizing relevant words (https://arxiv.org/abs/1707.05261)
 
-    # Currently, support for estimator
-    coef_list = list(estimator.coef_[class_label_index])
-    feature_coef_df = pd.DataFrame(np.column_stack([feature_names, coef_list]),
-                                   columns=['features', 'coef_wts'])
-
     merged_df = pd.merge(feature_coef_df, features_by_class, on='features')
     merged_df['coef_wts'] = merged_df['coef_wts'].astype('float64')
     merged_df['tf_idf'] = merged_df['tf_idf'].astype('float64')
-
-    merged_df['coef_tfidf_wts'] = merged_df['coef_wts']*merged_df['tf_idf'] + \
-                                  float(estimator.intercept_[class_label_index]/total_features)
+    merged_df['coef_tfidf_wts'] = merged_df['coef_wts']*merged_df['tf_idf'] + float(bias)
 
     top_feature_df = merged_df.nlargest(top_k, 'coef_tfidf_wts')[['features', 'coef_tfidf_wts']]
     top_feature_df_dict = dataframe_to_dict('features', 'coef_tfidf_wts', top_feature_df)
-    return merged_df, top_feature_df, top_feature_df_dict
+    return top_feature_df_dict, top_feature_df, merged_df
+
+
+def _based_on_learned_estimator(feature_coef_df, bias, top_k):
+    feature_coef_df['coef_wts'] = feature_coef_df['coef_wts'].astype('float64')
+    feature_coef_df['coef_wts_intercept'] = feature_coef_df['coef_wts'] + float(bias)
+    top_feature_df = feature_coef_df.nlargest(top_k, 'coef_wts_intercept')
+    top_feature_df_dict = dataframe_to_dict(top_feature_df, 'features', 'coef_wts_intercept')
+    return top_feature_df_dict, top_feature_df, feature_coef_df
+
+
+def understand_estimator(estimator, class_label_index, features_by_class, feature_names,
+                         no_of_features, top_k, relevance_type='default'):
+    # Currently, support for sklearn based estimator
+    # TODO: extend it for estimator from other frameworks - MLLib, H20, vw
+    if ('coef_' in estimator.__dict__) is False:
+        raise KeyError('the estimator does not support coef, try using LIME for local interpretation')
+
+    # Currently, support for sklearn based estimator
+    # TODO: extend it for estimator from other frameworks - MLLib, H20, vw
+    coef_list = list(np.squeeze(estimator.coef_[class_label_index]))
+    feature_coef_df = pd.DataFrame(np.column_stack([feature_names, coef_list]),
+                                   columns=['features', 'coef_wts'])
+    bias = estimator.intercept_[class_label_index]/no_of_features
+
+    if relevance_type == 'default':
+        top_feature_df_dict, top_feature_df, feature_coef_df = _based_on_learned_estimator(feature_coef_df, bias, top_k)
+    elif relevance_type == 'SLRP':
+        top_feature_df_dict, top_feature_df, feature_coef_df = _single_layer_lrp(feature_coef_df, bias,
+                                                                                 features_by_class, top_k)
+    return top_feature_df_dict, top_feature_df, feature_coef_df
