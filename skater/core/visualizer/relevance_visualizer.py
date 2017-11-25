@@ -120,6 +120,24 @@ def generate_word_cloud(relevant_feature_wts, pos_clr_name='blue',
     plt.axis("off")
 
 
-def show_in_notebook(file_name='rendered'):
+def _render_html(file_name):
     from IPython.core.display import display, HTML
-    return HTML('./{}.html'.format(file_name))
+    return HTML(file_name)
+
+
+def _render_image(file_name):
+    from IPython.display import Image
+    return Image(file_name)
+
+
+def show_in_notebook(file_name_with_type='rendered.html'):
+    file_type = file_name_with_type.split('/')[-1].split('.')[-1]
+    choice_dict = {
+        'html': _render_html,
+        'png': _render_image,
+        'jpeg': _render_image,
+        'jpg': _render_image
+    }
+
+    select_type = lambda choice_type: choice_dict[choice_type]
+    return select_type(file_type)(file_name_with_type)

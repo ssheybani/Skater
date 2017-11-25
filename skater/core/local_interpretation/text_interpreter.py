@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 import re
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import chi2
 
 
 def cleaner(text, to_lower=True, norm_num=False, char_to_strip=' ', non_alphanumeric_exceptions=","):
@@ -42,9 +44,13 @@ def relevance_wt_transformer(raw_txt, wts_as_dict):
     return relevance_wts
 
 
-def vectorize_as_tf_idf(data):
-    tfidf_vec = TfidfVectorizer(sublinear_tf=True, max_df=0.5,
-                    stop_words='english')
+def vectorize_as_tf_idf(data, **kwargs):
+    """Term Frequency times Inverse Document Frequency"""
+    # TODO: extend support to other forms of Vectorization schemes - Feature Hashing
+    # Converting raw document to tf-idf feature matrix
+    tfidf_vec = TfidfVectorizer(sublinear_tf=kwargs['sublinear_tf'], max_df=kwargs['max_df'],
+                    stop_words=kwargs['stop_words'], smooth_idf=kwargs['smooth_idf'],
+                                ngram_range=kwargs['ngram_range'])
     X = tfidf_vec.fit_transform(data)
     return tfidf_vec, X
 
@@ -53,9 +59,24 @@ def get_feature_names(vectorizer_inst):
     return vectorizer_inst.get_feature_names()
 
 
-def top_k_tfidf_features(each_row, features, top_k=25):
-    """ Computes top 'k' tf-idf values in a row.
+def top_k_with_feature_selection(X, y, feature_names, top_k):
+    ch2 = SelectKBest(chi2, top_k)
+    X_new = ch2.fit_transform(X, y)
+    selected_feature = [(feature_names[i], X_new[i]) for i in ch2.get_support(indices=True)]
+    return ch2, X_new, selected_feature
 
+
+def _default_feature_selection(X, feature_names, top_k):
+    arg_sort = lambda r, k: np.argsort(r)[::-1][:k]
+    top_k_index = arg_sort(X, top_k)
+    top_features = [(feature_names[i], X[i]) for i in top_k_index]
+    return None, None, top_features
+
+
+def top_k_tfidf_features(X, features, feature_selection_type='default', top_k=25):
+    """ Computes top 'k' tf-idf values in a row.
+    chi-square statistical test for feature selection helps in weeding out the features that are most likely independent
+    of the categorization class or label
     Parameters
     __________
     each_row:
@@ -67,8 +88,14 @@ def top_k_tfidf_features(each_row, features, top_k=25):
     df : pandas.DataFrame
 
     """
-    top_k_index = np.argsort(each_row)[::-1][:top_k]
-    top_features = [(features[i], each_row[i]) for i in top_k_index]
+    choice_dict = {
+    'default': _default_feature_selection,
+    #'chi2': _feature_selection
+    }
+
+    select_type = lambda choice_type: choice_dict[choice_type]
+    type_inst, new_x, top_features = select_type(feature_selection_type)(X, features, top_k)
+
     df = pd.DataFrame(top_features)
     df.columns = ['features', 'tf_idf']
     return df
@@ -89,7 +116,7 @@ def topk_tfidf_features_in_doc(data, features, top_k=25):
 dataframe_to_dict = lambda key_column_name, value_column_name, df: df.set_index(key_column_name).to_dict()[value_column_name]
 
 
-def _topk_tfidf_features_overall(data, feature_list, min_tfidf=0.1, summarizer_type='mean', top_n=25):
+def topk_tfidf_features_overall(data, feature_list, min_tfidf=0.1, summarizer_type='mean', top_n=25):
     """
     """
     d = data.toarray()
@@ -107,12 +134,13 @@ def _topk_tfidf_features_overall(data, feature_list, min_tfidf=0.1, summarizer_t
     return top_k_tfidf_features(tfidf_summarized, feature_list, top_n)
 
 
-def topk_tfidf_features_by_class(X, y, feature_names, class_index, min_tfidf=0.1, top_n=25):
+def topk_tfidf_features_by_class(X, y, feature_names, class_index, summarizer_type='mean', min_tfidf=0.1, top_n=25):
     """
     """
     labels = np.unique(y)
     ids_by_class = list(map(lambda label: np.where(y==label), labels))
-    feature_df = _topk_tfidf_features_overall(X[ids_by_class[class_index]], feature_names, min_tfidf, top_n)
+    feature_df = topk_tfidf_features_overall(X[ids_by_class[class_index]], feature_names, min_tfidf,
+                                              summarizer_type, top_n)
     feature_df.label = ids_by_class[class_index]
     return feature_df
 

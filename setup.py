@@ -42,7 +42,8 @@ def setup_package():
             'ds-lime>=0.1.1.21',
             'requests',
             'multiprocess',
-            'dill>=0.2.6'],
+            'dill>=0.2.6',
+            'wordcloud==1.3.1'],
         extras_require ={'all':'matplotlib'},
         )
 

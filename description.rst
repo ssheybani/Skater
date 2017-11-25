@@ -57,5 +57,3 @@ is recommended that you use a virtual environment (virtualenv, conda environment
 ::
 
     pip install -U Skater
-
-
