@@ -133,7 +133,7 @@ def topk_tfidf_features_overall(data, feature_list, min_tfidf=0.1, feature_selec
     return top_k_tfidf_features(tfidf_summarized, feature_list, feature_selection, top_k)
 
 
-def topk_tfidf_features_class(X, y, feature_names, class_index, feature_selection='default',
+def topk_tfidf_features_by_class(X, y, feature_names, class_index, feature_selection='default',
                               summarizer_type='mean', topk_features=25, min_tfidf=0.1):
     """
     """
