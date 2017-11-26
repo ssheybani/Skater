@@ -1,5 +1,5 @@
 from matplotlib.cm import get_cmap
-from skater.core.local_interpretation.text_interpreter import relevance_wt_transformer
+from skater.core.local_interpretation.text_interpreter import relevance_wt_assigner
 from wordcloud import (WordCloud, get_single_color_func)
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -31,7 +31,7 @@ def build_html(text, feature_relevance_wts, font_size='10pt', file_name='rendere
     html_str += '%s\n\n' % metainf if metainf else html_str
 
     rest_text = text
-    relevance_wts = relevance_wt_transformer(text, feature_relevance_wts)
+    relevance_wts = relevance_wt_assigner(text, feature_relevance_wts)
     for word, wts in relevance_wts:
         # was anything before the identified word? add it unchanged to the html
         html_str += rest_text[:rest_text.find(word)]
