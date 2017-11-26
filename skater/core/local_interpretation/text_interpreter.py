@@ -88,14 +88,12 @@ def top_k_tfidf_features(X, features, feature_selection_type='default', top_k=25
     df : pandas.DataFrame
 
     """
-    choice_dict = {
-    'default': _default_feature_selection,
-    #'chi2': _feature_selection
+    fs_choice_dict = {
+        'default': _default_feature_selection,
+        #     'chi2': _feature_selection
     }
 
-    select_type = lambda choice_type: choice_dict[choice_type]
-    type_inst, new_x, top_features = select_type(feature_selection_type)(X, features, top_k)
-
+    type_inst, new_x, top_features = fs_choice_dict[feature_selection_type](X, features, top_k)
     df = pd.DataFrame(top_features)
     df.columns = ['features', 'tf_idf']
     return df
@@ -116,7 +114,8 @@ def topk_tfidf_features_in_doc(data, features, top_k=25):
 dataframe_to_dict = lambda key_column_name, value_column_name, df: df.set_index(key_column_name).to_dict()[value_column_name]
 
 
-def topk_tfidf_features_overall(data, feature_list, min_tfidf=0.1, summarizer_type='mean', top_n=25):
+def topk_tfidf_features_overall(data, feature_list, min_tfidf=0.1, feature_selection='default',
+                                summarizer_type='mean', top_k=25):
     """
     """
     d = data.toarray()
@@ -124,23 +123,25 @@ def topk_tfidf_features_overall(data, feature_list, min_tfidf=0.1, summarizer_ty
     summarizer_default = lambda x: np.sum(x, axis=0)
     summarizer_mean = lambda x: np.mean(x, axis=0)
     summarizer_median = lambda x: np.median(x, axis=0)
-    choice_dict = {
+    summarizer_choice_dict = {
         'sum': summarizer_default,
         'mean': summarizer_mean,
         'median': summarizer_median
     }
-    select_type = lambda choice_type: choice_dict[choice_type]
-    tfidf_summarized = select_type(summarizer_type)(d)
-    return top_k_tfidf_features(tfidf_summarized, feature_list, top_n)
+
+    tfidf_summarized = summarizer_choice_dict[summarizer_type](d)
+    return top_k_tfidf_features(tfidf_summarized, feature_list, feature_selection, top_k)
 
 
-def topk_tfidf_features_by_class(X, y, feature_names, class_index, summarizer_type='mean', min_tfidf=0.1, top_n=25):
+def topk_tfidf_features_class(X, y, feature_names, class_index, feature_selection='default',
+                              summarizer_type='mean', topk_features=25, min_tfidf=0.1):
     """
     """
     labels = np.unique(y)
     ids_by_class = list(map(lambda label: np.where(y==label), labels))
-    feature_df = topk_tfidf_features_overall(X[ids_by_class[class_index]], feature_names, min_tfidf,
-                                              summarizer_type, top_n)
+    feature_df = topk_tfidf_features_overall(data=X[ids_by_class[class_index]], feature_list=feature_names,
+                                             min_tfidf=0.1, feature_selection='default',
+                                             summarizer_type=summarizer_type, top_k=topk_features)
     feature_df.label = ids_by_class[class_index]
     return feature_df
 
