@@ -2,7 +2,6 @@ from matplotlib.cm import get_cmap
 from skater.core.local_interpretation.text_interpreter import relevance_wt_assigner
 from wordcloud import (WordCloud, get_single_color_func)
 import matplotlib as mpl
-import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 
@@ -94,7 +93,7 @@ class _GroupedColorFunc(object):
 
 
 def generate_word_cloud(relevant_feature_wts, pos_clr_name='blue',
-                        neg_clr_name='red', threshold=0.1, mask_filename=None):
+                        neg_clr_name='red', threshold=0.1, save_to_file=True, mask_filename=None):
     # Prepare a color map to word aggregated on threshold
     color_mapping = {pos_clr_name: [], neg_clr_name: []}
     color_map_append = lambda key, value: color_mapping[key].append(value)
@@ -111,13 +110,14 @@ def generate_word_cloud(relevant_feature_wts, pos_clr_name='blue',
     default_color = 'yellow'
     grouped_color_func = _GroupedColorFunc(color_mapping, default_color)
 
-    mask_file = np.array(Image.open(mask_filename)) if mask_filename is not None else mask_filename
-    # TODO extend support for Word Cloud params
-    wc = WordCloud(background_color="white", random_state=0, max_words=len(relevant_feature_wts), width=900,
-                   height=600, mask=mask_file, color_func=grouped_color_func)
+    im = Image.open(mask_filename)
+    mask_file = np.array(im) if mask_filename is not None else mask_filename
+    # TODO extend better support for Word Cloud params
+    wc = WordCloud(background_color="white", random_state=0, max_words=len(relevant_feature_wts),
+                   mask=mask_file, color_func=grouped_color_func)
     wc.generate_from_frequencies(relevant_feature_wts)
-    plt.imshow(wc)
-    plt.axis("off")
+    wc.to_file('word_cloud.png') if save_to_file else None
+    return wc
 
 
 def _render_html(file_name):
