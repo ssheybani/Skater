@@ -99,7 +99,7 @@ def top_k_tfidf_features(X, features, feature_selection_type='default', top_k=25
     return df
 
 
-def topk_tfidf_features_in_doc(data, features, top_k=25):
+def topk_tfidf_features_in_doc(data, features, feature_selection_choice='default', top_k=25):
     """ Compute top tf-idf features for each document in the corpus
 
     Returns
@@ -107,7 +107,8 @@ def topk_tfidf_features_in_doc(data, features, top_k=25):
     pandas.DataFrame with columns 'features', 'tf_idf'
     """
     row = np.squeeze(data.toarray())
-    return top_k_tfidf_features(row, features, top_k)
+    return top_k_tfidf_features(data=row, features=features, feature_selection_type=feature_selection_choice,
+                                top_k=top_k)
 
 
 # Lamda for converting data-frame to a dictionary
