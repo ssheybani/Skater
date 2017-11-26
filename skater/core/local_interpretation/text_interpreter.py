@@ -107,7 +107,7 @@ def topk_tfidf_features_in_doc(data, features, feature_selection_choice='default
     pandas.DataFrame with columns 'features', 'tf_idf'
     """
     row = np.squeeze(data.toarray())
-    return top_k_tfidf_features(data=row, features=features, feature_selection_type=feature_selection_choice,
+    return top_k_tfidf_features(X=row, features=features, feature_selection_type=feature_selection_choice,
                                 top_k=top_k)
 
 
