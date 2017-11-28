@@ -12,6 +12,7 @@ def build_html(text, feature_relevance_wts, font_size='10pt', file_name='rendere
                     pos_clr_name='Blues', neg_clr_name='Reds', highlight_oov=False):
     """
     Reference: http://matplotlib.org/examples/color/colormaps_reference.html
+    Reference: https://github.com/cod3licious/textcatvis
     Based on the original text and relevance scores, generate a html doc highlighting positive / negative words
     Inputs:
         - text: the raw text in which the words should be highlighted
@@ -21,6 +22,7 @@ def build_html(text, feature_relevance_wts, font_size='10pt', file_name='rendere
         - highlight_oov: if True, out-of-vocabulary words will be highlighted in yellow (default False)
     Saves the visualization in 'file_name.html' (you probably want to make this a whole path to not clutter your main directory...)
     """
+    #TODO: Add support for better visualization and plotting may be bokeh
     # color-maps
     cmap_pos = get_cmap(pos_clr_name)
     cmap_neg = get_cmap(neg_clr_name)
@@ -51,7 +53,7 @@ def build_html(text, feature_relevance_wts, font_size='10pt', file_name='rendere
     # after the last word, add the rest of the text
     html_str += rest_text
     html_str += u'</div></body>'
-    with codecs.open('%s.html' % file_name, 'w', encoding='utf8') as f:
+    with codecs.open('{}.html'.format(file_name), 'w',  encoding='utf8') as f:
         f.write(html_str)
 
 
