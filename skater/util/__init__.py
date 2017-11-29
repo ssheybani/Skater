@@ -14,4 +14,5 @@ __all__ = [
     'OutputTypes',
     'ControlledDict',
     'pickle_method',
-    'unpickle_method']
+    'unpickle_method',
+    'plot_from_df']

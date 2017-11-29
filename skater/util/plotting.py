@@ -208,7 +208,7 @@ def tick_formatter(powerlimits=None):
 
 def plot_from_df(data_df, column_name_to_sort, x_label, y_label, ascending=True, display_size=(8,8)):
     try:
-        from matplotlib.pyplot import plt
+        import matplotlib.pyplot as plt
     except ImportError:
         raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
 
