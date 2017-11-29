@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import re
+import numpy as np
 
 def preprocessor(text):
     # remove HTML tags
@@ -14,3 +15,6 @@ def preprocessor(text):
     # replace('-','') removes nose of emoticons
     text = re.sub('[\W]+', ' ', text.lower()) + ' ' + ' '.join(emoticons).replace('-','')
     return text
+
+# returns indexes where ground truth and predicted value does not match
+query_false_prediction = lambda predictions, ground_truth:  np.where(ground_truth != predictions)

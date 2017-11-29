@@ -1,4 +1,6 @@
-# Reference: https://github.com/cod3licious/textcatvis
+# Reference:
+# 1. https://github.com/cod3licious/textcatvis
+# 2. https://buhrmann.github.io/tfidf-analysis.html
 
 import numpy as np
 import pandas as pd
