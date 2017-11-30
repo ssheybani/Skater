@@ -78,7 +78,7 @@ def get_feature_names(vectorizer_inst):
     return vectorizer_inst.get_feature_names()
 
 
-def top_k_with_feature_selection(X, y, feature_names, top_k):
+def query_topk_with_feature_selection(X, y, feature_names, top_k='all'):
     ch2 = SelectKBest(chi2, top_k)
     X_new = ch2.fit_transform(X, y)
     selected_feature = [feature_names[i] for i in ch2.get_support(indices=True)]
@@ -92,7 +92,7 @@ def _default_feature_selection(X, feature_names, top_k):
     return None, None, top_features
 
 
-def top_k_tfidf_features(X, features, feature_selection_type='default', top_k=25):
+def query_topk_tfidf_features(X, features, feature_selection_type='default', top_k=25):
     """ Computes top 'k' tf-idf values in a row.
     chi-square statistical test for feature selection helps in weeding out the features that are most likely independent
     of the categorization class or label
@@ -118,7 +118,7 @@ def top_k_tfidf_features(X, features, feature_selection_type='default', top_k=25
     return df
 
 
-def topk_tfidf_features_in_doc(data, features, feature_selection_choice='default', top_k=25):
+def query_topk_tfidf_features_in_doc(data, features, feature_selection_choice='default', top_k=25):
     """ Compute top tf-idf features for each document in the corpus
 
     Returns
@@ -126,7 +126,7 @@ def topk_tfidf_features_in_doc(data, features, feature_selection_choice='default
     pandas.DataFrame with columns 'features', 'tf_idf'
     """
     row = np.squeeze(data.toarray())
-    return top_k_tfidf_features(X=row, features=features, feature_selection_type=feature_selection_choice,
+    return query_topk_tfidf_features(X=row, features=features, feature_selection_type=feature_selection_choice,
                                 top_k=top_k)
 
 
@@ -134,7 +134,7 @@ def topk_tfidf_features_in_doc(data, features, feature_selection_choice='default
 dataframe_to_dict = lambda key_column_name, value_column_name, df: df.set_index(key_column_name).to_dict()[value_column_name]
 
 
-def topk_tfidf_features_overall(data, feature_list, min_tfidf=0.1, feature_selection='default',
+def query_topk_tfidf_features_overall(data, feature_list, min_tfidf=0.1, feature_selection='default',
                                 summarizer_type='mean', top_k=25):
     """
     """
@@ -150,16 +150,16 @@ def topk_tfidf_features_overall(data, feature_list, min_tfidf=0.1, feature_selec
     }
 
     tfidf_summarized = summarizer_choice_dict[summarizer_type](d)
-    return top_k_tfidf_features(tfidf_summarized, feature_list, feature_selection, top_k)
+    return query_topk_tfidf_features(tfidf_summarized, feature_list, feature_selection, top_k)
 
 
-def topk_tfidf_features_by_class(X, y, feature_names, class_index, feature_selection='default',
+def query_topk_tfidf_features_by_class(X, y, feature_names, class_index, feature_selection='default',
                               summarizer_type='mean', topk_features=25, min_tfidf=0.1):
     """
     """
     labels = np.unique(y)
     ids_by_class = list(map(lambda label: np.where(y==label), labels))
-    feature_df = topk_tfidf_features_overall(data=X[ids_by_class[class_index]], feature_list=feature_names,
+    feature_df = query_topk_tfidf_features_overall(data=X[ids_by_class[class_index]], feature_list=feature_names,
                                              min_tfidf=min_tfidf, feature_selection=feature_selection,
                                              summarizer_type=summarizer_type, top_k=topk_features)
     feature_df.label = ids_by_class[class_index]

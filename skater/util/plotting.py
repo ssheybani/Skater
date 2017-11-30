@@ -216,7 +216,7 @@ def plot_from_df(data_df, column_name_to_sort, x_label, y_label, ascending=True,
     f, ax = plt.subplots(1, figsize = display_size)
     data_df.sort_values(column_name_to_sort, ascending=ascending).plot(kind='barh', ax=ax, color='blue',
                                                 title='Feature ranking')
-    plt.xlabel('tf_idf_wts')
-    plt.ylabel('Features')
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
     ax.set_yticklabels(data_df.features)
     plt.show()

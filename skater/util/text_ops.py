@@ -17,4 +17,4 @@ def preprocessor(text):
     return text
 
 # returns indexes where ground truth and predicted value does not match
-query_false_prediction = lambda predictions, ground_truth:  np.where(ground_truth != predictions)
+query_for_false_predictions = lambda predictions, ground_truth:  np.where(ground_truth != predictions)

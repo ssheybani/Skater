@@ -8,7 +8,7 @@ from PIL import Image
 import codecs
 
 
-def build_html(text, feature_relevance_wts, font_size='10pt', file_name='rendered', metainf='',
+def build_explainer(text, feature_relevance_wts, font_size='10pt', file_name='rendered', metainf='',
                     pos_clr_name='Blues', neg_clr_name='Reds', highlight_oov=False):
     """
     Reference: http://matplotlib.org/examples/color/colormaps_reference.html
@@ -140,6 +140,5 @@ def show_in_notebook(file_name_with_type='rendered.html'):
         'jpeg': _render_image,
         'jpg': _render_image
     }
-
     select_type = lambda choice_type: choice_dict[choice_type]
     return select_type(file_type)(file_name_with_type)
