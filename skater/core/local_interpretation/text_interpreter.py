@@ -131,7 +131,7 @@ def query_topk_tfidf_features_in_doc(data, features, feature_selection_choice='d
 
 
 # Lamda for converting data-frame to a dictionary
-dataframe_to_dict = lambda key_column_name, value_column_name, df: df.set_index(key_column_name).to_dict()[value_column_name]
+convert_dataframe_to_dict = lambda key_column_name, value_column_name, df: df.set_index(key_column_name).to_dict()[value_column_name]
 
 
 def query_topk_tfidf_features_overall(data, feature_list, min_tfidf=0.1, feature_selection='default',
@@ -178,7 +178,7 @@ def _single_layer_lrp(feature_coef_df, bias, features_by_class, top_k):
 
     # This is sorting is more of a precaution for corner cases, might be removed as the implementation matures
     top_feature_df = merged_df.nlargest(top_k, 'coef_tfidf_wts')[['features', 'coef_tfidf_wts']]
-    top_feature_df_dict = dataframe_to_dict('features', 'coef_tfidf_wts', top_feature_df)
+    top_feature_df_dict = convert_dataframe_to_dict('features', 'coef_tfidf_wts', top_feature_df)
     return top_feature_df_dict, top_feature_df, merged_df
 
 
@@ -187,7 +187,7 @@ def _based_on_learned_estimator(feature_coef_df, bias, top_k):
     feature_coef_df['coef_wts_intercept'] = feature_coef_df['coef_wts'] + float(bias)
     top_feature_df = feature_coef_df.nlargest(top_k, 'coef_wts_intercept')
 
-    top_feature_df_dict = dataframe_to_dict('features', 'coef_wts_intercept', top_feature_df)
+    top_feature_df_dict = convert_dataframe_to_dict('features', 'coef_wts_intercept', top_feature_df)
     return top_feature_df_dict, top_feature_df, feature_coef_df
 
 
