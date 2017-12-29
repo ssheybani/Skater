@@ -132,7 +132,7 @@ convert_dataframe_to_dict = lambda key_column_name, value_column_name, df: \
     df.set_index(key_column_name).to_dict()[value_column_name]
 
 
-def query_topk_tfidf_features_overall(data, y, feature_list, min_tfidf=0.1, feature_selection='default',
+def query_topk_tfidf_features_overall(data, y_true, feature_list, min_tfidf=0.1, feature_selection='default',
                                 summarizer_type='mean', top_k=25):
     """
     """
@@ -153,7 +153,7 @@ def query_topk_tfidf_features_overall(data, y, feature_list, min_tfidf=0.1, feat
         result_df = query_topk_tfidf_features(tfidf_summarized, feature_list, feature_selection, top_k)
 
     else:
-        result_df = query_topk_with_feature_selection(data, y, feature_list, top_k)
+        result_df = query_topk_with_feature_selection(data, y_true, feature_list, top_k)
     return result_df
 
 
@@ -162,7 +162,7 @@ def query_topk_tfidf_features_by_class(X, y, feature_names, class_index, feature
     """
     """
     indexes = list(np.where(y==class_index))
-    feature_df = query_topk_tfidf_features_overall(data=X[indexes[0]], feature_list=feature_names,
+    feature_df = query_topk_tfidf_features_overall(data=X[indexes[0]], y_true=y, feature_list=feature_names,
                                                    min_tfidf=min_tfidf, feature_selection=feature_selection,
                                                    summarizer_type=summarizer_type, top_k=topk_features)
     return feature_df
