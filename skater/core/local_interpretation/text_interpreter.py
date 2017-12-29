@@ -149,7 +149,7 @@ def query_topk_tfidf_features_overall(data, y_true, feature_list, min_tfidf=0.1,
     }
 
     tfidf_summarized = summarizer_choice_dict[summarizer_type](d)
-    if tfidf_summarized is None:
+    if tfidf_summarized is not None:
         result_df = query_topk_tfidf_features(tfidf_summarized, feature_list, feature_selection, top_k)
 
     else:
