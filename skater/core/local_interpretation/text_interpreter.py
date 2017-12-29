@@ -64,7 +64,8 @@ def get_feature_names(vectorizer_inst):
     return vectorizer_inst.get_feature_names()
 
 
-def _default_feature_selection(X, feature_names, top_k):
+def _default_feature_selection(X, y, feature_names, top_k):
+    y
     arg_sort = lambda r, k: np.argsort(r)[::-1][:k]
     top_k_index = arg_sort(X, top_k)
     top_features = [(feature_names[i], X[i]) for i in top_k_index]
