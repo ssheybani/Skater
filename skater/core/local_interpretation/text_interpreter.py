@@ -13,7 +13,7 @@ from skater.util.text_ops import cleaner
 
 
 def _handling_ngrams_wts(original_feat_dict):
-    # Currently, when feature dictionary contains continuous sequences such as 2-gram/3-gram sequences as features,
+    # Currently, when feature dictionary contains continuous sequences such as 2-gram/3-gram etc. sequences as features,
     # a short term solution is to further split them into additional keys.
     # e.g. {'stay ball dropped': 0,5} will be split into a new dict as {'stay':0.5, 'ball': 0.5, 'dropped': 0.5}
     # TODO: this is just a temporary solution for handling n-grams, figure out a better solution
@@ -64,6 +64,13 @@ def get_feature_names(vectorizer_inst):
     return vectorizer_inst.get_feature_names()
 
 
+def _default_feature_selection(X, feature_names, top_k):
+    arg_sort = lambda r, k: np.argsort(r)[::-1][:k]
+    top_k_index = arg_sort(X, top_k)
+    top_features = [(feature_names[i], X[i]) for i in top_k_index]
+    return None, None, top_features
+
+
 def query_topk_with_feature_selection(X, y, feature_names, top_k='all'):
     """
     Feature selection currently is done using Chi2.
@@ -77,14 +84,7 @@ def query_topk_with_feature_selection(X, y, feature_names, top_k='all'):
     return ch2, X_new, selected_feature
 
 
-def _default_feature_selection(X, feature_names, top_k):
-    arg_sort = lambda r, k: np.argsort(r)[::-1][:k]
-    top_k_index = arg_sort(X, top_k)
-    top_features = [(feature_names[i], X[i]) for i in top_k_index]
-    return None, None, top_features
-
-
-def query_topk_tfidf_features(X, features, feature_selection_type='default', top_k=25):
+def query_topk_tfidf_features(X, y, features, feature_selection_type='default', top_k=25):
     """ Computes top 'k' tf-idf values in a row.
     Parameters
     __________
@@ -109,13 +109,13 @@ def query_topk_tfidf_features(X, features, feature_selection_type='default', top
         'chi2': query_topk_with_feature_selection
     }
 
-    type_inst, new_x, top_features = fs_choice_dict[feature_selection_type](X, features, top_k)
+    type_inst, new_x, top_features = fs_choice_dict[feature_selection_type](X, y, features, top_k)
     df = pd.DataFrame(top_features)
     df.columns = ['features', 'tf_idf']
     return df
 
 
-def query_topk_tfidf_features_in_doc(data, features, feature_selection_choice='default', top_k=25):
+def query_topk_tfidf_features_in_doc(data, y, features, feature_selection_choice='default', top_k=25):
     """ Compute top tf-idf features for each document in the corpus
 
     Returns
@@ -123,7 +123,7 @@ def query_topk_tfidf_features_in_doc(data, features, feature_selection_choice='d
     pandas.DataFrame with columns 'features', 'tf_idf'
     """
     row = np.squeeze(data.toarray())
-    return query_topk_tfidf_features(X=row, features=features, feature_selection_type=feature_selection_choice,
+    return query_topk_tfidf_features(X=row, y=y, features=features, feature_selection_type=feature_selection_choice,
                                 top_k=top_k)
 
 
@@ -132,7 +132,7 @@ convert_dataframe_to_dict = lambda key_column_name, value_column_name, df: \
     df.set_index(key_column_name).to_dict()[value_column_name]
 
 
-def query_topk_tfidf_features_overall(data, feature_list, min_tfidf=0.1, feature_selection='default',
+def query_topk_tfidf_features_overall(data, y, feature_list, min_tfidf=0.1, feature_selection='default',
                                 summarizer_type='mean', top_k=25):
     """
     """
@@ -144,23 +144,27 @@ def query_topk_tfidf_features_overall(data, feature_list, min_tfidf=0.1, feature
     summarizer_choice_dict = {
         'sum': summarizer_default,
         'mean': summarizer_mean,
-        'median': summarizer_median
+        'median': summarizer_median,
+        'auto-feature-selection': 'None'
     }
 
     tfidf_summarized = summarizer_choice_dict[summarizer_type](d)
-    return query_topk_tfidf_features(tfidf_summarized, feature_list, feature_selection, top_k)
+    if tfidf_summarized is None:
+        result_df = query_topk_tfidf_features(tfidf_summarized, feature_list, feature_selection, top_k)
+
+    else:
+        result_df = query_topk_with_feature_selection(data, y, feature_list, top_k)
+    return result_df
 
 
 def query_topk_tfidf_features_by_class(X, y, feature_names, class_index, feature_selection='default',
                               summarizer_type='mean', topk_features=25, min_tfidf=0.1):
     """
     """
-    labels = np.unique(y)
-    ids_by_class = list(map(lambda label: np.where(y==label), labels))
-    feature_df = query_topk_tfidf_features_overall(data=X[ids_by_class[class_index]], feature_list=feature_names,
-                                             min_tfidf=min_tfidf, feature_selection=feature_selection,
-                                             summarizer_type=summarizer_type, top_k=topk_features)
-    feature_df.label = ids_by_class[class_index]
+    indexes = list(np.where(y==class_index))
+    feature_df = query_topk_tfidf_features_overall(data=X[indexes[0]], feature_list=feature_names,
+                                                   min_tfidf=min_tfidf, feature_selection=feature_selection,
+                                                   summarizer_type=summarizer_type, top_k=topk_features)
     return feature_df
 
 
