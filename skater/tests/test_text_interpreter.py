@@ -1,5 +1,5 @@
 import unittest
-from skater.core.local_interpretation.text_interpreter import cleaner
+from skater.util.text_ops import cleaner
 
 class TestTextInterpreter(unittest.TestCase):
     """
@@ -8,6 +8,7 @@ class TestTextInterpreter(unittest.TestCase):
 
     def setUp(self):
         pass
+
 
     def test_cleaner(self):
         raw_text = "    11111this is just an example..., don't be surprised!!!0000000    "

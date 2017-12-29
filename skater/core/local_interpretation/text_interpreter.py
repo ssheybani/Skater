@@ -4,33 +4,19 @@
 
 import numpy as np
 import pandas as pd
-import re
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
 
-
-def cleaner(text, to_lower=True, norm_num=False, char_to_strip=' |(|)|,', non_alphanumeric_exceptions=","):
-    # if the to_lower flag is true, convert the text to lowercase
-    text = text.lower() if to_lower else text
-    # Removes unwanted http hyper links in text
-    text = re.sub(r"http(s)?://\S*", " ", text)
-    # In some cases, one may want to normalize numbers for better visualization
-    text = re.sub(r"[0-9]", "1", text) if norm_num else text
-    # remove non-alpha numeric characters [!, $, #, or %] and normalize whitespace
-    text = re.sub(r"[^A-Za-z0-9-" + non_alphanumeric_exceptions + "]", " ", text)
-    # replace leftover unwanted white space
-    text = re.sub(r"\s+", " ", text)
-    # remove trailing or leading white spaces
-    text = text.strip(char_to_strip)
-    return text
+from skater.util.text_ops import cleaner
 
 
-def handling_ngrams_wts(original_feat_dict):
-    # Currently, when feature dict contains continuous sequence as a result of continuous sequence as a features,
+def _handling_ngrams_wts(original_feat_dict):
+    # Currently, when feature dictionary contains continuous sequences such as 2-gram/3-gram sequences as features,
     # a short term solution is to further split them into additional keys.
     # e.g. {'stay ball dropped': 0,5} will be split into a new dict as {'stay':0.5, 'ball': 0.5, 'dropped': 0.5}
-    # TODO: this is just a temporary solution for handling ngrams, figure out a better solution
+    # TODO: this is just a temporary solution for handling n-grams, figure out a better solution
     for k in list(original_feat_dict.keys()):
         additional_keys = k.split()
     for a_k in additional_keys:
@@ -45,7 +31,7 @@ def handling_ngrams_wts(original_feat_dict):
 def relevance_wt_assigner(raw_txt, wts_as_dict):
     # normalize score by absolute max value
     if isinstance(wts_as_dict, dict):
-        feature_scores = handling_ngrams_wts(wts_as_dict)
+        feature_scores = _handling_ngrams_wts(wts_as_dict)
         max_wt = np.max(np.abs(list(feature_scores.values())))
         wts_as_dict = {word: feature_scores[word]/max_wt for word in feature_scores.keys()}
         # transform dict into list of tuples (word, relevance_wts)
@@ -79,8 +65,14 @@ def get_feature_names(vectorizer_inst):
 
 
 def query_topk_with_feature_selection(X, y, feature_names, top_k='all'):
+    """
+    Feature selection currently is done using Chi2.
+    Other solutions may be added shortly.
+    """
     ch2 = SelectKBest(chi2, top_k)
     X_new = ch2.fit_transform(X, y)
+    # retrieve the feature names post selection
+    # Reference: https://stackoverflow.com/questions/14133348/show-feature-names-after-feature-selection
     selected_feature = [feature_names[i] for i in ch2.get_support(indices=True)]
     return ch2, X_new, selected_feature
 
@@ -94,13 +86,18 @@ def _default_feature_selection(X, feature_names, top_k):
 
 def query_topk_tfidf_features(X, features, feature_selection_type='default', top_k=25):
     """ Computes top 'k' tf-idf values in a row.
-    chi-square statistical test for feature selection helps in weeding out the features that are most likely independent
-    of the categorization class or label
     Parameters
     __________
-    each_row:
+    X: input data
     features:
-    top_k:
+    feature_selection_type:
+     - 'default': uses vanila ranking of features based on Frequency Vectorization wts
+     - 'ch2': chi-square statistical test of independence. It helps feature selection by getting rid of the features
+        that are most likely independent of the categorization class or label (discarding irrelevant features)
+        Reference:
+        * https://nlp.stanford.edu/IR-book/html/htmledition/chi-square-feature-selection-1.html
+        * Liu et al.'95: http://sci2s.ugr.es/keel/pdf/specific/congreso/liu1995.pdf
+    top_k: number of top features to return
 
     Returns
     _______
@@ -109,7 +106,7 @@ def query_topk_tfidf_features(X, features, feature_selection_type='default', top
     """
     fs_choice_dict = {
         'default': _default_feature_selection,
-        #     'chi2': _feature_selection
+        'chi2': query_topk_with_feature_selection
     }
 
     type_inst, new_x, top_features = fs_choice_dict[feature_selection_type](X, features, top_k)
@@ -131,7 +128,8 @@ def query_topk_tfidf_features_in_doc(data, features, feature_selection_choice='d
 
 
 # Lamda for converting data-frame to a dictionary
-convert_dataframe_to_dict = lambda key_column_name, value_column_name, df: df.set_index(key_column_name).to_dict()[value_column_name]
+convert_dataframe_to_dict = lambda key_column_name, value_column_name, df: \
+    df.set_index(key_column_name).to_dict()[value_column_name]
 
 
 def query_topk_tfidf_features_overall(data, feature_list, min_tfidf=0.1, feature_selection='default',
@@ -167,9 +165,13 @@ def query_topk_tfidf_features_by_class(X, y, feature_names, class_index, feature
 
 
 def _single_layer_lrp(feature_coef_df, bias, features_by_class, top_k):
-    # Reference:
-    # Franziska Horn, Leila Arras, Grégoire Montavon, Klaus-Robert Müller, Wojciech Samek. 2017
-    # Exploring text datasets by visualizing relevant words (https://arxiv.org/abs/1707.05261)
+    """
+    References
+    ----------
+    Franziska Horn, Leila Arras, Gregoire Montavon, Klaus-Robert Muller, Wojciech Samek. 2017
+    Exploring text datasets by visualizing relevant words (https://arxiv.org/abs/1707.05261)
+    """
+
 
     merged_df = pd.merge(feature_coef_df, features_by_class, on='features')
     merged_df['coef_wts'] = merged_df['coef_wts'].astype('float64')

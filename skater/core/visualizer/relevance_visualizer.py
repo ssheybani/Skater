@@ -11,9 +11,7 @@ import codecs
 def build_explainer(text, feature_relevance_wts, font_size='10pt', file_name='rendered', metainf='',
                     pos_clr_name='Blues', neg_clr_name='Reds', highlight_oov=False):
     """
-    Reference: http://matplotlib.org/examples/color/colormaps_reference.html
-    Reference: https://github.com/cod3licious/textcatvis
-    Based on the original text and relevance scores, generate a html doc highlighting positive / negative words
+    Generate a html doc highlighting positive / negative words based on the original text and relevance scores
     Inputs:
         - text: the raw text in which the words should be highlighted
         - scores: a dictionary with {word: score} or a list with tuples [(word, score)]
@@ -21,8 +19,13 @@ def build_explainer(text, feature_relevance_wts, font_size='10pt', file_name='re
         - metainf: an optional string which will be added at the top of the file (e.g. true class of the document)
         - highlight_oov: if True, out-of-vocabulary words will be highlighted in yellow (default False)
     Saves the visualization in 'file_name.html' (you probably want to make this a whole path to not clutter your main directory...)
+
+    References
+    ----------
+    * http://matplotlib.org/examples/color/colormaps_reference.html
+    * https://github.com/cod3licious/textcatvis
     """
-    #TODO: Add support for better visualization and plotting may be bokeh
+    # TODO: Add support for better visualization and plotting - e.g bokeh
     # color-maps
     cmap_pos = get_cmap(pos_clr_name)
     cmap_neg = get_cmap(neg_clr_name)
@@ -58,7 +61,6 @@ def build_explainer(text, feature_relevance_wts, font_size='10pt', file_name='re
 
 
 class _GroupedColorFunc(object):
-    # Reference: https://github.com/amueller/word_cloud/blob/master/examples/colored_by_group.py
     """Create a color function object which assigns DIFFERENT SHADES of
        specified colors to certain words based on the color to words mapping.
        Uses wordcloud.get_single_color_func
@@ -69,6 +71,11 @@ class _GroupedColorFunc(object):
        default_color : str
          Color that will be assigned to a word that's not a member
          of any value from color_to_words.
+
+       References
+       ----------
+       https://github.com/amueller/word_cloud/blob/master/examples/colored_by_group.py
+
     """
 
     def __init__(self, color_to_words, default_color):
