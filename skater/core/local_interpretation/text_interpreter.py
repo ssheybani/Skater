@@ -81,12 +81,13 @@ def query_topk_with_feature_selection(X, y, feature_names, top_k='all'):
     X_new = ch2.fit_transform(X, y)
     # retrieve the feature names post selection
     # Reference: https://stackoverflow.com/questions/14133348/show-feature-names-after-feature-selection
-    selected_feature = [feature_names[i] for i in ch2.get_support(indices=True)]
+    features_scores = tuple(zip(feature_names, ch2.scores_))
+    selected_feature = [features_scores[i] for i in ch2.get_support(indices=True)]
     return ch2, X_new, selected_feature
 
 
 def query_topk_tfidf_features(X, y, features, feature_selection_type='default', top_k=25):
-    """ Computes top 'k' tf-idf values in a row.
+    """ Computes top 'k' features in a row.
     Parameters
     __________
     X: input data
@@ -112,7 +113,7 @@ def query_topk_tfidf_features(X, y, features, feature_selection_type='default', 
 
     type_inst, new_x, top_features = fs_choice_dict[feature_selection_type](X, y, features, top_k)
     df = pd.DataFrame(top_features)
-    df.columns = ['features', 'tf_idf']
+    df.columns = ['features', 'scores']
     return df
 
 
@@ -125,7 +126,7 @@ def query_topk_tfidf_features_in_doc(data, y, features, feature_selection_choice
     """
     row = np.squeeze(data.toarray())
     return query_topk_tfidf_features(X=row, y=y, features=features, feature_selection_type=feature_selection_choice,
-                                top_k=top_k)
+                                     top_k=top_k)
 
 
 # Lamda for converting data-frame to a dictionary
@@ -134,36 +135,40 @@ convert_dataframe_to_dict = lambda key_column_name, value_column_name, df: \
 
 
 def query_topk_tfidf_features_overall(data, y_true, feature_list, min_tfidf=0.1, feature_selection='default',
-                                summarizer_type='mean', top_k=25):
+                                      summarizer_type='mean', top_k=25):
     """
     """
-    d = data.toarray()
-    d[d < min_tfidf] = 0
-    summarizer_default = lambda x: np.sum(x, axis=0)
-    summarizer_mean = lambda x: np.mean(x, axis=0)
-    summarizer_median = lambda x: np.median(x, axis=0)
-    summarizer_choice_dict = {
-        'sum': summarizer_default,
-        'mean': summarizer_mean,
-        'median': summarizer_median,
-        'auto-feature-selection': 'None'
-    }
+    # TODO add summarizer type as a sub-argument
+    # The use of summarizer to capture the tf-idf scores overall with use of vanilla aggregation is Experimental.
+    # The idea here is to use such aggregation as a simple ranking criteria
+    # On-going discussion: https://stackoverflow.com/questions/42269313/interpreting-the-sum-of-tf-idf-scores-of-words-across-documents
+    # Always safe to compute globally responsible features using more theoretical statistical tests e.g. chi2
+    if feature_selection is 'default':
+        d = data.toarray()
+        d[d < min_tfidf] = 0
+        summarizer_default = lambda x: np.sum(x, axis=0)
+        summarizer_mean = lambda x: np.mean(x, axis=0)
+        summarizer_median = lambda x: np.median(x, axis=0)
+        summarizer_choice_dict = {
+            'sum': summarizer_default,
+            'mean': summarizer_mean,
+            'median': summarizer_median
+        }
 
-    tfidf_summarized = summarizer_choice_dict[summarizer_type](d)
-    if tfidf_summarized is not None:
-        result_df = query_topk_tfidf_features(tfidf_summarized, feature_list, feature_selection, top_k)
-
+        tfidf_summarized = summarizer_choice_dict[summarizer_type](d)
+        temp_df = query_topk_tfidf_features(tfidf_summarized, y_true, feature_list, feature_selection, top_k)
+        return temp_df
     else:
-        result_df = query_topk_with_feature_selection(data, y_true, feature_list, top_k)
-    return result_df
+        temp_df = query_topk_tfidf_features(data, y_true, feature_list, 'chi2', top_k)
+        return temp_df
 
 
 def query_topk_tfidf_features_by_class(X, y, feature_names, class_index, feature_selection='default',
-                              summarizer_type='mean', topk_features=25, min_tfidf=0.1):
+                                       summarizer_type='mean', topk_features=25, min_tfidf=0.1):
     """
     """
     indexes = list(np.where(y==class_index))
-    feature_df = query_topk_tfidf_features_overall(data=X[indexes[0]], y_true=y, feature_list=feature_names,
+    feature_df = query_topk_tfidf_features_overall(data=X[indexes[0]], y_true=y[indexes[0]], feature_list=feature_names,
                                                    min_tfidf=min_tfidf, feature_selection=feature_selection,
                                                    summarizer_type=summarizer_type, top_k=topk_features)
     return feature_df
