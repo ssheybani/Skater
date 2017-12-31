@@ -72,7 +72,7 @@ def _default_feature_selection(X, y, feature_names, top_k):
     return None, None, top_features
 
 
-def query_topk_with_feature_selection(X, y, feature_names, top_k='all'):
+def auto_feature_selection(X, y, feature_names, top_k='all'):
     """
     Feature selection currently is done using Chi2.
     Other solutions may be added shortly.
@@ -86,7 +86,7 @@ def query_topk_with_feature_selection(X, y, feature_names, top_k='all'):
     return ch2, X_new, selected_feature
 
 
-def query_topk_tfidf_features(X, y, features, feature_selection_type='default', top_k=25):
+def _compute_top_features(X, y, features, feature_selection_type='default', top_k=25):
     """ Computes top 'k' features in a row.
     Parameters
     __________
@@ -108,7 +108,7 @@ def query_topk_tfidf_features(X, y, features, feature_selection_type='default', 
     """
     fs_choice_dict = {
         'default': _default_feature_selection,
-        'chi2': query_topk_with_feature_selection
+        'chi2': auto_feature_selection
     }
 
     type_inst, new_x, top_features = fs_choice_dict[feature_selection_type](X, y, features, top_k)
@@ -117,15 +117,16 @@ def query_topk_tfidf_features(X, y, features, feature_selection_type='default', 
     return df
 
 
-def query_topk_tfidf_features_in_doc(data, y, features, feature_selection_choice='default', top_k=25):
-    """ Compute top tf-idf features for each document in the corpus
+def query_top_features_in_doc(data, y, features, feature_selection_choice='default', top_k=25):
+    """ Compute top features for each document in the corpus. The scores are dependent on the type of
+    transformation applied e.g. TF-IDF
 
     Returns
     _______
-    pandas.DataFrame with columns 'features', 'tf_idf'
+    pandas.DataFrame with columns 'features', 'scores'
     """
     row = np.squeeze(data.toarray())
-    return query_topk_tfidf_features(X=row, y=y, features=features, feature_selection_type=feature_selection_choice,
+    return _compute_top_features(X=row, y=y, features=features, feature_selection_type=feature_selection_choice,
                                      top_k=top_k)
 
 
@@ -134,7 +135,7 @@ convert_dataframe_to_dict = lambda key_column_name, value_column_name, df: \
     df.set_index(key_column_name).to_dict()[value_column_name]
 
 
-def query_topk_tfidf_features_overall(data, y_true, feature_list, min_tfidf=0.1, feature_selection='default',
+def query_top_features_overall(data, y_true, feature_list, min_threshold=0.1, feature_selection='default',
                                       summarizer_type='mean', top_k=25):
     """
     """
@@ -145,7 +146,7 @@ def query_topk_tfidf_features_overall(data, y_true, feature_list, min_tfidf=0.1,
     # Always safe to compute globally responsible features using more theoretical statistical tests e.g. chi2
     if feature_selection is 'default':
         d = data.toarray()
-        d[d < min_tfidf] = 0
+        d[d < min_threshold] = 0
         summarizer_default = lambda x: np.sum(x, axis=0)
         summarizer_mean = lambda x: np.mean(x, axis=0)
         summarizer_median = lambda x: np.median(x, axis=0)
@@ -156,21 +157,21 @@ def query_topk_tfidf_features_overall(data, y_true, feature_list, min_tfidf=0.1,
         }
 
         tfidf_summarized = summarizer_choice_dict[summarizer_type](d)
-        temp_df = query_topk_tfidf_features(tfidf_summarized, y_true, feature_list, feature_selection, top_k)
+        temp_df = _compute_top_features(tfidf_summarized, y_true, feature_list, feature_selection, top_k)
         return temp_df
     else:
-        temp_df = query_topk_tfidf_features(data, y_true, feature_list, 'chi2', top_k)
+        temp_df = _compute_top_features(data, y_true, feature_list, 'chi2', top_k)
         return temp_df
 
 
-def query_topk_tfidf_features_by_class(X, y, feature_names, class_index, feature_selection='default',
-                                       summarizer_type='mean', topk_features=25, min_tfidf=0.1):
+def query_topk_tfidf_features_by_class(X, y, feature_names, class_index,
+                                       summarizer_type='mean', topk_features=25, min_threshold=0.1):
     """
     """
     indexes = list(np.where(y==class_index))
-    feature_df = query_topk_tfidf_features_overall(data=X[indexes[0]], y_true=y[indexes[0]], feature_list=feature_names,
-                                                   min_tfidf=min_tfidf, feature_selection=feature_selection,
-                                                   summarizer_type=summarizer_type, top_k=topk_features)
+    feature_df = query_top_features_overall(data=X[indexes[0]], y_true=y[indexes[0]], feature_list=feature_names,
+                                            min_threshold=min_threshold, summarizer_type=summarizer_type,
+                                            top_k=topk_features)
     return feature_df
 
 
@@ -185,12 +186,12 @@ def _single_layer_lrp(feature_coef_df, bias, features_by_class, top_k):
 
     merged_df = pd.merge(feature_coef_df, features_by_class, on='features')
     merged_df['coef_wts'] = merged_df['coef_wts'].astype('float64')
-    merged_df['tf_idf'] = merged_df['tf_idf'].astype('float64')
-    merged_df['coef_tfidf_wts'] = merged_df['coef_wts']*merged_df['tf_idf'] + float(bias)
+    merged_df['scores'] = merged_df['scores'].astype('float64')
+    merged_df['coef_score_wts'] = merged_df['coef_wts']*merged_df['scores'] + float(bias)
 
     # This is sorting is more of a precaution for corner cases, might be removed as the implementation matures
-    top_feature_df = merged_df.nlargest(top_k, 'coef_tfidf_wts')[['features', 'coef_tfidf_wts']]
-    top_feature_df_dict = convert_dataframe_to_dict('features', 'coef_tfidf_wts', top_feature_df)
+    top_feature_df = merged_df.nlargest(top_k, 'coef_scores_wts')[['features', 'coef_scores_wts']]
+    top_feature_df_dict = convert_dataframe_to_dict('features', 'coef_scores_wts', top_feature_df)
     return top_feature_df_dict, top_feature_df, merged_df
 
 
