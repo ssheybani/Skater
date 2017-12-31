@@ -164,7 +164,7 @@ def query_top_features_overall(data, y_true, feature_list, min_threshold=0.1, fe
         return temp_df
 
 
-def query_topk_tfidf_features_by_class(X, y, feature_names, class_index,
+def query_top_features_by_class(X, y, feature_names, class_index,
                                        summarizer_type='mean', topk_features=25, min_threshold=0.1):
     """
     """
