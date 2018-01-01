@@ -113,7 +113,7 @@ def _compute_top_features(X, y, features, feature_selection_type='default', top_
 
     type_inst, new_x, top_features = fs_choice_dict[feature_selection_type](X, y, features, top_k)
     df = pd.DataFrame(top_features)
-    df.columns = ['features', 'scores']
+    df.columns = ['features', 'relevance_scores']
     return df
 
 
@@ -123,7 +123,7 @@ def query_top_features_in_doc(data, y, features, feature_selection_choice='defau
 
     Returns
     _______
-    pandas.DataFrame with columns 'features', 'scores'
+    pandas.DataFrame with columns 'features', 'relevance_scores'
     """
     row = np.squeeze(data.toarray())
     return _compute_top_features(X=row, y=y, features=features, feature_selection_type=feature_selection_choice,
@@ -137,7 +137,7 @@ convert_dataframe_to_dict = lambda key_column_name, value_column_name, df: \
 
 def query_top_features_overall(data, y_true, feature_list, min_threshold=0.1, feature_selection='default',
                                       summarizer_type='mean', top_k=25):
-    """
+    """ Compute and query for top features in the whole corpus
     """
     # TODO add summarizer type as a sub-argument
     # The use of summarizer to capture the tf-idf scores overall with use of vanilla aggregation is Experimental.
@@ -166,7 +166,7 @@ def query_top_features_overall(data, y_true, feature_list, min_threshold=0.1, fe
 
 def query_top_features_by_class(X, y, feature_names, class_index,
                                        summarizer_type='mean', topk_features=25, min_threshold=0.1):
-    """
+    """ Compute and query for top features in the whole corpus wrt individual classes
     """
     indexes = list(np.where(y==class_index))
     feature_df = query_top_features_overall(data=X[indexes[0]], y_true=y[indexes[0]], feature_list=feature_names,
@@ -177,6 +177,8 @@ def query_top_features_by_class(X, y, feature_names, class_index,
 
 def _single_layer_lrp(feature_coef_df, bias, features_by_class, top_k):
     """
+    This is a simplified form of LRP(Layerwise Relevance Propagation) adopted to understand Linear classifier decisions
+
     References
     ----------
     Franziska Horn, Leila Arras, Gregoire Montavon, Klaus-Robert Muller, Wojciech Samek. 2017
@@ -186,8 +188,10 @@ def _single_layer_lrp(feature_coef_df, bias, features_by_class, top_k):
 
     merged_df = pd.merge(feature_coef_df, features_by_class, on='features')
     merged_df['coef_wts'] = merged_df['coef_wts'].astype('float64')
-    merged_df['scores'] = merged_df['scores'].astype('float64')
-    merged_df['coef_score_wts'] = merged_df['coef_wts']*merged_df['scores'] + float(bias)
+    merged_df['relevance_scores'] = merged_df['relevance_scores'].astype('float64')
+
+    # Multiply element-wise transformed relevance score for each class with the wt. vector of the class
+    merged_df['coef_score_wts'] = merged_df['coef_wts'] * merged_df['relevance_scores'] + float(bias)
 
     # This is sorting is more of a precaution for corner cases, might be removed as the implementation matures
     top_feature_df = merged_df.nlargest(top_k, 'coef_scores_wts')[['features', 'coef_scores_wts']]
@@ -196,6 +200,10 @@ def _single_layer_lrp(feature_coef_df, bias, features_by_class, top_k):
 
 
 def _based_on_learned_estimator(feature_coef_df, bias, top_k):
+    """
+    Provides access to the learned estimator wts, that could possibly help visualize and understand learned policies
+    globally.
+    """
     feature_coef_df['coef_wts'] = feature_coef_df['coef_wts'].astype('float64')
     feature_coef_df['coef_wts_intercept'] = feature_coef_df['coef_wts'] + float(bias)
     top_feature_df = feature_coef_df.nlargest(top_k, 'coef_wts_intercept')
@@ -221,8 +229,9 @@ def understand_estimator(estimator, class_label_index, tfidf_wts_by_class, featu
     bias = estimator.intercept_[class_label_index]/no_of_features
 
     if relevance_type == 'default':
-        top_feature_df_dict, top_feature_df, feature_coef_df = _based_on_learned_estimator(feature_coef_df, bias, no_of_features)
+        feature_df_dict, feature_df, feature_coef_df = _based_on_learned_estimator(feature_coef_df,
+                                                                                       bias, no_of_features)
     elif relevance_type == 'SLRP':
-        top_feature_df_dict, top_feature_df, feature_coef_df = _single_layer_lrp(feature_coef_df, bias,
+        feature_df_dict, feature_df, feature_coef_df = _single_layer_lrp(feature_coef_df, bias,
                                                                                  tfidf_wts_by_class, top_k)
-    return top_feature_df_dict, top_feature_df, feature_coef_df
+    return feature_df_dict, feature_df, feature_coef_df
