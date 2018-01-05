@@ -29,6 +29,10 @@ def build_explainer(text, feature_relevance_wts, font_size='10pt', file_name='re
     # color-maps
     cmap_pos = get_cmap(pos_clr_name)
     cmap_neg = get_cmap(neg_clr_name)
+    # color mapping for non-vocabulary words
+    rgbac = (1., 0.6, 0.2)
+    # adjust opacity for non-vocabulary words
+    alpha = 0.2 if highlight_oov else 0.
     norm = mpl.colors.Normalize(0., 1.)
 
     html_str = u'<body><div style="white-space: pre-wrap; font-size: {}; font-family: Verdana;">'.format(font_size)
@@ -41,15 +45,14 @@ def build_explainer(text, feature_relevance_wts, font_size='10pt', file_name='re
         html_str += rest_text[:rest_text.find(word)]
         # cut off the identified word
         rest_text = rest_text[rest_text.find(word) + len(word):]
-        # get the colorcode of the word
-        rgbac = (1., 1., 0.)  # for unknown words
-        alpha = 0.3 if highlight_oov else 0.
+
 
         if wts is not None:
             if wts < 0:
                 rgbac = cmap_neg(norm(-wts))
             else:
                 rgbac = cmap_pos(norm(wts))
+            # adjusting opacity for in-dictionary words
             alpha = 0.5
         html_str += u'<span style="background-color: rgba(%i, %i, %i, %.1f)">%s</span>' \
                    % (round(255 * rgbac[0]), round(255 * rgbac[1]), round(255 * rgbac[2]), alpha, word)
