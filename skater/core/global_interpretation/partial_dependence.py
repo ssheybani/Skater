@@ -387,6 +387,8 @@ class PartialDependence(BaseGlobalInterpretation):
 
         pd_list = []
         try:
+            if n_jobs == 1:
+                raise ValueError("Skipping to single processing")
             for pd_row in mapper(pd_func, arg_list):
                 if progressbar:
                     p.animate()
