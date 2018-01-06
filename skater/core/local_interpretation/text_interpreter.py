@@ -223,7 +223,8 @@ def understand_estimator(estimator, class_label_index, feature_wts, feature_name
     # TODO: extend it for estimator from other frameworks - MLLib, H20, vw
     coef_array = np.squeeze(estimator.coef_[class_label_index])
     no_of_features = top_k
-    _, _, feature_coef_list = _default_feature_selection(coef_array, feature_names, k_features=no_of_features)
+    _, _, feature_coef_list = _default_feature_selection(X=coef_array,
+                                                         feature_names=feature_names, k_features=no_of_features)
 
     feature_coef_df = pd.DataFrame(feature_coef_list, columns=['features', 'coef_wts'])
     bias = estimator.intercept_[class_label_index]/no_of_features
