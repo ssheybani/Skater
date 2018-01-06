@@ -64,10 +64,10 @@ def get_feature_names(vectorizer_inst):
     return vectorizer_inst.get_feature_names()
 
 
-def _default_feature_selection(X, y, feature_names, top_k):
+def _default_feature_selection(X, y, feature_names, k_features):
     y
     arg_sort = lambda r, k: np.argsort(r)[::-1][:k]
-    top_k_index = arg_sort(X, top_k)
+    top_k_index = arg_sort(X, k_features)
     top_features = [(feature_names[i], X[i]) for i in top_k_index]
     return None, None, top_features
 
@@ -212,7 +212,7 @@ def _based_on_learned_estimator(feature_coef_df, bias, top_k):
     return top_feature_df_dict, top_feature_df, feature_coef_df
 
 
-def understand_estimator(estimator, class_label_index, tfidf_wts_by_class, feature_names,
+def understand_estimator(estimator, class_label_index, feature_wts, feature_names,
                          top_k, relevance_type='default'):
     # Currently, support for sklearn based estimator
     # TODO: extend it for estimator from other frameworks - MLLib, H20, vw
@@ -221,10 +221,10 @@ def understand_estimator(estimator, class_label_index, tfidf_wts_by_class, featu
 
     # Currently, support for sklearn based estimator
     # TODO: extend it for estimator from other frameworks - MLLib, H20, vw
-    # sort the coefficients in descending order, this will give access to the coefficient wts
     coef_array = np.squeeze(estimator.coef_[class_label_index])
     no_of_features = top_k
-    _, _, feature_coef_list = _default_feature_selection(coef_array, feature_names, no_of_features)
+    _, _, feature_coef_list = _default_feature_selection(coef_array, feature_names, k_features=no_of_features)
+
     feature_coef_df = pd.DataFrame(feature_coef_list, columns=['features', 'coef_wts'])
     bias = estimator.intercept_[class_label_index]/no_of_features
 
@@ -233,5 +233,5 @@ def understand_estimator(estimator, class_label_index, tfidf_wts_by_class, featu
                                                                                        bias, no_of_features)
     elif relevance_type == 'SLRP':
         feature_df_dict, feature_df, feature_coef_df = _single_layer_lrp(feature_coef_df, bias,
-                                                                                 tfidf_wts_by_class, top_k)
+                                                                         feature_wts, top_k)
     return feature_df_dict, feature_df, feature_coef_df
