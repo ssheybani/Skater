@@ -43,6 +43,16 @@ class TestTextInterpreter(unittest.TestCase):
     def test_understand_estimator(self):
         select_type_inst, X_new_train, selected_feature = auto_feature_selection(self.X_train, self.y_train,
                                                                                  feature_names=feature_names)
+        self.assertEquals(len(selected_feature), 126384)
+        clf = SGDClassifier(alpha=.0001, n_iter=10, penalty="elasticnet", loss='log')
+        clf.fit(X_new_train, self.y_train)
+
+        features_to_consider = query_top_features_by_class(X_new_train, self.y_train, selected_feature, class_index=0,
+                                                           topk_features=len(selected_feature),
+                                                           summarizer_type='mean', min_threshold=0.1)
+
+        relevance_dict, df, _ = understand_estimator(clf, 0, features_to_consider, selected_feature,
+                                             top_k=len(features_to_consider), relevance_type='SLRP')
 
 
 

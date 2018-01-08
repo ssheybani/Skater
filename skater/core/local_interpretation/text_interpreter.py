@@ -15,8 +15,8 @@ from skater.util.text_ops import cleaner
 def _handling_ngrams_wts(original_feat_dict):
     # Currently, when feature dictionary contains continuous sequences such as 2-gram/3-gram etc. sequences as features,
     # a short term solution is to further split them into additional keys.
-    # e.g. {'stay ball dropped': 0,5} will be split into a new dict as {'stay':0.5, 'ball': 0.5, 'dropped': 0.5}
-    # TODO: this is just a temporary solution for handling n-grams, figure out a better solution
+    # e.g. {'stay ball dropped': 0.5} will be split into a new dict as {'stay':0.5, 'ball': 0.5, 'dropped': 0.5}
+    # TODO: this is just a temporary solution for handling n-grams, figure out a better solution    
     for k in list(original_feat_dict.keys()):
         additional_keys = k.split()
     for a_k in additional_keys:
@@ -185,16 +185,17 @@ def _single_layer_lrp(feature_coef_df, bias, features_by_class, top_k):
     Exploring text datasets by visualizing relevant words (https://arxiv.org/abs/1707.05261)
     """
 
-
+    
     merged_df = pd.merge(feature_coef_df, features_by_class, on='features')
-    merged_df['coef_wts'] = merged_df['coef_wts'].astype('float64')
+    merged_df['coef_scores_wts'] = merged_df['coef_scores_wts'].astype('float64')
     merged_df['relevance_scores'] = merged_df['relevance_scores'].astype('float64')
 
     # Multiply element-wise transformed relevance score for each class with the wt. vector of the class
-    merged_df['coef_score_wts'] = merged_df['coef_wts'] * merged_df['relevance_scores'] + float(bias)
+    merged_df['coef_scores_wts'] = merged_df['coef_scores_wts'] * merged_df['relevance_scores'] + float(bias)
 
     # This is sorting is more of a precaution for corner cases, might be removed as the implementation matures
     top_feature_df = merged_df.nlargest(top_k, 'coef_scores_wts')[['features', 'coef_scores_wts']]
+    top_feature_df['features'] = top_feature_df['features'].apply(lambda x: x[0])
     top_feature_df_dict = convert_dataframe_to_dict('features', 'coef_scores_wts', top_feature_df)
     return top_feature_df_dict, top_feature_df, merged_df
 
@@ -204,10 +205,11 @@ def _based_on_learned_estimator(feature_coef_df, bias, top_k):
     Provides access to the learned estimator wts, that could possibly help visualize and understand learned policies
     globally.
     """
-    feature_coef_df['coef_wts'] = feature_coef_df['coef_wts'].astype('float64')
-    feature_coef_df['coef_wts_intercept'] = feature_coef_df['coef_wts'] + float(bias)
+    feature_coef_df['coef_scores_wts'] = feature_coef_df['coef_scores_wts'].astype('float64')
+    feature_coef_df['coef_wts_intercept'] = feature_coef_df['coef_scores_wts'] + float(bias)
     top_feature_df = feature_coef_df.nlargest(top_k, 'coef_wts_intercept')
 
+    top_feature_df['features'] = top_feature_df['features'].apply(lambda x: x[0])
     top_feature_df_dict = convert_dataframe_to_dict('features', 'coef_wts_intercept', top_feature_df)
     return top_feature_df_dict, top_feature_df, feature_coef_df
 
@@ -223,10 +225,10 @@ def understand_estimator(estimator, class_label_index, feature_wts, feature_name
     # TODO: extend it for estimator from other frameworks - MLLib, H20, vw
     coef_array = np.squeeze(estimator.coef_[class_label_index])
     no_of_features = top_k
-    _, _, feature_coef_list = _default_feature_selection(X=coef_array,
-                                                         feature_names=feature_names, k_features=no_of_features)
+    #_, _, feature_coef_list = _default_feature_selection(coef_array, feature_names, k_features=no_of_features)
+    _, _, feature_coef_list = _default_feature_selection(X=coef_array, y=0, feature_names=feature_names, k_features=no_of_features)
 
-    feature_coef_df = pd.DataFrame(feature_coef_list, columns=['features', 'coef_wts'])
+    feature_coef_df = pd.DataFrame(feature_coef_list, columns=['features', 'coef_scores_wts'])
     bias = estimator.intercept_[class_label_index]/no_of_features
 
     if relevance_type == 'default':
