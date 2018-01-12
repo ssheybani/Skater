@@ -10,6 +10,7 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
 
 from skater.util.text_ops import cleaner
+from skater.util.dataops import convert_dataframe_to_dict
 
 
 def _handling_ngrams_wts(original_feat_dict):
@@ -130,11 +131,6 @@ def query_top_features_in_doc(data, y, features, feature_selection_choice='defau
                                      top_k=top_k)
 
 
-# Lamda for converting data-frame to a dictionary
-convert_dataframe_to_dict = lambda key_column_name, value_column_name, df: \
-    df.set_index(key_column_name).to_dict()[value_column_name]
-
-
 def query_top_features_overall(data, y_true, feature_list, min_threshold=0.1, feature_selection='default',
                                       summarizer_type='mean', top_k=25):
     """ Compute and query for top features in the whole corpus
@@ -191,12 +187,12 @@ def _single_layer_lrp(feature_coef_df, bias, features_by_class, top_k):
     merged_df['relevance_scores'] = merged_df['relevance_scores'].astype('float64')
 
     # Multiply element-wise transformed relevance score for each class with the wt. vector of the class
-    merged_df['coef_scores_wts'] = merged_df['coef_scores_wts'] * merged_df['relevance_scores'] + float(bias)
+    merged_df['relevance_wts'] = merged_df['coef_scores_wts'] * merged_df['relevance_scores'] + float(bias)
 
     # This is sorting is more of a precaution for corner cases, might be removed as the implementation matures
-    top_feature_df = merged_df.nlargest(top_k, 'coef_scores_wts')[['features', 'coef_scores_wts']]
+    top_feature_df = merged_df.nlargest(top_k, 'relevance_wts')[['features', 'relevance_wts']]
     top_feature_df['features'] = top_feature_df['features'].apply(lambda x: x[0])
-    top_feature_df_dict = convert_dataframe_to_dict('features', 'coef_scores_wts', top_feature_df)
+    top_feature_df_dict = convert_dataframe_to_dict('features', 'relevance_wts', top_feature_df)
     return top_feature_df_dict, top_feature_df, merged_df
 
 
@@ -206,11 +202,11 @@ def _based_on_learned_estimator(feature_coef_df, bias, top_k):
     globally.
     """
     feature_coef_df['coef_scores_wts'] = feature_coef_df['coef_scores_wts'].astype('float64')
-    feature_coef_df['coef_wts_intercept'] = feature_coef_df['coef_scores_wts'] + float(bias)
-    top_feature_df = feature_coef_df.nlargest(top_k, 'coef_wts_intercept')
+    feature_coef_df['relevance_wts'] = feature_coef_df['coef_scores_wts'] + float(bias)
+    top_feature_df = feature_coef_df.nlargest(top_k, 'relevance_wts')
 
     top_feature_df['features'] = top_feature_df['features'].apply(lambda x: x[0])
-    top_feature_df_dict = convert_dataframe_to_dict('features', 'coef_wts_intercept', top_feature_df)
+    top_feature_df_dict = convert_dataframe_to_dict('features', 'relevance_wts', top_feature_df)
     return top_feature_df_dict, top_feature_df, feature_coef_df
 
 

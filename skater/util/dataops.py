@@ -129,5 +129,8 @@ def divide_zerosafe(a, b):
     with np.errstate(divide='ignore', invalid='ignore'):
         c = np.true_divide(a, b)
         c[~np.isfinite(c)] = 0  # -inf inf NaN
-
     return c
+
+# Lamda for converting data-frame to a dictionary
+convert_dataframe_to_dict = lambda key_column_name, value_column_name, df: \
+    df.set_index(key_column_name).to_dict()[value_column_name]
