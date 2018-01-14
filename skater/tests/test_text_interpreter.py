@@ -55,7 +55,7 @@ class TestTextInterpreter(unittest.TestCase):
 
 
     def test_utils(self):
-        # converting of dataframe to dict
+        # converting of data-frame to dict
         data = np.array([['','feature_name','relevance_scores'],
                          ['R1','F1',20],
                          ['R2','F2',40]])
