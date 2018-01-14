@@ -210,8 +210,8 @@ def _based_on_learned_estimator(feature_coef_df, bias, top_k):
     return top_feature_df_dict, top_feature_df, feature_coef_df
 
 
-def understand_estimator(estimator, class_label_index, feature_wts, feature_names,
-                         top_k, relevance_type='default'):
+def understand_estimator(estimator, class_label_index, feature_names, top_k,
+                         relevance_type='default', feature_wts=None):
     # Currently, support for sklearn based estimator
     # TODO: extend it for estimator from other frameworks - MLLib, H20, vw
     if ('coef_' in estimator.__dict__) is False:
@@ -220,19 +220,20 @@ def understand_estimator(estimator, class_label_index, feature_wts, feature_name
     # Currently, support for sklearn based estimator
     # TODO: extend it for estimator from other frameworks - MLLib, H20, vw
     # In case of a binary classification, reverse the learned coef. wts for index 1
-    estimator.coef_ = -estimator.coef_ if estimator.coef_.shpae[0]==1 and class_label_index==1 else estimator.coef_
-    coef_array = np.squeeze(estimator.coef_[class_label_index])
+    coef_array = np.squeeze(-estimator.coef_[0]) if estimator.coef_.shape[0]==1 and class_label_index==1 \
+        else np.squeeze(estimator.coef_[class_label_index])
     no_of_features = top_k
-    #_, _, feature_coef_list = _default_feature_selection(coef_array, feature_names, k_features=no_of_features)
-    _, _, feature_coef_list = _default_feature_selection(X=coef_array, y=0, feature_names=feature_names, k_features=no_of_features)
+    _, _, feature_coef_list = _default_feature_selection(X=coef_array, y=0, feature_names=feature_names,
+                                                         k_features=no_of_features)
 
     feature_coef_df = pd.DataFrame(feature_coef_list, columns=['features', 'coef_scores_wts'])
-    bias = estimator.intercept_[class_label_index]/no_of_features
+    bias = estimator.intercept_[0]/no_of_features if estimator.coef_.shape[0]==1 and class_label_index==1 \
+        else estimator.intercept_[class_label_index]/no_of_features
 
     if relevance_type == 'default':
         feature_df_dict, feature_df, feature_coef_df = _based_on_learned_estimator(feature_coef_df,
                                                                                        bias, no_of_features)
     elif relevance_type == 'SLRP':
         feature_df_dict, feature_df, feature_coef_df = _single_layer_lrp(feature_coef_df, bias,
-                                                                         feature_wts, top_k)
+                                                                         feature_wts, no_of_features)
     return feature_df_dict, feature_df, feature_coef_df
