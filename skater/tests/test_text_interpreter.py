@@ -99,18 +99,13 @@ class TestTextInterpreter(unittest.TestCase):
         self.assertEquals(rows[1].relevance_wts > 0, True)
 
         relevance_dict, relevance_df, _ = understand_estimator(clf, 0, features_to_consider, selected_feature,
-                                                               topk=len(features_to_consider), relevance_type='SLRP')
+                                                               top_k=len(features_to_consider), relevance_type='SLRP')
         self.assertEquals(len(relevance_df.columns), 2)
         # validate the construction of the data-frame
         rows = [row for row in relevance_df.head(2).itertuples()]
         self.assertEquals(rows[0].features, "ll")
         self.assertEquals(rows[1].features, "bmw")
         self.assertEquals(rows[1].relevance_wts > 0, True)
-
-        relevance_dict, relevance_df, _ = understand_estimator(clf, 1, features_to_consider, selected_feature,
-                                                               topk=len(features_to_consider), relevance_type='default')
-        self.assertEquals("{:.2f}".format(relevance_df[relevance_df['features']=='sounds'].coef_scores_wts.values[0]),
-                          '-0.58')
 
 
 if __name__ == '__main__':
