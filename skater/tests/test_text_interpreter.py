@@ -80,7 +80,7 @@ class TestTextInterpreter(unittest.TestCase):
                                                                                  feature_names=feature_names)
         self.assertEquals(len(selected_feature), 126384)
 
-        clf = SGDClassifier(alpha=.0001, n_iter=10, penalty="elasticnet", loss='log')
+        clf = SGDClassifier(alpha=.0001, n_iter=10, penalty="elasticnet", loss='log', random_state=1)
         clf.fit(X_new_train, self.y_train)
 
         features_to_consider = query_top_features_by_class(X_new_train, self.y_train, selected_feature, class_index=0,
@@ -106,6 +106,11 @@ class TestTextInterpreter(unittest.TestCase):
         self.assertEquals(rows[0].features, "ll")
         self.assertEquals(rows[1].features, "bmw")
         self.assertEquals(rows[1].relevance_wts > 0, True)
+
+        relevance_dict, relevance_df, _ = understand_estimator(clf, 1, features_to_consider, selected_feature,
+                                                               top_k=len(features_to_consider), relevance_type='default')
+        self.assertEquals("{:.2f}".format(relevance_df[relevance_df['features']=='sounds'].coef_scores_wts.values[0]),
+                          '0.55')
 
 
 if __name__ == '__main__':

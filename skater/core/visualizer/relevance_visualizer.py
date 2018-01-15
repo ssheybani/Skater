@@ -9,7 +9,7 @@ import codecs
 
 
 def build_explainer(text, feature_relevance_wts, font_size='10pt', file_name='rendered', metainf='',
-                    pos_clr_name='Blues', neg_clr_name='Reds', highlight_oov=False):
+                    pos_clr_name='Greens', neg_clr_name='Reds', highlight_oov=False):
     """
     Generate a html doc highlighting positive / negative words based on the original text and relevance scores
     Inputs:
@@ -22,7 +22,7 @@ def build_explainer(text, feature_relevance_wts, font_size='10pt', file_name='re
 
     References
     ----------
-    * http://matplotlib.org/examples/color/colormaps_reference.html
+    # * http://matplotlib.org/examples/color/colormaps_reference.html
     * https://github.com/cod3licious/textcatvis
     """
     # TODO: Add support for better visualization and plotting - e.g bokeh
@@ -30,7 +30,7 @@ def build_explainer(text, feature_relevance_wts, font_size='10pt', file_name='re
     cmap_pos = get_cmap(pos_clr_name)
     cmap_neg = get_cmap(neg_clr_name)
     # color mapping for non-vocabulary words
-    rgbac = (1., 0.6, 0.2)
+    rgbac = (0.1, 0.1, 1.0)
     # adjust opacity for non-vocabulary words
     alpha = 0.2 if highlight_oov else 0.
     norm = mpl.colors.Normalize(0., 1.)
@@ -55,7 +55,7 @@ def build_explainer(text, feature_relevance_wts, font_size='10pt', file_name='re
             # adjusting opacity for in-dictionary words
             alpha = 0.5
         html_str += u'<span style="background-color: rgba(%i, %i, %i, %.1f)">%s</span>' \
-                   % (round(255 * rgbac[0]), round(255 * rgbac[1]), round(255 * rgbac[2]), alpha, word)
+                    % (round(255 * rgbac[0]), round(255 * rgbac[1]), round(255 * rgbac[2]), alpha, word)
     # after the last word, add the rest of the text
     html_str += rest_text
     html_str += u'</div></body>'
