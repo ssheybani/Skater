@@ -219,8 +219,6 @@ def understand_estimator(estimator, class_label_index, feature_wts, feature_name
 
     # Currently, support for sklearn based estimator
     # TODO: extend it for estimator from other frameworks - MLLib, H20, vw
-    # In case of a binary classification, reverse the learned coef. wts for index 1
-    estimator.coef_ = -estimator.coef_ if estimator.coef_.shpae[0]==1 and class_label_index==1 else estimator.coef_
     coef_array = np.squeeze(estimator.coef_[class_label_index])
     no_of_features = top_k
     #_, _, feature_coef_list = _default_feature_selection(coef_array, feature_names, k_features=no_of_features)
