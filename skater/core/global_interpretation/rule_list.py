@@ -12,7 +12,7 @@ class SBRL(object):
         self.r_sbrl = importr('sbrl')
         self.model = None
         self.as_factor = ro.r['as.factor']
-        self.s_apply = ro.r['sapply']
+        self.s_apply = ro.r['lapply']
         self.r_frame = ro.r['data.frame']
 
 
@@ -53,7 +53,7 @@ class SBRL(object):
         return pandas2ri.ri2py_dataframe(results).T
 
 
-    def print_model_(self):
+    def print_model(self):
         self.r_sbrl.print_sbrl(self.model)
 
 
