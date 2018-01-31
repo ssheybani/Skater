@@ -11,32 +11,33 @@ pandas2ri.activate()
 class SBRL(object):
     def __init__(self, iterations=30000, pos_sign=1, neg_sign=0, min_rule_len=1,
                  max_rule_len=8, min_support_pos=0.10, min_support_neg=0.10,
-                 eta=1.0, n_chains=50, lambda_=8):
+                 eta=1.0, n_chains=50, alpha=1, lambda_=8):
         """
         SBRL is a scalable generative estimator to build interpretable decision lists
 
         Parameters
         ----------
-        'iters': the number of iterations for each MCMC chain (default 30000)
-        'pos_sign': sign for the positive labels in the "label" column.(default "1")
-        'neg_sign': sign for the negative labels in the "label" column.(default "0")
-        'rule_minlen': the minimum number of cardinality for rules to be mined from the data-frame(default 1)
-        'rule_maxlen': the maximum number of cardinality for rules to be mined from the data-frame(default 1)
-        'minsupport_pos': a number between 0 and 1, for the minimum percentage support for the positive
+        iterations: the number of iterations for each MCMC chain (default 30000)
+        pos_sign: sign for the positive labels in the "label" column.(default "1")
+        neg_sign: sign for the negative labels in the "label" column.(default "0")
+        min_rule_len: the minimum number of cardinality for rules to be mined from the data-frame(default 1)
+        max_rule_len: the maximum number of cardinality for rules to be mined from the data-frame(default 1)
+        min_support_pos: a number between 0 and 1, for the minimum percentage support for the positive
         observations.(default 0.1)
-        'minsupport_neg': a number between 0 and 1, for the minimum percentage support for the negative
+        min_support_neg: a number between 0 and 1, for the minimum percentage support for the negative
         observations.(default 0.1)
-        'lambda': a hyper-parameter for the expected length of the rule list(default 10)
-        'eta':  default 1
-        'nchain': default 10
-        'alpha': a prior pseudo-count for the positive and negative classes. fixed at 1’s
+        eta:  default 1
+        n_chains: default 10
+        alpha: a prior pseudo-count for the positive and negative classes. fixed at 1’s
+        lambda_: a hyper-parameter for the expected length of the rule list(default 10)
 
         References
         ----------
         .. [1] Letham et.al(2015) Interpretable classifiers using rules and Bayesian analysis:
                Building a better stroke prediction model (https://arxiv.org/abs/1511.01644)
-           [2] Yang et.al(2016) Scalable Bayesian Rule Lists (https://arxiv.org/abs/1602.08610)
+        .. [2] Yang et.al(2016) Scalable Bayesian Rule Lists (https://arxiv.org/abs/1602.08610)
         .. [3] https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py
+
         """
         self.r_sbrl = importr('sbrl')
         self.model = None
@@ -46,7 +47,7 @@ class SBRL(object):
         self.model_params = {
             "iters":iterations, "pos_sign":pos_sign, "neg_sign":neg_sign, "rule_minlen":min_rule_len,
             "rule_maxlen":max_rule_len, "minsupport_pos":min_support_pos, "minsupport_neg":min_support_neg,
-            "eta":eta, "nchain":n_chains, "lambda":lambda_
+            "eta":eta, "nchain":n_chains, "lambda":lambda_, "alpha":alpha
         }
 
 
