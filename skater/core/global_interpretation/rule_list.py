@@ -1,4 +1,5 @@
-# Reference: https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py
+# coding=utf-8
+# Reference:
 # Referencing the work done by Professor Cynthia/Hongyuy/Others with modifications
 
 from rpy2.robjects.packages import importr
@@ -8,36 +9,57 @@ pandas2ri.activate()
 
 
 class SBRL(object):
-    def __init__(self):
+    def __init__(self, iterations=30000, pos_sign=1, neg_sign=0, min_rule_len=1,
+                 max_rule_len=8, min_support_pos=0.10, min_support_neg=0.10,
+                 eta=1.0, n_chains=50, lambda_=8):
+        """
+        SBRL is a scalable generative estimator to build interpretable decision lists
+
+        Parameters
+        ----------
+        'iters': the number of iterations for each MCMC chain (default 30000)
+        'pos_sign': sign for the positive labels in the "label" column.(default "1")
+        'neg_sign': sign for the negative labels in the "label" column.(default "0")
+        'rule_minlen': the minimum number of cardinality for rules to be mined from the data-frame(default 1)
+        'rule_maxlen': the maximum number of cardinality for rules to be mined from the data-frame(default 1)
+        'minsupport_pos': a number between 0 and 1, for the minimum percentage support for the positive
+        observations.(default 0.1)
+        'minsupport_neg': a number between 0 and 1, for the minimum percentage support for the negative
+        observations.(default 0.1)
+        'lambda': a hyper-parameter for the expected length of the rule list(default 10)
+        'eta':  default 1
+        'nchain': default 10
+        'alpha': a prior pseudo-count for the positive and negative classes. fixed at 1’s
+
+        References
+        ----------
+        .. [1] Letham et.al(2015) Interpretable classifiers using rules and Bayesian analysis:
+               Building a better stroke prediction model (https://arxiv.org/abs/1511.01644)
+           [2] Yang et.al(2016) Scalable Bayesian Rule Lists (https://arxiv.org/abs/1602.08610)
+        .. [3] https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py
+        """
         self.r_sbrl = importr('sbrl')
         self.model = None
         self.as_factor = ro.r['as.factor']
         self.s_apply = ro.r['lapply']
         self.r_frame = ro.r['data.frame']
+        self.model_params = {
+            "iters":iterations, "pos_sign":pos_sign, "neg_sign":neg_sign, "rule_minlen":min_rule_len,
+            "rule_maxlen":max_rule_len, "minsupport_pos":min_support_pos, "minsupport_neg":min_support_neg,
+            "eta":eta, "nchain":n_chains, "lambda":lambda_
+        }
 
 
-    def fit(self, X, y_true, **kwargs):
+    def fit(self, X, y_true):
         """
         Parameters:
             X: pandas.DataFrame object that could be used by the model for training.
                  It must not have a column named 'label'
             y_true: pandas.Series, 1-D array to store ground truth labels
-            **kwarg: key word arguments including the following keys:
-            'iters':    default 30000
-            'pos_sign': default "1"
-            'neg_sign': default "0"
-            'rule_minlen': default 1
-            'rule_maxlen': default 1
-            'minsupport_pos': 0.1
-            'minsupport_neg': 0.1
-            'lambda':   default 10
-            'eta':  default 1
-            'nchain': default 10
-
         """
         data = X.assign(label=y_true)
         data_as_r_frame = self.r_frame(self.s_apply(data, self.as_factor))
-        self.model = self.r_sbrl.sbrl(data_as_r_frame, **kwargs)
+        self.model = self.r_sbrl.sbrl(data_as_r_frame, **self.model_params)
         return self.model
 
 
@@ -68,5 +90,8 @@ class SBRL(object):
 
         rules_result = lambda rules: result_dict['rulenames'][indexes[0]:indexes[1]] if rule_indexes.find(':') > -1\
             else result_dict['rulenames'][indexes[0]]
-
         return rules_result(self.model)
+
+
+
+
