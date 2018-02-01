@@ -9,6 +9,8 @@ pandas2ri.activate()
 
 
 class SBRL(object):
+    _estimator_type = "classifier"
+
     def __init__(self, iterations=30000, pos_sign=1, neg_sign=0, min_rule_len=1,
                  max_rule_len=8, min_support_pos=0.10, min_support_neg=0.10,
                  eta=1.0, n_chains=50, alpha=1, lambda_=8):
