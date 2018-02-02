@@ -1,13 +1,13 @@
 import unittest
 import pandas as pd
 from skater.core.global_interpretation.rule_list import SBRL
-from skater.core.validation import validation_curve
+from skater.core.validation import compute_validation_curve
 
 
 class TestRuleList(unittest.TestCase):
 
     def setUp(self):
-        self.sbrl_inst = SBRL(iterations=100)
+        self.sbrl_inst = SBRL()
         self.input_data = pd.read_csv('skater/tests/data/sample_data.csv')
         # data transformation and cleaning ...
         self.input_data["Sex"] = self.input_data["Sex"].astype('category')
@@ -33,9 +33,12 @@ class TestRuleList(unittest.TestCase):
         self.assertEquals(len(result), 2)
 
 
-    # def test_validation(self):
-    #     validation_curve(SBRL())
-
+    def test_validation(self):
+        param_range = [1, 3, 5]
+        train_scores, test_scores = compute_validation_curve(SBRL(), n_folds=2, x=self.input_data, y=self.y,
+                                                                     param_name="rule_minlen", param_range=param_range)
+        self.assertEquals(train_scores.shape[0], 3)
+        self.assertEquals(test_scores.shape[0], 3)
 
 
 if __name__ == '__main__':
