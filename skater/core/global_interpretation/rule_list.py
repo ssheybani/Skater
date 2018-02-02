@@ -4,6 +4,8 @@
 
 from rpy2.robjects.packages import importr
 from rpy2.robjects import pandas2ri
+import numpy as np
+import pandas as pd
 import rpy2.robjects as ro
 pandas2ri.activate()
 
@@ -81,6 +83,18 @@ class SBRL(object):
         data_as_r_frame = self.r_frame(self.s_apply(X, self.as_factor))
         results = self.r_sbrl.predict_sbrl(self.model, data_as_r_frame)
         return pandas2ri.ri2py_dataframe(results).T
+
+
+    def predict(self, X=None, prob_score=None, threshold=0.5, pos_label=1):
+        """
+        Binary Classification
+        Adjust threshold to balance between sensitivity and specificity
+        """
+        probability_df = self.predict_prob(X) if X is not None and prob_score is None else prob_score
+        y_prob = probability_df.loc[:, pos_label]
+        y_prob.loc[np.where(y_prob.values > threshold)] = 1
+        y_prob.loc[np.where(y_prob.values < threshold)] = 0
+        return y_prob
 
 
     def print_model(self):

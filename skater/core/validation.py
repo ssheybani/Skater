@@ -4,9 +4,21 @@ from sklearn import metrics
 
 
 def compute_validation_curve(estimator, n_folds, x=None, y=None, param_name=None, param_range=None):
+    """
+    This is a convenient function to compute train and test scores for varying parameter values. Its a simplified form
+    of parameter optimization but with one variable. This might come handy once the optimized parameters are
+    determined but one wants to investigate and understand the impact of different parameters of the estimator.
+    Also, provides training scores for visualization allowing to investigate whether the model is overfitting or
+    underfitting.
+
+    Reference:
+    ----------
+    .. [1] http://scikit-learn.org/stable/modules/learning_curve.html#validation-curves-plotting-scores-to-evaluate-models
+    ( sklearn's implementation is tied to the sklearn estimator type hence not allowing comparison with other models
+    from other frameworks )
+    """
+    #TODO: make it scalable
     c_v = StratifiedKFold(n_splits=n_folds)
-    #no_of_params = len(param_range)
-    #result = numpy.zeros(shape=(n_folds, no_of_params))
     param_result_train = []
     param_result_test = []
     for v in param_range:
