@@ -55,9 +55,8 @@ class SBRL(object):
         }
 
 
-    def set_params(self, **param_dict):
-        self.model_params[list(param_dict.keys())[0]] = list(param_dict.values)[0]
-        return self
+    def set_params(self, params):
+        self.model_params[list(params.keys())[0]] = list(params.values())[0]
 
 
     def fit(self, X, y_true):
