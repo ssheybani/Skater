@@ -3,6 +3,7 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn import metrics
 
 
+
 def compute_validation_curve(estimator, n_folds, x=None, y=None, param_name=None, param_range=None):
     """
     This is a convenient function to compute train and test scores for varying parameter values. Its a simplified form
@@ -26,7 +27,7 @@ def compute_validation_curve(estimator, n_folds, x=None, y=None, param_name=None
         cv_result_test = []
         for train_idx, test_idx in c_v.split(x, y):
             param_dict = {param_name: v}
-            estimator = estimator.set_params(param_dict)
+            estimator.set_params(param_dict)
             estimator.fit(x.iloc[train_idx], y.iloc[train_idx])
 
             train_scores = estimator.predict_prob(x.iloc[train_idx])

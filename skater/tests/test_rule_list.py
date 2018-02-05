@@ -34,11 +34,11 @@ class TestRuleList(unittest.TestCase):
 
 
     def test_validation(self):
-        param_range = [1, 3, 5]
-        train_scores, test_scores = compute_validation_curve(SBRL(), n_folds=2, x=self.input_data, y=self.y,
+        param_range = [1, 3]
+        train_scores, test_scores = compute_validation_curve(self.sbrl_inst, n_folds=2, x=self.input_data, y=self.y,
                                                                      param_name="rule_minlen", param_range=param_range)
-        self.assertEquals(train_scores.shape[0], 3)
-        self.assertEquals(test_scores.shape[0], 3)
+        self.assertEquals(train_scores.shape[0], 2)
+        self.assertEquals(test_scores.shape[0], 2)
 
 
 if __name__ == '__main__':
