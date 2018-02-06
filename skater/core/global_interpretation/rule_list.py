@@ -44,7 +44,7 @@ class SBRL(object):
 
         """
         self.r_sbrl = importr('sbrl')
-        self.model = None
+        self.__model = None
         self.as_factor = ro.r['as.factor']
         self.s_apply = ro.r['lapply']
         self.r_frame = ro.r['data.frame']
@@ -68,8 +68,22 @@ class SBRL(object):
         """
         data = X.assign(label=y_true)
         data_as_r_frame = self.r_frame(self.s_apply(data, self.as_factor))
-        self.model = self.r_sbrl.sbrl(data_as_r_frame, **self.model_params)
+        self.__model = self.r_sbrl.sbrl(data_as_r_frame, **self.model_params)
         return self.model
+
+
+    def save_model(self, model_name):
+        import joblib
+        if self.r_sbrl.model is not None:
+            joblib.dump(self.r_sbrl.model, model_name, compressed=True)
+        else:
+            raise Exception("SBRL model is not fitted yet; no relevant model instance present")
+
+
+    def load_model(self, serialized_model_name):
+        if ".pkl" not in serialized_model_name:
+            raise TypeError("In-correct file type. Currently serialization using pickle is supported")
+        self.__model = serialized_model_name
 
 
     def predict_prob(self, X):
@@ -80,7 +94,7 @@ class SBRL(object):
             return a numpy.ndarray of shape (#datapoints, 2), the probability for each observations
         """
         data_as_r_frame = self.r_frame(self.s_apply(X, self.as_factor))
-        results = self.r_sbrl.predict_sbrl(self.model, data_as_r_frame)
+        results = self.r_sbrl.predict_sbrl(self.__model, data_as_r_frame)
         return pandas2ri.ri2py_dataframe(results).T
 
 
