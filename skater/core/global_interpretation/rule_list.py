@@ -5,7 +5,6 @@
 from rpy2.robjects.packages import importr
 from rpy2.robjects import pandas2ri
 import numpy as np
-import pandas as pd
 import rpy2.robjects as ro
 pandas2ri.activate()
 
@@ -66,6 +65,8 @@ class SBRL(object):
                  It must not have a column named 'label'
             y_true: pandas.Series, 1-D array to store ground truth labels
         """
+        if not isinstance(X, "pandas.core.frame.DataFrame"):
+            raise TypeError("Only pandas.DataFrame as input type is currently supported")
         data = X.assign(label=y_true)
         data_as_r_frame = self.r_frame(self.s_apply(data, self.as_factor))
         self.__model = self.r_sbrl.sbrl(data_as_r_frame, **self.model_params)
@@ -73,6 +74,8 @@ class SBRL(object):
 
 
     def save_model(self, model_name):
+        """ Persist the model for future use
+        """
         import joblib
         if self.r_sbrl.model is not None:
             joblib.dump(self.r_sbrl.model, model_name, compressed=True)
@@ -81,6 +84,8 @@ class SBRL(object):
 
 
     def load_model(self, serialized_model_name):
+        """ Load a serialized model
+        """
         if ".pkl" not in serialized_model_name:
             raise TypeError("In-correct file type. Currently serialization using pickle is supported")
         self.__model = serialized_model_name
@@ -93,6 +98,9 @@ class SBRL(object):
             `type`  whether the prediction is discrete or probabilistic.
             return a numpy.ndarray of shape (#datapoints, 2), the probability for each observations
         """
+        if not isinstance(X, "pandas.core.frame.DataFrame"):
+            raise TypeError("Only pandas.DataFrame as input type is currently supported")
+
         data_as_r_frame = self.r_frame(self.s_apply(X, self.as_factor))
         results = self.r_sbrl.predict_sbrl(self.__model, data_as_r_frame)
         return pandas2ri.ri2py_dataframe(results).T
@@ -103,14 +111,17 @@ class SBRL(object):
         Binary Classification
         Adjust threshold to balance between sensitivity and specificity
         """
+        #TODO: Extend it for multi-class classification
         probability_df = self.predict_prob(X) if X is not None and prob_score is None else prob_score
         y_prob = probability_df.loc[:, pos_label]
-        y_prob.loc[np.where(y_prob.values > threshold)] = 1
-        y_prob.loc[np.where(y_prob.values < threshold)] = 0
+        y_prob.loc[np.where(y_prob.values > threshold)] = '1'
+        y_prob.loc[np.where(y_prob.values < threshold)] = '0'
         return y_prob
 
 
     def print_model(self):
+        """ Generate the decision stumps
+        """
         self.r_sbrl.print_sbrl(self.model)
 
 
