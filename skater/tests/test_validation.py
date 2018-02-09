@@ -1,6 +1,4 @@
 import unittest
-import pandas as pd
-from skater.core.global_interpretation.rule_list import SBRL
 
 
 class TestValidation(unittest.TestCase):

@@ -9,7 +9,7 @@ import rpy2.robjects as ro
 pandas2ri.activate()
 
 
-class SBRL(object):
+class BayesianRuleLists(object):
     _estimator_type = "classifier"
 
     def __init__(self, iterations=30000, pos_sign=1, neg_sign=0, min_rule_len=1,
@@ -126,6 +126,8 @@ class SBRL(object):
 
 
     def access_learned_rules(self, rule_indexes):
+        """ Helper function to access all learned decision rules
+        """
         if not isinstance(rule_indexes, str):
             raise TypeError('Expected type string {} provided'.format(type(rule_indexes)))
 

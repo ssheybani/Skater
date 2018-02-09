@@ -1,13 +1,14 @@
-import unittest
 import pandas as pd
-from skater.core.global_interpretation.rule_list import SBRL
+import unittest
+
+from skater.core.global_interpretation.interpretable_models.rule_lists import BayesianRuleLists
 from skater.core.validation import compute_validation_curve
 
 
 class TestRuleList(unittest.TestCase):
 
     def setUp(self):
-        self.sbrl_inst = SBRL()
+        self.sbrl_inst = BayesianRuleLists()
         self.input_data = pd.read_csv('skater/tests/data/sample_data.csv')
         # data transformation and cleaning ...
         self.input_data["Sex"] = self.input_data["Sex"].astype('category')
