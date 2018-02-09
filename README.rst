@@ -26,7 +26,7 @@ The library was originally designed and developed at DataScience.com by Aaron Kr
     
 HighLevel Design 
 ================
-.. image:: https://github.com/datascienceinc/Skater/blob/master/presentations/designs/interpretable_ml_system_github.png
+.. image:: https://github.com/datascienceinc/Skater/blob/master/presentations/designs/interpretable_mls.png
 
 
 📖 Documentation
