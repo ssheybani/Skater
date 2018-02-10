@@ -26,6 +26,7 @@ before_install:
   - conda info -a
   - if [[ "$TRAVIS_PYTHON_VERSION" > "3.0" ]]; then
       bash setup.sh linux-ubuntu
+    fi
 
 install:
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib pandas flake8 coverage
