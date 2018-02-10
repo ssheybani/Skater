@@ -1,5 +1,6 @@
 import pandas as pd
 import unittest
+import sys
 
 from skater.core.global_interpretation.interpretable_models.rule_lists import BayesianRuleLists
 from skater.core.validation import compute_validation_curve
@@ -43,5 +44,6 @@ class TestRuleList(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestRuleList)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    if sys.version_info.major >= 3: # Allow the test to be executed only python 3.x is installed; ideally 3.5 and up
+        suite = unittest.TestLoader().loadTestsFromTestCase(TestRuleList)
+        unittest.TextTestRunner(verbosity=2).run(suite)
