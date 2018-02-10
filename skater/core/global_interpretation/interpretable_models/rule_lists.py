@@ -1,6 +1,4 @@
 # coding=utf-8
-# Reference:
-# Referencing the work done by Professor Cynthia/Hongyuy/Others with modifications
 
 from rpy2.robjects.packages import importr
 from rpy2.robjects import pandas2ri
