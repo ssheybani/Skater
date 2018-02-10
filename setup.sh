@@ -10,6 +10,7 @@ then
 elif [ "$1" = "linux-ubuntu" ]
 then
     sudo apt-get update
+    sudo apt-get upgrade
     sudo apt-get -y install r-base
     sudo apt-get install r-cran-rcpp
     # installing amp
