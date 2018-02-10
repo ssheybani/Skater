@@ -43,7 +43,7 @@ def setup_package():
             'requests',
             'multiprocess',
             'dill>=0.2.6',
-            'rpy2==2.9.0',
+            'rpy2==2.9.0; python_version>"3.0"',
             'Jinja2==2.10'],
         extras_require ={'all':'matplotlib'},
         )

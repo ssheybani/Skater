@@ -9,6 +9,7 @@ then
     brew install libgmp3-dev
 elif [ "$1" = "linux-ubuntu" ]
 then
+    sudo apt-get update
     sudo apt-get -y install r-base
     sudo apt-get install r-cran-rcpp
     # installing amp
