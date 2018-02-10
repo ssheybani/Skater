@@ -25,7 +25,7 @@ before_install:
   # Useful for debugging any issues with conda
   - conda info -a
   - if [[ "$TRAVIS_PYTHON_VERSION" > "3.0" ]]; then
-      bash setup.sh linux-ubuntu
+      bash setup.sh linux-ubuntu;
     fi
 
 install:
