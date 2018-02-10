@@ -2,8 +2,9 @@ import pandas as pd
 import unittest
 import sys
 
-from skater.core.global_interpretation.interpretable_models.rule_lists import BayesianRuleLists
-from skater.core.validation import compute_validation_curve
+if sys.version_info > (2, 7):
+    from skater.core.global_interpretation.interpretable_models.rule_lists import BayesianRuleLists
+    from skater.core.validation import compute_validation_curve
 
 
 class TestRuleList(unittest.TestCase):

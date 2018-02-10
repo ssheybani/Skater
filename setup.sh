@@ -9,7 +9,7 @@ then
     brew install libgmp3-dev
 elif [ "$1" = "linux-ubuntu" ]
 then
-    sudo add-apt-repository ppa:marutter/rrutter
+    sudo add-apt-repository -y ppa:marutter/rrutter
     sudo apt-get update
     sudo apt-get upgrade
     sudo apt-get -y install r-base
