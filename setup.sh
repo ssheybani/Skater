@@ -12,11 +12,11 @@ then
     sudo add-apt-repository -y ppa:marutter/rrutter
     sudo apt-get update
     sudo apt-get upgrade
-    sudo apt-get -y install r-base
-    sudo apt-get install r-cran-rcpp
-    # installing amp
     sudo apt-get install libgmp3-dev
     sudo apt-get install libgsl-dev
+    sudo apt-get install libgsl0ldb
+    sudo apt-get -y install r-base
+    sudo apt-get install r-cran-rcpp
 elif [ "$1" = "linux-rpm" ]
 then
     sudo yum -y install r-base
