@@ -3,6 +3,7 @@
 from rpy2.robjects.packages import importr
 from rpy2.robjects import pandas2ri
 import numpy as np
+import pandas as pd
 import rpy2.robjects as ro
 pandas2ri.activate()
 
@@ -63,7 +64,7 @@ class BayesianRuleLists(object):
                  It must not have a column named 'label'
             y_true: pandas.Series, 1-D array to store ground truth labels
         """
-        if not isinstance(X, "pandas.core.frame.DataFrame"):
+        if not isinstance(X, pd.DataFrame):
             raise TypeError("Only pandas.DataFrame as input type is currently supported")
         data = X.assign(label=y_true)
         data_as_r_frame = self.r_frame(self.s_apply(data, self.as_factor))
@@ -96,7 +97,7 @@ class BayesianRuleLists(object):
             `type`  whether the prediction is discrete or probabilistic.
             return a numpy.ndarray of shape (#datapoints, 2), the probability for each observations
         """
-        if not isinstance(X, "pandas.core.frame.DataFrame"):
+        if not isinstance(X, pd.DataFrame):
             raise TypeError("Only pandas.DataFrame as input type is currently supported")
 
         data_as_r_frame = self.r_frame(self.s_apply(X, self.as_factor))
