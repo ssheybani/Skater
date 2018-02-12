@@ -14,8 +14,7 @@ as you can obtain inputs, and use a function to obtain outputs, you can use
 Skater to learn about the models internal decision policies.
 
 
-The package was originally developed at DataScience.com by Aaron Kramer, Pramit Choudhary and internal DataScience Team 
-to help enable practitioners explain and interpret predictive "black boxes" in a human interpretable way.
+The library was originally designed and developed at DataScience.com by Aaron Kramer, Pramit Choudhary and internal DataScience Team with the idea to enable better interpretability(preferably human interpretability) to predictive "black boxes" both for researchers and practioners. 
 
 .. image:: https://travis-ci.org/datascienceinc/Skater.svg?branch=master
     :target: https://travis-ci.com/datascienceinc/Skater
@@ -23,6 +22,11 @@ to help enable practitioners explain and interpret predictive "black boxes" in a
 
 .. image:: https://coveralls.io/repos/github/datascienceinc/Skater/badge.svg?branch=master
     :target: https://coveralls.io/github/datascienceinc/Skater?branch=master
+    
+    
+HighLevel Design 
+================
+.. image:: https://github.com/datascienceinc/Skater/blob/master/presentations/designs/interpretable_mls.png
 
 
 📖 Documentation
