@@ -27,3 +27,5 @@ wget https://cran.r-project.org/src/contrib/Rcpp_0.12.15.tar.gz
 sudo R CMD INSTALL Rcpp_0.12.15.tar.gz
 wget https://cran.r-project.org/src/contrib/arules_1.5-5.tar.gz
 sudo R CMD INSTALL arules_1.5-5.tar.gz
+wget https://cran.r-project.org/src/contrib/sbrl_1.2.tar.gz
+sudo R CMD INSTALL sbrl_1.2.tar.gz

@@ -18,7 +18,7 @@ def compute_validation_curve(estimator, n_folds, x=None, y=None, param_name=None
     ( sklearn's implementation is tied to the sklearn estimator type hence not allowing comparison with other models
     from other frameworks )
     """
-    #TODO: make it scalable
+    # TODO: make it scalable
     c_v = StratifiedKFold(n_splits=n_folds)
     param_result_train = []
     param_result_test = []

@@ -46,9 +46,9 @@ class BayesianRuleLists(object):
         self.s_apply = ro.r['lapply']
         self.r_frame = ro.r['data.frame']
         self.model_params = {
-            "iters":iterations, "pos_sign":pos_sign, "neg_sign":neg_sign, "rule_minlen":min_rule_len,
-            "rule_maxlen":max_rule_len, "minsupport_pos":min_support_pos, "minsupport_neg":min_support_neg,
-            "eta":eta, "nchain":n_chains, "lambda":lambda_, "alpha":alpha
+            "iters": iterations, "pos_sign": pos_sign, "neg_sign": neg_sign, "rule_minlen": min_rule_len,
+            "rule_maxlen": max_rule_len, "minsupport_pos": min_support_pos, "minsupport_neg": min_support_neg,
+            "eta": eta, "nchain": n_chains, "lambda": lambda_, "alpha": alpha
         }
 
 
@@ -109,7 +109,7 @@ class BayesianRuleLists(object):
         Binary Classification
         Adjust threshold to balance between sensitivity and specificity
         """
-        #TODO: Extend it for multi-class classification
+        # TODO: Extend it for multi-class classification
         probability_df = self.predict_prob(X) if X is not None and prob_score is None else prob_score
         y_prob = probability_df.loc[:, pos_label]
         y_prob.loc[np.where(y_prob.values > threshold)] = '1'
@@ -130,14 +130,10 @@ class BayesianRuleLists(object):
             raise TypeError('Expected type string {} provided'.format(type(rule_indexes)))
 
         # Convert model properties into a readable python dict
-        result_dict = dict(zip(self.model.names, map(list,list(self.model))))
+        result_dict = dict(zip(self.model.names, map(list, list(self.model))))
         # Enable the ability to access single or multiple sequential model learned decisions
         indexes = [int(v) for v in rule_indexes.split(':')]
 
         rules_result = lambda rules: result_dict['rulenames'][indexes[0]:indexes[1]] if rule_indexes.find(':') > -1\
             else result_dict['rulenames'][indexes[0]]
         return rules_result(self.model)
-
-
-
-
