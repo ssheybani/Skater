@@ -16,6 +16,7 @@ then
     sudo apt-get install r-cran-rcpp
     # installing amp
     sudo apt-get install libgmp3-dev
+    sudo apt-get install libgsl-dev
 elif [ "$1" = "linux-rpm" ]
 then
     sudo yum -y install r-base
