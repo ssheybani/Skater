@@ -7,7 +7,9 @@ if sys.version_info >= (3, 5):
     from skater.core.validation import compute_validation_curve
 
 
-@unittest.skipIf(sys.version_info <= (3, 5), "SBRL supported only for python 3.5/3.6")
+#@unittest.skipIf(sys.version_info <= (3, 5), "SBRL supported only for python 3.5/3.6")
+@unittest.skip("Disabling these tests as running them could be computationally expensive. But, recommended to run these"
+               "tests during development")
 class TestRuleList(unittest.TestCase):
 
     def setUp(self):
