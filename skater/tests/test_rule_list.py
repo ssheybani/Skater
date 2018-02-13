@@ -7,11 +7,11 @@ if sys.version_info >= (3, 5):
     from skater.core.validation import compute_validation_curve
 
 
-@unittest.skipIf(sys.version_info < (3, 5), "SBRL supported only for python 3.5/3.6")
+@unittest.skipIf(sys.version_info <= (3, 5), "SBRL supported only for python 3.5/3.6")
 class TestRuleList(unittest.TestCase):
 
     def setUp(self):
-        self.sbrl_inst = BayesianRuleLists(min_rule_len=3)
+        self.sbrl_inst = BayesianRuleLists(min_rule_len=3, n_chains=10)
         self.input_data = pd.read_csv('skater/tests/data/sample_data.csv')
         # data transformation and cleaning ...
         self.input_data["Sex"] = self.input_data["Sex"].astype('category')
