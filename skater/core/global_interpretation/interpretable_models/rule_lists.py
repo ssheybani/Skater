@@ -69,7 +69,7 @@ class BayesianRuleLists(object):
         data = X.assign(label=y_true)
         data_as_r_frame = self.r_frame(self.s_apply(data, self.as_factor))
         self.__model = self.r_sbrl.sbrl(data_as_r_frame, **self.model_params)
-        return self.model
+        return self.__model
 
 
     def save_model(self, model_name):
@@ -121,7 +121,7 @@ class BayesianRuleLists(object):
     def print_model(self):
         """ Generate the decision stumps
         """
-        self.r_sbrl.print_sbrl(self.model)
+        self.r_sbrl.print_sbrl(self.__model)
 
 
     def access_learned_rules(self, rule_indexes):
@@ -131,10 +131,10 @@ class BayesianRuleLists(object):
             raise TypeError('Expected type string {} provided'.format(type(rule_indexes)))
 
         # Convert model properties into a readable python dict
-        result_dict = dict(zip(self.model.names, map(list, list(self.model))))
+        result_dict = dict(zip(self.__model.names, map(list, list(self.__model))))
         # Enable the ability to access single or multiple sequential model learned decisions
         indexes = [int(v) for v in rule_indexes.split(':')]
 
         rules_result = lambda rules: result_dict['rulenames'][indexes[0]:indexes[1]] if rule_indexes.find(':') > -1\
             else result_dict['rulenames'][indexes[0]]
-        return rules_result(self.model)
+        return rules_result(self.__model)
