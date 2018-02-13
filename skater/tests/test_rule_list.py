@@ -11,7 +11,7 @@ if sys.version_info >= (3, 5):
 class TestRuleList(unittest.TestCase):
 
     def setUp(self):
-        self.sbrl_inst = BayesianRuleLists()
+        self.sbrl_inst = BayesianRuleLists(min_rule_len=3)
         self.input_data = pd.read_csv('skater/tests/data/sample_data.csv')
         # data transformation and cleaning ...
         self.input_data["Sex"] = self.input_data["Sex"].astype('category')
@@ -38,7 +38,7 @@ class TestRuleList(unittest.TestCase):
 
 
     def test_validation(self):
-        param_range = [1, 3]
+        param_range = [3, 4]
         train_scores, test_scores = compute_validation_curve(self.sbrl_inst, n_folds=2, x=self.input_data, y=self.y,
                                                              param_name="rule_minlen", param_range=param_range)
         self.assertEquals(train_scores.shape[0], 2)
