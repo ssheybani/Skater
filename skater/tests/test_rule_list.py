@@ -7,9 +7,14 @@ if sys.version_info >= (3, 5):
     from skater.core.validation import compute_validation_curve
 
 
-#@unittest.skipIf(sys.version_info <= (3, 5), "SBRL supported only for python 3.5/3.6")
 @unittest.skip("Disabling these tests as running them could be computationally expensive. But, recommended to run these"
                "tests during development")
+# When in Dev mode, a consistent mode to validate test, that would keep track of weird segmentation fault is using gdb
+# (GNU Debugger). This is a temporary workaround. Follow the below mentioned steps
+# 1. sudo apt install gdb
+# 2. gdb python
+# 3. r skater/tests/test_rule_list.py
+# 4. Result: All the tests should succeed, and if it fails it will point out the trace for failure
 class TestRuleList(unittest.TestCase):
 
     def setUp(self):
