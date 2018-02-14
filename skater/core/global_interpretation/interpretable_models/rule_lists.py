@@ -113,9 +113,8 @@ class BayesianRuleLists(object):
         # TODO: Extend it for multi-class classification
         probability_df = self.predict_prob(X) if X is not None and prob_score is None else prob_score
         y_prob = probability_df.loc[:, pos_label]
-        y_prob.loc[np.where(y_prob.values > threshold)] = '1'
-        y_prob.loc[np.where(y_prob.values < threshold)] = '0'
-        return y_prob
+        y_prob['label'] = np.where(y_prob.values > threshold, 1, 0)
+        return y_prob, y_prob['label']
 
 
     def print_model(self):
