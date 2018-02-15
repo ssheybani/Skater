@@ -136,5 +136,11 @@ Testing
 ::
     python -c "from skater.tests.all_tests import run_tests; run_tests()"
 
+R Client
+~~~~~~~~
+For R client refer to https://github.com/christophM/iml 
 
-.. |Build Status-master| image:: https://api.travis-ci.com/repositories/datascienceinc/Skater.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master
+Books
+~~~~~~
+1. Christoph Molnar, Interpretable Machine Learning: https://christophm.github.io/interpretable-ml-book/ 
+2. Dipanjan Sarkar et al., Practical Machine Learning with Python: https://github.com/dipanjanS/practical-machine-learning-with-python
