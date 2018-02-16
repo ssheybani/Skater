@@ -51,7 +51,7 @@ class BayesianRuleLists(object):
             "rule_maxlen": max_rule_len, "minsupport_pos": min_support_pos, "minsupport_neg": min_support_neg,
             "eta": eta, "nchain": n_chains, "lambda": lambda_, "alpha": alpha
         }
-        self.discretizer = discretize
+        self.discretize = discretize
 
 
     def set_params(self, params):
@@ -102,10 +102,10 @@ class BayesianRuleLists(object):
         # 2. if undiscretize_feature_list is not empty and discretization flag is enabled, filter the ones not needed
         #    needed
         for_discretization_clmns = tuple(filter(lambda c_name: c_name not in undiscretize_feature_list, X.columns)) \
-                                                 if undiscretize_feature_list is not None else X.columns
+                                                 if undiscretize_feature_list is not None else tuple(X.columns)
 
         new_X = self.discretizer(X, self._filter_continuous_features(X, for_discretization_clmns)) \
-                                                 if self.discretizer is True else X
+                                                 if self.discretize is True else X
 
         data = new_X.assign(label=y_true)
         data_as_r_frame = self.r_frame(self.s_apply(data, self.as_factor))

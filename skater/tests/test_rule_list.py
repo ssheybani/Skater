@@ -31,7 +31,7 @@ class TestRuleList(unittest.TestCase):
 
 
     def test_discretizer(self):
-        new_df = self.discretizer(self.input_data, column_list=["Age"])
+        new_df = self.sbrl_inst.discretizer(self.input_data, column_list=["Age"])
         self.assertEquals(new_df["Age_q_label"].shape[0] > 0, True)
 
 
