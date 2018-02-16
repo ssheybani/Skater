@@ -13,7 +13,7 @@ class BayesianRuleLists(object):
 
     def __init__(self, iterations=30000, pos_sign=1, neg_sign=0, min_rule_len=1,
                  max_rule_len=8, min_support_pos=0.10, min_support_neg=0.10,
-                 eta=1.0, n_chains=50, alpha=1, lambda_=8):
+                 eta=1.0, n_chains=50, alpha=1, lambda_=8, discretize=True):
         """
         SBRL is a scalable generative estimator to build interpretable decision lists
 
@@ -51,22 +51,63 @@ class BayesianRuleLists(object):
             "rule_maxlen": max_rule_len, "minsupport_pos": min_support_pos, "minsupport_neg": min_support_neg,
             "eta": eta, "nchain": n_chains, "lambda": lambda_, "alpha": alpha
         }
+        self.discretizer = discretize
 
 
     def set_params(self, params):
         self.model_params[list(params.keys())[0]] = list(params.values())[0]
 
 
-    def fit(self, X, y_true):
+    def discretizer(self, X, column_list, q=None, labels=None):
+        if not isinstance(X, pd.DataFrame):
+            raise TypeError("Only pandas.DataFrame as input type is currently supported")
+        q_value = [0, .25, .5, .75, 1.] if q is None else q
+        q_labels = [1, 2, 3, 4] if labels is None else labels
+        for column_name in column_list:
+            X['{}_q_label'.format(column_name)] = pd.qcut(X[column_name].rank(method='first'),
+            q=q_value, labels=q_labels, duplicates='drop')
+
+            # explicitly convert the labels column to 'str' type
+            X['{}_q_label'.format(column_name)] = X['{}_q_label'.format(column_name)].astype(str)
+        return X
+
+
+    def _filter_continuous_features(self, X, column_list=None):
+        import collections
+        # Sequence is a base class for list and tuple. column_list could be of either type
+        if not isinstance(column_list, collections.Sequence):
+            raise TypeError("Only list/tuple type supported for specifying column list")
+        c_l = X.columns if column_list is None else column_list
+        float_type_columns = tuple(filter(lambda c_name: isinstance(X[c_name].iloc[0],
+                                                                   np.float64), c_l))
+        return float_type_columns
+
+
+    def fit(self, X, y_true, undiscretize_feature_list=None):
         """
         Parameters:
             X: pandas.DataFrame object that could be used by the model for training.
                  It must not have a column named 'label'
             y_true: pandas.Series, 1-D array to store ground truth labels
         """
+        if len(np.unique(y_true))!=2:
+            raise Exception("Supports only binary classification right now")
+
         if not isinstance(X, pd.DataFrame):
             raise TypeError("Only pandas.DataFrame as input type is currently supported")
-        data = X.assign(label=y_true)
+
+        # Conditions being managed
+        # 1. if 'undiscretize_feature_list' is empty and discretization flag is enabled,
+        #    discretize 'all' continuous features
+        # 2. if undiscretize_feature_list is not empty and discretization flag is enabled, filter the ones not needed
+        #    needed
+        for_discretization_clmns = tuple(filter(lambda c_name: c_name not in undiscretize_feature_list, X.columns)) \
+                                                 if undiscretize_feature_list is not None else X.columns
+
+        new_X = self.discretizer(X, self._filter_continuous_features(X, for_discretization_clmns)) \
+                                                 if self.discretizer is True else X
+
+        data = new_X.assign(label=y_true)
         data_as_r_frame = self.r_frame(self.s_apply(data, self.as_factor))
         self.__model = self.r_sbrl.sbrl(data_as_r_frame, **self.model_params)
         return self.__model

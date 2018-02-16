@@ -7,8 +7,6 @@ if sys.version_info >= (3, 5):
     from skater.core.validation import compute_validation_curve
 
 
-@unittest.skip("Disabling these tests as running them could be computationally expensive. But, recommended to run these"
-               "tests during development")
 # When in Dev mode, a consistent mode to validate test, that would keep track of weird segmentation fault is using gdb
 # (GNU Debugger). This is a temporary workaround. Follow the below mentioned steps
 # 1. sudo apt install gdb
@@ -18,7 +16,7 @@ if sys.version_info >= (3, 5):
 class TestRuleList(unittest.TestCase):
 
     def setUp(self):
-        self.sbrl_inst = BayesianRuleLists(min_rule_len=3, n_chains=10)
+        self.sbrl_inst = BayesianRuleLists(min_rule_len=1, n_chains=10)
         self.input_data = pd.read_csv('skater/tests/data/sample_data.csv')
         # data transformation and cleaning ...
         self.input_data["Sex"] = self.input_data["Sex"].astype('category')
@@ -32,18 +30,33 @@ class TestRuleList(unittest.TestCase):
         self.input_data = self.input_data.drop(['Survived'], axis=1)
 
 
+    def test_discretizer(self):
+        new_df = self.discretizer(self.input_data, column_list=["Age"])
+        self.assertEquals(new_df["Age_q_label"].shape[0] > 0, True)
+
+
     def test_model_build(self):
         self.sbrl_inst.fit(self.input_data, self.y)
         result_score = self.sbrl_inst.predict_prob(self.input_data)
         self.assertEquals(result_score.shape, (77, 2))
 
 
+    @unittest.skip("Disabling these tests as running them could be computationally expensive. But, recommended to run "
+                   "these tests during development")
+    def test_model_predict(self):
+        self.sbrl_inst.predict(self.input_data)
+
+
+    @unittest.skip("Disabling these tests as running them could be computationally expensive. But, recommended to run "
+                   "these tests during development")
     def test_model_output(self):
         self.sbrl_inst.fit(self.input_data, self.y)
         result = self.sbrl_inst.access_learned_rules('23:25')
         self.assertEquals(len(result), 2)
 
 
+    @unittest.skip("Disabling these tests as running them could be computationally expensive. But, recommended to run "
+                   "these tests during development")
     def test_validation(self):
         param_range = [3, 4]
         train_scores, test_scores = compute_validation_curve(self.sbrl_inst, n_folds=2, x=self.input_data, y=self.y,
