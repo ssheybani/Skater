@@ -64,8 +64,8 @@ class BayesianRuleLists(object):
         q_value = [0, .25, .5, .75, 1.] if q is None else q
         q_labels = [1, 2, 3, 4] if labels is None else labels
         for column_name in column_list:
-            X['{}_q_label'.format(column_name)] = pd.qcut(X[column_name].rank(method='first'),
-            q=q_value, labels=q_labels, duplicates='drop')
+            X['{}_q_label'.format(column_name)] = pd.qcut(X[column_name].rank(method='first'), q=q_value,
+                                                          labels=q_labels, duplicates='drop')
 
             # explicitly convert the labels column to 'str' type
             X['{}_q_label'.format(column_name)] = X['{}_q_label'.format(column_name)].astype(str)
@@ -78,8 +78,7 @@ class BayesianRuleLists(object):
         if not isinstance(column_list, collections.Sequence):
             raise TypeError("Only list/tuple type supported for specifying column list")
         c_l = X.columns if column_list is None else column_list
-        float_type_columns = tuple(filter(lambda c_name: isinstance(X[c_name].iloc[0],
-                                                                   np.float64), c_l))
+        float_type_columns = tuple(filter(lambda c_name: isinstance(X[c_name].iloc[0], np.float64), c_l))
         return float_type_columns
 
 
@@ -90,7 +89,7 @@ class BayesianRuleLists(object):
                  It must not have a column named 'label'
             y_true: pandas.Series, 1-D array to store ground truth labels
         """
-        if len(np.unique(y_true))!=2:
+        if len(np.unique(y_true)) != 2:
             raise Exception("Supports only binary classification right now")
 
         if not isinstance(X, pd.DataFrame):
@@ -102,10 +101,10 @@ class BayesianRuleLists(object):
         # 2. if undiscretize_feature_list is not empty and discretization flag is enabled, filter the ones not needed
         #    needed
         for_discretization_clmns = tuple(filter(lambda c_name: c_name not in undiscretize_feature_list, X.columns)) \
-                                                 if undiscretize_feature_list is not None else tuple(X.columns)
+            if undiscretize_feature_list is not None else tuple(X.columns)
 
         new_X = self.discretizer(X, self._filter_continuous_features(X, for_discretization_clmns)) \
-                                                 if self.discretize is True else X
+            if self.discretize is True else X
 
         data = new_X.assign(label=y_true)
         data_as_r_frame = self.r_frame(self.s_apply(data, self.as_factor))
