@@ -41,17 +41,17 @@ class BayesianRuleLists(object):
         .. [3] https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py
 
         """
-        self.r_sbrl = importr('sbrl')
+        self.__r_sbrl = importr('sbrl')
         self.__model = None
-        self.as_factor = ro.r['as.factor']
-        self.s_apply = ro.r['lapply']
-        self.r_frame = ro.r['data.frame']
+        self.__as_factor = ro.r['as.factor']
+        self.__s_apply = ro.r['lapply']
+        self.__r_frame = ro.r['data.frame']
         self.model_params = {
             "iters": iterations, "pos_sign": pos_sign, "neg_sign": neg_sign, "rule_minlen": min_rule_len,
             "rule_maxlen": max_rule_len, "minsupport_pos": min_support_pos, "minsupport_neg": min_support_neg,
             "eta": eta, "nchain": n_chains, "lambda": lambda_, "alpha": alpha
         }
-        self.discretize = discretize
+        self.__discretize = discretize
 
 
     def set_params(self, params):
@@ -64,11 +64,11 @@ class BayesianRuleLists(object):
         q_value = [0, .25, .5, .75, 1.] if q is None else q
         q_labels = [1, 2, 3, 4] if labels is None else labels
         for column_name in column_list:
-            X['{}_q_label'.format(column_name)] = pd.qcut(X[column_name].rank(method='first'), q=q_value,
+            X.loc[:, '{}_q_label'.format(column_name)] = pd.qcut(X[column_name].rank(method='first'), q=q_value,
                                                           labels=q_labels, duplicates='drop')
 
             # explicitly convert the labels column to 'str' type
-            X['{}_q_label'.format(column_name)] = X['{}_q_label'.format(column_name)].astype(str)
+            X.loc[:, '{}_q_label'.format(column_name)] = X['{}_q_label'.format(column_name)].astype(str)
         return X
 
 
@@ -80,6 +80,11 @@ class BayesianRuleLists(object):
         c_l = X.columns if column_list is None else column_list
         float_type_columns = tuple(filter(lambda c_name: isinstance(X[c_name].iloc[0], np.float64), c_l))
         return float_type_columns
+
+
+    # a helper function to filter unwanted features
+    filter_discretize = lambda clmn_list, unwanted_list: tuple(filter(lambda c_name: c_name not in unwanted_list,
+                                                                  clmn_list))
 
 
     def fit(self, X, y_true, undiscretize_feature_list=None):
@@ -107,8 +112,8 @@ class BayesianRuleLists(object):
             if self.discretize is True else X
 
         data = new_X.assign(label=y_true)
-        data_as_r_frame = self.r_frame(self.s_apply(data, self.as_factor))
-        self.__model = self.r_sbrl.sbrl(data_as_r_frame, **self.model_params)
+        data_as_r_frame = self.__r_frame(self.__s_apply(data, self.__as_factor))
+        self.__model = self.__r_sbrl.sbrl(data_as_r_frame, **self.model_params)
         return self.__model
 
 
@@ -117,7 +122,7 @@ class BayesianRuleLists(object):
         """
         import joblib
         if self.r_sbrl.model is not None:
-            joblib.dump(self.r_sbrl.model, model_name, compressed=True)
+            joblib.dump(self.__r_sbrl.model, model_name, compressed=True)
         else:
             raise Exception("SBRL model is not fitted yet; no relevant model instance present")
 
@@ -140,8 +145,8 @@ class BayesianRuleLists(object):
         if not isinstance(X, pd.DataFrame):
             raise TypeError("Only pandas.DataFrame as input type is currently supported")
 
-        data_as_r_frame = self.r_frame(self.s_apply(X, self.as_factor))
-        results = self.r_sbrl.predict_sbrl(self.__model, data_as_r_frame)
+        data_as_r_frame = self.__r_frame(self.__s_apply(X, self.__as_factor))
+        results = self.__r_sbrl.predict_sbrl(self.__model, data_as_r_frame)
         return pandas2ri.ri2py_dataframe(results).T
 
 

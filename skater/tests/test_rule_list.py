@@ -6,13 +6,13 @@ if sys.version_info >= (3, 5):
     from skater.core.global_interpretation.interpretable_models.rule_lists import BayesianRuleLists
     from skater.core.validation import compute_validation_curve
 
-
 # When in Dev mode, a consistent mode to validate test, that would keep track of weird segmentation fault is using gdb
 # (GNU Debugger). This is a temporary workaround. Follow the below mentioned steps
 # 1. sudo apt install gdb
 # 2. gdb python
 # 3. r skater/tests/test_rule_list.py
 # 4. Result: All the tests should succeed, and if it fails it will point out the trace for failure
+@unittest.skipIf(sys.version_info < (3, 5))
 class TestRuleList(unittest.TestCase):
 
     def setUp(self):
