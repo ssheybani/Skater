@@ -108,10 +108,10 @@ class BayesianRuleLists(object):
         for_discretization_clmns = tuple(filter(lambda c_name: c_name not in undiscretize_feature_list, X.columns)) \
             if undiscretize_feature_list is not None else tuple(X.columns)
 
-        new_X = self.discretizer(X, self._filter_continuous_features(X, for_discretization_clmns)) \
+        data = self.discretizer(X, self._filter_continuous_features(X, for_discretization_clmns)) \
         if self.__discretize is True else X
 
-        data = new_X.assign(label=y_true)
+        data.assign(label=y_true)
         data_as_r_frame = self.__r_frame(self.__s_apply(data, self.__as_factor))
         self.__model = self.__r_sbrl.sbrl(data_as_r_frame, **self.model_params)
         return self.__model
@@ -121,7 +121,7 @@ class BayesianRuleLists(object):
         """ Persist the model for future use
         """
         import joblib
-        if self.r_sbrl.model is not None:
+        if self.__r_sbrl.model is not None:
             joblib.dump(self.__r_sbrl.model, model_name, compressed=True)
         else:
             raise Exception("SBRL model is not fitted yet; no relevant model instance present")
@@ -165,7 +165,7 @@ class BayesianRuleLists(object):
     def print_model(self):
         """ Generate the decision stumps
         """
-        self.r_sbrl.print_sbrl(self.__model)
+        self.__r_sbrl.print_sbrl(self.__model)
 
 
     def access_learned_rules(self, rule_indexes):
