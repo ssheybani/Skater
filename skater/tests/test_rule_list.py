@@ -12,7 +12,7 @@ if sys.version_info >= (3, 5):
 # 2. gdb python
 # 3. r skater/tests/test_rule_list.py
 # 4. Result: All the tests should succeed, and if it fails it will point out the trace for failure
-@unittest.skipIf(sys.version_info < (3, 5))
+@unittest.skipIf(sys.version_info < (3, 5), "only Bayesian Rule List supported only for python 3.5/3.6")
 class TestRuleList(unittest.TestCase):
 
     def setUp(self):

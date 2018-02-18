@@ -109,7 +109,7 @@ class BayesianRuleLists(object):
             if undiscretize_feature_list is not None else tuple(X.columns)
 
         new_X = self.discretizer(X, self._filter_continuous_features(X, for_discretization_clmns)) \
-            if self.discretize is True else X
+        if self.__discretize is True else X
 
         data = new_X.assign(label=y_true)
         data_as_r_frame = self.__r_frame(self.__s_apply(data, self.__as_factor))
