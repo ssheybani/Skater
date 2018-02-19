@@ -37,13 +37,13 @@ class TestRuleList(unittest.TestCase):
         self.assertEquals(new_df["Age_q_label"].shape[0] > 0, True)
 
 
-    @unittest.skip("Under developement")
     def test_model_build(self):
-        self.sbrl_inst.fit(self.input_data, self.y)
-        # features_to_descritize = sbrl_inst.filter_to_be_discretize(Xtest.columns, ["Pregnant"])
-        # Xtest_filtered = sbrl_inst.discretizer(Xtest, features_to_descritize)
-        # result_score = self.sbrl_inst.predict_prob(self.input_data)
-        # self.assertEquals(result_score.shape, (77, 2))
+        self.sbrl_inst.fit(self.input_data, self.y, undiscretize_feature_list=["PassengerId", "Pclass",
+                                                                 "SibSp", "Parch", "Sex_Encoded", "Embarked_Encoded"])
+
+        new_data = self.sbrl_inst.discretizer(self.input_data, column_list=["Age", "Fare"])
+        result_score = self.sbrl_inst.predict_prob(new_data)
+        self.assertEquals(result_score.shape, (77, 2))
 
 
     @unittest.skip("Disabling these tests as running them could be computationally expensive. But, recommended to run "

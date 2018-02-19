@@ -54,6 +54,7 @@ class BayesianRuleLists(object):
         }
         self.__discretize = discretize
         self.discretized_features = []
+        self.feature_names = []
 
 
     def set_params(self, params):
@@ -67,8 +68,10 @@ class BayesianRuleLists(object):
         q_labels = [1, 2, 3, 4] if labels is None else labels
         new_X = X.copy()
         for column_name in column_list:
-            new_X.loc[:, '{}_q_label'.format(column_name)] = pd.qcut(X[column_name].rank(method='first'), q=q_value,
-                                                                     labels=q_labels, duplicates='drop')
+            new_clm_name = '{}_q_label'.format(column_name)
+            self.discretized_features.append(new_clm_name)
+            new_X.loc[:, new_clm_name] = pd.qcut(X[column_name].rank(method='first'), q=q_value,
+                                                 labels=q_labels, duplicates='drop')
 
             # explicitly convert the labels column to 'str' type
             new_X = new_X.astype(dtype={'{}_q_label'.format(column_name): "str"})
@@ -84,7 +87,6 @@ class BayesianRuleLists(object):
         # To check for numeric type, validate again numbers.Number (base class for numeric type )
         # Reference[PEP-3141]: https://www.python.org/dev/peps/pep-3141/
         numeric_type_columns = tuple(filter(lambda c_name: isinstance(X[c_name].iloc[0], numbers.Number), c_l))
-        self.discretized_features = numeric_type_columns
         return numeric_type_columns
 
 
@@ -123,6 +125,8 @@ class BayesianRuleLists(object):
         data = self.discretizer(X, self._filter_continuous_features(X, for_discretization_clmns)) \
             if self.__discretize is True else X
 
+        # record all the feature names
+        self.feature_names = data.columns
         data.loc[:, "label"] = y_true
         data_as_r_frame = self.__r_frame(self.__s_apply(data, self.__as_factor))
         self.__model = self.__r_sbrl.sbrl(data_as_r_frame, **self.model_params)
