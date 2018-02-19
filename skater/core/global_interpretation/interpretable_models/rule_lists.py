@@ -63,13 +63,14 @@ class BayesianRuleLists(object):
             raise TypeError("Only pandas.DataFrame as input type is currently supported")
         q_value = [0, .25, .5, .75, 1.] if q is None else q
         q_labels = [1, 2, 3, 4] if labels is None else labels
+        new_X = X.copy()
         for column_name in column_list:
-            X.loc[:, '{}_q_label'.format(column_name)] = pd.qcut(X[column_name].rank(method='first'), q=q_value,
+            new_X.loc[:, '{}_q_label'.format(column_name)] = pd.qcut(X[column_name].rank(method='first'), q=q_value,
                                                           labels=q_labels, duplicates='drop')
 
             # explicitly convert the labels column to 'str' type
-            X.loc[:, '{}_q_label'.format(column_name)] = X['{}_q_label'.format(column_name)].astype(str)
-        return X
+            new_X = new_X.astype(dtype= {'{}_q_label'.format(column_name):"str"})
+        return new_X
 
 
     def _filter_continuous_features(self, X, column_list=None):
@@ -111,7 +112,7 @@ class BayesianRuleLists(object):
         data = self.discretizer(X, self._filter_continuous_features(X, for_discretization_clmns)) \
         if self.__discretize is True else X
 
-        data.assign(label=y_true)
+        data.loc[:, "label"] = y_true
         data_as_r_frame = self.__r_frame(self.__s_apply(data, self.__as_factor))
         self.__model = self.__r_sbrl.sbrl(data_as_r_frame, **self.model_params)
         return self.__model
