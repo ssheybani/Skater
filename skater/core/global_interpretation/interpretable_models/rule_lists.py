@@ -66,10 +66,10 @@ class BayesianRuleLists(object):
         new_X = X.copy()
         for column_name in column_list:
             new_X.loc[:, '{}_q_label'.format(column_name)] = pd.qcut(X[column_name].rank(method='first'), q=q_value,
-                                                          labels=q_labels, duplicates='drop')
+                                                                     labels=q_labels, duplicates='drop')
 
             # explicitly convert the labels column to 'str' type
-            new_X = new_X.astype(dtype= {'{}_q_label'.format(column_name):"str"})
+            new_X = new_X.astype(dtype={'{}_q_label'.format(column_name): "str"})
         return new_X
 
 
@@ -84,8 +84,8 @@ class BayesianRuleLists(object):
 
 
     # a helper function to filter unwanted features
-    filter_discretize = lambda clmn_list, unwanted_list: tuple(filter(lambda c_name: c_name not in unwanted_list,
-                                                                  clmn_list))
+    filter_to_be_discretize = lambda self, clmn_list, unwanted_list: \
+        tuple(filter(lambda c_name: c_name not in unwanted_list, clmn_list))
 
 
     def fit(self, X, y_true, undiscretize_feature_list=None):
@@ -110,7 +110,7 @@ class BayesianRuleLists(object):
             if undiscretize_feature_list is not None else tuple(X.columns)
 
         data = self.discretizer(X, self._filter_continuous_features(X, for_discretization_clmns)) \
-        if self.__discretize is True else X
+            if self.__discretize is True else X
 
         data.loc[:, "label"] = y_true
         data_as_r_frame = self.__r_frame(self.__s_apply(data, self.__as_factor))
