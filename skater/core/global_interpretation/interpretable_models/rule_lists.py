@@ -2,6 +2,7 @@
 
 from rpy2.robjects.packages import importr
 from rpy2.robjects import pandas2ri
+import numbers
 import numpy as np
 import pandas as pd
 import rpy2.robjects as ro
@@ -52,13 +53,14 @@ class BayesianRuleLists(object):
             "eta": eta, "nchain": n_chains, "lambda": lambda_, "alpha": alpha
         }
         self.__discretize = discretize
+        self.discretized_features = []
 
 
     def set_params(self, params):
         self.model_params[list(params.keys())[0]] = list(params.values())[0]
 
 
-    def discretizer(self, X, column_list, q=None, labels=None):
+    def discretizer(self, X, column_list, q=None, labels=None, verbose=False):
         if not isinstance(X, pd.DataFrame):
             raise TypeError("Only pandas.DataFrame as input type is currently supported")
         q_value = [0, .25, .5, .75, 1.] if q is None else q
@@ -79,8 +81,11 @@ class BayesianRuleLists(object):
         if not isinstance(column_list, collections.Sequence):
             raise TypeError("Only list/tuple type supported for specifying column list")
         c_l = X.columns if column_list is None else column_list
-        float_type_columns = tuple(filter(lambda c_name: isinstance(X[c_name].iloc[0], np.float64), c_l))
-        return float_type_columns
+        # To check for numeric type, validate again numbers.Number (base class for numeric type )
+        # Reference[PEP-3141]: https://www.python.org/dev/peps/pep-3141/
+        numeric_type_columns = tuple(filter(lambda c_name: isinstance(X[c_name].iloc[0], numbers.Number), c_l))
+        self.discretized_features = numeric_type_columns
+        return numeric_type_columns
 
 
     # a helper function to filter unwanted features
@@ -89,11 +94,17 @@ class BayesianRuleLists(object):
 
 
     def fit(self, X, y_true, undiscretize_feature_list=None):
-        """
-        Parameters:
+        """ Fit the estimator.
+
+        Parameters
+        -----------
             X: pandas.DataFrame object that could be used by the model for training.
                  It must not have a column named 'label'
             y_true: pandas.Series, 1-D array to store ground truth labels
+
+        Returns
+        -------
+            SBRL model instance: rpy2.robjects.vectors.ListVector
         """
         if len(np.unique(y_true)) != 2:
             raise Exception("Supports only binary classification right now")
@@ -177,9 +188,13 @@ class BayesianRuleLists(object):
 
         # Convert model properties into a readable python dict
         result_dict = dict(zip(self.__model.names, map(list, list(self.__model))))
-        # Enable the ability to access single or multiple sequential model learned decisions
-        indexes = [int(v) for v in rule_indexes.split(':')]
 
-        rules_result = lambda rules: result_dict['rulenames'][indexes[0]:indexes[1]] if rule_indexes.find(':') > -1\
-            else result_dict['rulenames'][indexes[0]]
-        return rules_result(self.__model)
+        indexes_func = lambda indexes: [int(v) for v in indexes.split(':')]
+        # original index starts from 0 while the printed index starts from 1, hence adjust the index
+        rules_filter = lambda all_rules, indexes: all_rules['rulenames'][(indexes[0] - 1):(indexes[1] - 1)] \
+            if rule_indexes.find(':') > -1 else all_rules['rulenames'][indexes[0] - 1]
+
+        # Enable the ability to access single or multiple sequential model learned decisions
+        rules_result = result_dict['rulenames'] if rule_indexes == "all" \
+            else rules_filter(result_dict, indexes_func(rule_indexes))
+        return rules_result
