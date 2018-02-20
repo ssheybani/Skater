@@ -39,7 +39,8 @@ class TestRuleList(unittest.TestCase):
 
     def test_model_build(self):
         self.sbrl_inst.fit(self.input_data, self.y, undiscretize_feature_list=["PassengerId", "Pclass",
-                                                                 "SibSp", "Parch", "Sex_Encoded", "Embarked_Encoded"])
+                                                                               "SibSp", "Parch", "Sex_Encoded",
+                                                                               "Embarked_Encoded"])
 
         new_data = self.sbrl_inst.discretizer(self.input_data, column_list=["Age", "Fare"])
         result_score = self.sbrl_inst.predict_prob(new_data)

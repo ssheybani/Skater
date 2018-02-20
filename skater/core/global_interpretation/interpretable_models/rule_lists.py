@@ -58,20 +58,42 @@ class BayesianRuleLists(object):
 
 
     def set_params(self, params):
+        """ Set model hyper-parameters
+        """
         self.model_params[list(params.keys())[0]] = list(params.values())[0]
 
 
-    def discretizer(self, X, column_list, q=None, labels=None, verbose=False):
+    def discretizer(self, X, column_list, no_of_quantiles=None, labels_for_bin=None, precision=3):
+        """ A discretizer for continuous features
+
+        Parameters
+        -----------
+        X : pandas.DataFrame
+            Dataframe containing continuous features
+        column_list : list/tuple
+        no_of_quantiles : integer/list
+            Number of quantiles, e.g. deciles(10), quartiles(4) or as a list of quantiles[0, .25, .5, .75, 1.]
+            if 'None' then [0, .25, .5, .75, 1.] is used
+        labels_for_bin : labels for the resulting bins
+        precision : int
+            precision for storing and creating bins
+
+        Returns
+        --------
+        new_X : pandas.DataFrame
+            Contains discretized features
+
+        """
         if not isinstance(X, pd.DataFrame):
             raise TypeError("Only pandas.DataFrame as input type is currently supported")
-        q_value = [0, .25, .5, .75, 1.] if q is None else q
-        q_labels = [1, 2, 3, 4] if labels is None else labels
+        q_value = [0, .25, .5, .75, 1.] if no_of_quantiles is None else no_of_quantiles
+        q_labels = [1, 2, 3, 4] if labels_for_bin is 'default' else labels_for_bin
         new_X = X.copy()
         for column_name in column_list:
             new_clm_name = '{}_q_label'.format(column_name)
             self.discretized_features.append(new_clm_name)
             new_X.loc[:, new_clm_name] = pd.qcut(X[column_name].rank(method='first'), q=q_value,
-                                                 labels=q_labels, duplicates='drop')
+                                                 labels=q_labels, duplicates='drop', precision=precision)
 
             # explicitly convert the labels column to 'str' type
             new_X = new_X.astype(dtype={'{}_q_label'.format(column_name): "str"})
@@ -100,7 +122,7 @@ class BayesianRuleLists(object):
 
         Parameters
         -----------
-            X: pandas.DataFrame object that could be used by the model for training.
+            X: pandas.DataFrame object, that could be used by the model for training.
                  It must not have a column named 'label'
             y_true: pandas.Series, 1-D array to store ground truth labels
 
