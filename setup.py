@@ -38,6 +38,8 @@ def setup_package():
         license=about['__license__'],
         install_requires=[
             'scikit-learn>=0.18',
+            'numpy>=1.13.3',
+            'SciPy>=1.0.0'
             'pandas>=0.19',
             'ds-lime>=0.1.1.21',
             'requests',

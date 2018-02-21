@@ -1,5 +1,24 @@
 #!/bin/sh
 # Requirements: R >= 3.4.0
+# Follow the steps mentioned at the link mentioned below to instal conda
+# https://conda.io/docs/user-guide/install/linux.html
+source ~/.bashrc # just as a pre-caution, to make sure all system paths are updated post library installations
+
+# Install python related dev tools as per the python version. This is needed for gcc installation
+ver=$(python -V 2>&1 | sed 's/. *\([0-9]\).\([0-9]\).*/\1\2/')
+if [ "$ver" -eq "36" ]; then
+    echo "python 3.6.x detected"
+    sudo apt-get install python3.6-dev
+    exit 0
+elif [ "$ver" -eq "35" ]; then
+    echo "python 3.5.x detected"
+    sudo apt-get install python3.5-dev
+    exit 0
+elif [ "$ver" -eq "27" ]; then
+    echo "This script requires python 2.7 or greater"
+    sudo apt-get install libffi-dev
+fi
+
 conda install gxx_linux-64
 if [ "$1" = "mac" ]
 then
@@ -9,6 +28,9 @@ then
     brew install libgmp3-dev
 elif [ "$1" = "linux-ubuntu" ]
 then
+    # installs R base as well
+    # decent info on installing R manually could be found here at the link mentioned below,
+    # https://www.digitalocean.com/community/tutorials/how-to-install-r-on-ubuntu-16-04-2
     sudo add-apt-repository -y ppa:marutter/rrutter
     sudo apt-get update
     sudo apt-get upgrade

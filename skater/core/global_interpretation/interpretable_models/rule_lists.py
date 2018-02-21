@@ -16,7 +16,9 @@ class BayesianRuleLists(object):
                  max_rule_len=8, min_support_pos=0.10, min_support_neg=0.10,
                  eta=1.0, n_chains=50, alpha=1, lambda_=8, discretize=True):
         """
-        SBRL is a scalable generative estimator to build interpretable decision lists
+        SBRL is a scalable generative estimator to build hierarchical interpretable decision lists. This python wrapper is
+        an extension to the awesome work done by Professor Cynthia Rudin, Benjamin Letham, Hongyu Yang, Margo Seltzer
+        and others. For more information check out the reference section
 
         Parameters
         ----------
@@ -175,9 +177,13 @@ class BayesianRuleLists(object):
 
     def predict_prob(self, X):
         """
-        Parameters:
-            X:  pandas.DataFrame object, representing the data to be making predictions on.
+        Parameters
+        -----------
+            X :  pandas.DataFrame object, representing the data to be making predictions on.
             `type`  whether the prediction is discrete or probabilistic.
+
+        Returns
+        -------
             return a numpy.ndarray of shape (#datapoints, 2), the probability for each observations
         """
         if not isinstance(X, pd.DataFrame):
@@ -189,9 +195,10 @@ class BayesianRuleLists(object):
 
 
     def predict(self, X=None, prob_score=None, threshold=0.5, pos_label=1):
-        """
-        Binary Classification
-        Adjust threshold to balance between sensitivity and specificity
+        """ Predict the class for input data
+        The predicted class is determined by setting a threshold on the Adjust threshold to
+        balance between sensitivity and specificity
+
         """
         # TODO: Extend it for multi-class classification
         probability_df = self.predict_prob(X) if X is not None and prob_score is None else prob_score
@@ -201,7 +208,7 @@ class BayesianRuleLists(object):
 
 
     def print_model(self):
-        """ Generate the decision stumps
+        """ print the decision stumps of the learned estimator
         """
         self.__r_sbrl.print_sbrl(self.__model)
 
