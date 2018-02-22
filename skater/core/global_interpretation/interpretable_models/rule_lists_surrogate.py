@@ -1,4 +1,4 @@
-from rule_lists import BayesianRuleLists
+from skater.core.global_interpretation.interpretable_models.rule_lists import BayesianRuleLists
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.exceptions import NotFittedError
 
