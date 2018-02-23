@@ -2,14 +2,14 @@ from skater.core.global_interpretation.interpretable_models.brlc \
     import BRLC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.exceptions import NotFittedError
-from ..util import exceptions
+from skater.util import exceptions
 
 import pandas as pd
 import numpy as np
 
 
 class BigDataBRLC(BRLC):
-    
+
     def __init__(self, sub_sample_percentage=0.1, iterations=30000, pos_sign=1, neg_sign=0, min_rule_len=1,
                  max_rule_len=8, min_support_pos=0.10, min_support_neg=0.10, eta=1.0, n_chains=50, alpha=1,
                  lambda_=8, discretize=True, threshold=0.5, surrogate_estimator=None):
