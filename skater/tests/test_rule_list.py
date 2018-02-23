@@ -4,7 +4,8 @@ import sys
 
 
 if sys.version_info >= (3, 5):
-    from skater.core.global_interpretation.interpretable_models.rule_lists import BayesianRuleLists
+    from skater.core.global_interpretation.interpretable_models.brlc \
+        import BRLC
     from skater.core.validation import compute_validation_curve
 
 
@@ -18,7 +19,7 @@ if sys.version_info >= (3, 5):
 class TestRuleList(unittest.TestCase):
 
     def setUp(self):
-        self.sbrl_inst = BayesianRuleLists(min_rule_len=1, max_rule_len=2, iterations=10000, n_chains=3, lambda_=12)
+        self.sbrl_inst = BRLC(min_rule_len=1, max_rule_len=2, iterations=10000, n_chains=3, lambda_=12)
         self.input_data = pd.read_csv('skater/tests/data/sample_data.csv')
         # data transformation and cleaning ...
         self.input_data["Sex"] = self.input_data["Sex"].astype('category')

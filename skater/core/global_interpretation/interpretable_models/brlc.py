@@ -1,5 +1,6 @@
 # coding=utf-8
 
+from ..util import exceptions
 from rpy2.robjects.packages import importr
 from rpy2.robjects import pandas2ri
 import numbers
@@ -9,7 +10,7 @@ import rpy2.robjects as ro
 pandas2ri.activate()
 
 
-class BayesianRuleLists(object):
+class BRLC(object):
     _estimator_type = "classifier"
 
     def __init__(self, iterations=30000, pos_sign=1, neg_sign=0, min_rule_len=1,
@@ -97,6 +98,8 @@ class BayesianRuleLists(object):
             new_X.loc[:, new_clm_name] = pd.qcut(X[column_name].rank(method='first'), q=q_value,
                                                  labels=q_labels, duplicates='drop', precision=precision)
 
+            # Drop the column which has been discretized
+            new_X = new_X.drop([column_name], axis=1)
             # explicitly convert the labels column to 'str' type
             new_X = new_X.astype(dtype={'{}_q_label'.format(column_name): "str"})
         return new_X
@@ -119,7 +122,7 @@ class BayesianRuleLists(object):
         tuple(filter(lambda c_name: c_name not in unwanted_list, clmn_list))
 
 
-    def fit(self, X, y_true, undiscretize_feature_list=None):
+    def fit(self, X, y_true, n_quantiles=None, bin_labels=None, undiscretize_feature_list=None, precision=3):
         """ Fit the estimator.
 
         Parameters
@@ -136,7 +139,7 @@ class BayesianRuleLists(object):
             raise Exception("Supports only binary classification right now")
 
         if not isinstance(X, pd.DataFrame):
-            raise TypeError("Only pandas.DataFrame as input type is currently supported")
+            raise exceptions.DataSetError("Only pandas.DataFrame as input type is currently supported")
 
         # Conditions being managed
         # 1. if 'undiscretize_feature_list' is empty and discretization flag is enabled,
@@ -146,7 +149,8 @@ class BayesianRuleLists(object):
         for_discretization_clmns = tuple(filter(lambda c_name: c_name not in undiscretize_feature_list, X.columns)) \
             if undiscretize_feature_list is not None else tuple(X.columns)
 
-        data = self.discretizer(X, self._filter_continuous_features(X, for_discretization_clmns)) \
+        data = self.discretizer(X, self._filter_continuous_features(X, for_discretization_clmns),
+                                no_of_quantiles=n_quantiles, labels_for_bin=bin_labels, precision=precision) \
             if self.__discretize is True else X
 
         # record all the feature names
@@ -157,12 +161,12 @@ class BayesianRuleLists(object):
         return self.__model
 
 
-    def save_model(self, model_name):
+    def save_model(self, model_name, compress=True):
         """ Persist the model for future use
         """
         import joblib
         if self.__r_sbrl.model is not None:
-            joblib.dump(self.__r_sbrl.model, model_name, compressed=True)
+            joblib.dump(self.__r_sbrl.model, model_name, compress=compress)
         else:
             raise Exception("SBRL model is not fitted yet; no relevant model instance present")
 
@@ -170,9 +174,8 @@ class BayesianRuleLists(object):
     def load_model(self, serialized_model_name):
         """ Load a serialized model
         """
-        if ".pkl" not in serialized_model_name:
-            raise TypeError("In-correct file type. Currently serialization using pickle is supported")
-        self.__model = serialized_model_name
+        import joblib
+        self.__model = joblib.load(serialized_model_name)
 
 
     def predict_prob(self, X):
@@ -187,7 +190,7 @@ class BayesianRuleLists(object):
             return a numpy.ndarray of shape (#datapoints, 2), the probability for each observations
         """
         if not isinstance(X, pd.DataFrame):
-            raise TypeError("Only pandas.DataFrame as input type is currently supported")
+            raise exceptions.DataSetError("Only pandas.DataFrame as input type is currently supported")
 
         data_as_r_frame = self.__r_frame(self.__s_apply(X, self.__as_factor))
         results = self.__r_sbrl.predict_sbrl(self.__model, data_as_r_frame)

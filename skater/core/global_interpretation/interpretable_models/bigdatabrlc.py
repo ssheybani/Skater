@@ -1,14 +1,18 @@
-from skater.core.global_interpretation.interpretable_models.rule_lists import BayesianRuleLists
+from skater.core.global_interpretation.interpretable_models.brlc \
+    import BRLC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.exceptions import NotFittedError
+from ..util import exceptions
 
 import pandas as pd
 import numpy as np
 
 
-class RuleListSurrogate(BayesianRuleLists):
+class BigDataBRLC(BRLC):
 
-    def __init__(self, sub_sample_percentage=0.1, surrogate_estimator=None, threshold=0.5):
+    def __init__(self, sub_sample_percentage=0.1, iterations=30000, pos_sign=1, neg_sign=0, min_rule_len=1,
+                 max_rule_len=8, min_support_pos=0.10, min_support_neg=0.10, eta=1.0, n_chains=50, alpha=1,
+                 lambda_=8, discretize=True, threshold=0.5, surrogate_estimator=None):
         self.sample_percentage = sub_sample_percentage
         self.threshold = threshold
         self.surrogate_estimator = RandomForestClassifier(warm_start=True, oob_score=True,
@@ -16,12 +20,19 @@ class RuleListSurrogate(BayesianRuleLists):
                                                           random_state=0) \
             if surrogate_estimator is None else surrogate_estimator
 
+        super(BRLC, self).__init__(iterations, pos_sign, neg_sign, min_rule_len,
+                                   max_rule_len, min_support_pos, min_support_neg, eta, n_chains, alpha,
+                                   lambda_, discretize)
+
 
     def subsample(self, X, y, pos_label=1, neg_label=0):
-        if not isinstance(X, pd.DataFrame) or isinstance(y, pd.Series):
-            raise TypeError("Only pandas.DataFrame as input type is currently supported")
-        # check on the size of x and y (raise exception)
-        # add logging
+        if not isinstance(X, pd.DataFrame) or not isinstance(y, pd.Series):
+            raise exceptions.DataSetError("Only pandas.DataFrame as input type is currently supported")
+
+        # validate the consistency of the input data
+        if not X.shape[0] == y.shape[0]:
+            raise exceptions.DataSetError("mismatch in the shape of X and y")
+
         try:
             self.surrogate_estimator.predict_proba(X[0:1])
         except NotFittedError:
