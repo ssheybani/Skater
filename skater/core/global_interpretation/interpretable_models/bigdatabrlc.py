@@ -1,24 +1,35 @@
-from skater.core.global_interpretation.interpretable_models.brlc \
-    import BRLC
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import LinearSVC
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.exceptions import NotFittedError
-from skater.util import exceptions
-
+from sklearn.utils import shuffle
 import pandas as pd
 import numpy as np
+
+from skater.core.global_interpretation.interpretable_models.brlc import BRLC
+from skater.util import exceptions
 
 
 class BigDataBRLC(BRLC):
 
     def __init__(self, sub_sample_percentage=0.1, iterations=30000, pos_sign=1, neg_sign=0, min_rule_len=1,
                  max_rule_len=8, min_support_pos=0.10, min_support_neg=0.10, eta=1.0, n_chains=50, alpha=1,
-                 lambda_=8, discretize=True, threshold=0.5, surrogate_estimator=None):
+                 lambda_=8, discretize=True, threshold=0.5, penalty_param_svm=0.01, calibration_type='sigmoid',
+                 cv_calibration=3,
+                 random_state=0, surrogate_estimator='SVM'):
+
+        # Reference: https://www.cs.cornell.edu/~alexn/papers/calibration.icml05.crc.rev3.pdf
         self.sample_percentage = sub_sample_percentage
         self.threshold = threshold
+
         self.surrogate_estimator = RandomForestClassifier(warm_start=True, oob_score=True,
                                                           max_features="sqrt",
-                                                          random_state=0) \
-            if surrogate_estimator is None else surrogate_estimator
+                                                          random_state=random_state) \
+            if surrogate_estimator is 'RF' else surrogate_estimator
+
+        self.surrogate_estimator = CalibratedClassifierCV(LinearSVC(C=penalty_param_svm, random_state=random_state),
+                                                          method=calibration_type, cv=cv_calibration) \
+            if surrogate_estimator is 'SVM' else surrogate_estimator
 
         super(BRLC, self).__init__(iterations, pos_sign, neg_sign, min_rule_len,
                                    max_rule_len, min_support_pos, min_support_neg, eta, n_chains, alpha,
@@ -48,7 +59,7 @@ class BigDataBRLC(BRLC):
         pos_label_dist = distance_from_threshold[pos_label_index]
         neg_label_dist = distance_from_threshold[neg_label_index]
 
-        # Sort the neighboring distances from the threshold in the ascending order to select points which
+        # sort the neighboring distances from the threshold in the ascending order to select points which
         # are closer to the decision boundary
         sorted_dist_pos_label = pos_label_dist.sort_values()
         sorted_dist_neg_label = neg_label_dist.sort_values()
@@ -62,4 +73,7 @@ class BigDataBRLC(BRLC):
         neg_df = pd.DataFrame(X.iloc[sorted_dist_neg_label[:int(number_of_rows * neg_fraction) + 1].index])
 
         new_X = pd.concat([pos_df, neg_df], axis=0)
-        return new_X, y[new_X.index]
+
+        # Randomly shuffle the newly formed data-set
+        X_, y_ = shuffle(new_X, y[new_X.index])
+        return X_, y_

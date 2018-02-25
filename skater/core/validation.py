@@ -33,7 +33,7 @@ def compute_validation_curve(estimator, n_folds, x=None, y=None, param_name=None
             train_scores = estimator.predict_prob(x.iloc[train_idx])
             train_metric = roc_auc_score(y.iloc[train_idx], train_scores[1], pos_label=1)
 
-            test_scores = estimator.predict_prob(x.iloc[test_idx])
+            test_scores = estimator.predict_proba(x.iloc[test_idx])
             test_metric = roc_auc_score(y.iloc[test_idx], test_scores[1], pos_label=1)
             cv_result_train.append(train_metric[0])
             cv_result_test.append(test_metric[0])

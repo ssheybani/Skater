@@ -44,7 +44,7 @@ class TestRuleList(unittest.TestCase):
                                                                                "Embarked_Encoded"])
 
         new_data = self.sbrl_inst.discretizer(self.input_data, column_list=["Age", "Fare"])
-        result_score = self.sbrl_inst.predict_prob(new_data)
+        result_score = self.sbrl_inst.predict_proba(new_data)
         self.assertEquals(result_score.shape, (77, 2))
 
 

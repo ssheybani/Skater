@@ -15,7 +15,7 @@ class BRLC(object):
 
     def __init__(self, iterations=30000, pos_sign=1, neg_sign=0, min_rule_len=1,
                  max_rule_len=8, min_support_pos=0.10, min_support_neg=0.10,
-                 eta=1.0, n_chains=50, alpha=1, lambda_=8, discretize=True):
+                 eta=1.0, n_chains=50, alpha=1, lambda_=10, discretize=True):
         """
         SBRL is a scalable generative estimator to build hierarchical interpretable decision lists. This python wrapper is
         an extension to the awesome work done by Professor Cynthia Rudin, Benjamin Letham, Hongyu Yang, Margo Seltzer
@@ -178,7 +178,7 @@ class BRLC(object):
         self.__model = joblib.load(serialized_model_name)
 
 
-    def predict_prob(self, X):
+    def predict_proba(self, X):
         """
         Parameters
         -----------
