@@ -15,8 +15,9 @@ class BRLC(object):
 
     def __init__(self, iterations=30000, pos_sign=1, neg_sign=0, min_rule_len=1,
                  max_rule_len=8, min_support_pos=0.10, min_support_neg=0.10,
-                 eta=1.0, n_chains=50, alpha=1, lambda_=10, discretize=True):
+                 eta=1.0, n_chains=50, alpha=1, lambda_=10, discretize=True, drop_features=False):
         """
+        BRLC(Bayesian Rule List Classifier) is a python wrapper for SBRL(Scalable Bayesian Rule list).
         SBRL is a scalable generative estimator to build hierarchical interpretable decision lists. This python wrapper is
         an extension to the awesome work done by Professor Cynthia Rudin, Benjamin Letham, Hongyu Yang, Margo Seltzer
         and others. For more information check out the reference section
@@ -56,6 +57,7 @@ class BRLC(object):
             "eta": eta, "nchain": n_chains, "lambda": lambda_, "alpha": alpha
         }
         self.__discretize = discretize
+        self.__drop_features = drop_features
         self.discretized_features = []
         self.feature_names = []
 
@@ -98,8 +100,8 @@ class BRLC(object):
             new_X.loc[:, new_clm_name] = pd.qcut(X[column_name].rank(method='first'), q=q_value,
                                                  labels=q_labels, duplicates='drop', precision=precision)
 
-            # Drop the column which has been discretized
-            new_X = new_X.drop([column_name], axis=1)
+            # Drop the continuous feature column which has been discritized
+            new_X = new_X.drop([column_name], axis=1) if self.__drop_features else new_X
             # explicitly convert the labels column to 'str' type
             new_X = new_X.astype(dtype={'{}_q_label'.format(column_name): "str"})
         return new_X
@@ -122,7 +124,7 @@ class BRLC(object):
         tuple(filter(lambda c_name: c_name not in unwanted_list, clmn_list))
 
 
-    def fit(self, X, y_true, n_quantiles=None, bin_labels=None, undiscretize_feature_list=None, precision=3):
+    def fit(self, X, y_true, n_quantiles=None, bin_labels='default', undiscretize_feature_list=None, precision=3):
         """ Fit the estimator.
 
         Parameters
@@ -165,8 +167,8 @@ class BRLC(object):
         """ Persist the model for future use
         """
         import joblib
-        if self.__r_sbrl.model is not None:
-            joblib.dump(self.__r_sbrl.model, model_name, compress=compress)
+        if self.__model is not None:
+            joblib.dump(self.__model, model_name, compress=compress)
         else:
             raise Exception("SBRL model is not fitted yet; no relevant model instance present")
 
@@ -175,7 +177,11 @@ class BRLC(object):
         """ Load a serialized model
         """
         import joblib
-        self.__model = joblib.load(serialized_model_name)
+        try:
+            self.__model = joblib.load(serialized_model_name)
+        except (OSError, IOError) as err:
+            print("Something is not right with the serialization format. Details {}".format(err))
+            raise
 
 
     def predict_proba(self, X):
@@ -204,7 +210,7 @@ class BRLC(object):
 
         """
         # TODO: Extend it for multi-class classification
-        probability_df = self.predict_prob(X) if X is not None and prob_score is None else prob_score
+        probability_df = self.predict_proba(X) if X is not None and prob_score is None else prob_score
         y_prob = probability_df.loc[:, pos_label]
         y_prob['label'] = np.where(y_prob.values > threshold, 1, 0)
         return y_prob, y_prob['label']
