@@ -11,44 +11,52 @@ pandas2ri.activate()
 
 
 class BRLC(object):
+    """BRLC(Bayesian Rule List Classifier) is a python wrapper for SBRL(Scalable Bayesian Rule list).
+    SBRL is a scalable Bayesian Rule List. It's a generative estimator to build hierarchical interpretable
+    decision lists. This python wrapper is an extension to the work done by Professor Cynthia Rudin,
+    Benjamin Letham, Hongyu Yang, Margo Seltzer and others. For more information check out the reference section below.
+
+    Parameters
+    ----------
+    iterations: int (default=30000)
+        number of iterations for each MCMC chain.
+    pos_sign: int (default=1)
+        sign for the positive labels in the "label" column.
+    neg_sign: int (default=0)
+     sign for the negative labels in the "label" column.
+    min_rule_len: int (default=1)
+        minimum number of cardinality for rules to be mined from the data-frame.
+    max_rule_len: int (default=8)
+        maximum number of cardinality for rules to be mined from the data-frame.
+    min_support_pos: float (default=0.1)
+        a number between 0 and 1, for the minimum percentage support for the positive observations.
+    min_support_neg: float (default 0.1)
+        a number between 0 and 1, for the minimum percentage support for the negative observations.
+    eta: int (default=1)
+    n_chains: int (default=10)
+    alpha: int (default=1)
+        a prior pseudo-count for the positive(alpha1) and negative(alpha0) classes. Default values (1, 1)
+    lambda_: int (default=8)
+        a hyper-parameter for the expected length of the rule list.
+    discretize: bool (default=True)
+        apply discretizer to handle continuous features.
+    drop_features: bool (default=False)
+        once continuous features are discretized, use this flag to either retain or drop them from the dataframe
+
+    References
+    ----------
+    .. [1] Letham et.al(2015) Interpretable classifiers using rules and Bayesian analysis:
+    Building a better stroke prediction model (https://arxiv.org/abs/1511.01644)
+    .. [2] Yang et.al(2016) Scalable Bayesian Rule Lists (https://arxiv.org/abs/1602.08610)
+    .. [3] https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py
+
+    """
     _estimator_type = "classifier"
 
     def __init__(self, iterations=30000, pos_sign=1, neg_sign=0, min_rule_len=1,
                  max_rule_len=8, min_support_pos=0.10, min_support_neg=0.10,
-                 eta=1.0, n_chains=50, alpha=1, lambda_=10, discretize=True, drop_features=False):
-        """
-        BRLC(Bayesian Rule List Classifier) is a python wrapper for SBRL(Scalable Bayesian Rule list).
-        SBRL is a scalable Bayesian Rule List. It's a generative estimator to build hierarchical interpretable
-        decision lists. This python wrapper is an extension to the work done by Professor Cynthia Rudin,
-        Benjamin Letham, Hongyu Yang, Margo Seltzer and others. For more information check out the reference section
-        below.
+                 eta=1.0, n_chains=10, alpha=1, lambda_=10, discretize=True, drop_features=False):
 
-        Parameters
-        ----------
-        iterations: number of iterations for each MCMC chain (default 30000)
-        pos_sign: sign for the positive labels in the "label" column.(default "1")
-        neg_sign: sign for the negative labels in the "label" column.(default "0")
-        min_rule_len: minimum number of cardinality for rules to be mined from the data-frame(default 1)
-        max_rule_len: maximum number of cardinality for rules to be mined from the data-frame(default 1)
-        min_support_pos: a number between 0 and 1, for the minimum percentage support for the positive
-        observations.(default 0.1)
-        min_support_neg: a number between 0 and 1, for the minimum percentage support for the negative
-        observations.(default 0.1)
-        eta:  default 1
-        n_chains: default 10
-        alpha: a prior pseudo-count for the positive(alpha1) and negative(alpha0) classes. default values (1, 1)
-        lambda_: a hyper-parameter for the expected length of the rule list(default 10)
-        discretize: apply discretizer to handle continuous features (default True)
-        drop_features: once continuous features are discretized, use this flag to drop them (default False)
-
-        References
-        ----------
-        .. [1] Letham et.al(2015) Interpretable classifiers using rules and Bayesian analysis:
-               Building a better stroke prediction model (https://arxiv.org/abs/1511.01644)
-        .. [2] Yang et.al(2016) Scalable Bayesian Rule Lists (https://arxiv.org/abs/1602.08610)
-        .. [3] https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py
-
-        """
         self.__r_sbrl = importr('sbrl')
         self.__model = None
         self.__as_factor = ro.r['as.factor']
