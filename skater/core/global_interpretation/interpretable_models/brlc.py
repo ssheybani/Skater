@@ -18,25 +18,28 @@ class BRLC(object):
                  eta=1.0, n_chains=50, alpha=1, lambda_=10, discretize=True, drop_features=False):
         """
         BRLC(Bayesian Rule List Classifier) is a python wrapper for SBRL(Scalable Bayesian Rule list).
-        SBRL is a scalable generative estimator to build hierarchical interpretable decision lists. This python wrapper is
-        an extension to the awesome work done by Professor Cynthia Rudin, Benjamin Letham, Hongyu Yang, Margo Seltzer
-        and others. For more information check out the reference section
+        SBRL is a scalable Bayesian Rule List. It's a generative estimator to build hierarchical interpretable
+        decision lists. This python wrapper is an extension to the work done by Professor Cynthia Rudin,
+        Benjamin Letham, Hongyu Yang, Margo Seltzer and others. For more information check out the reference section
+        below.
 
         Parameters
         ----------
-        iterations: the number of iterations for each MCMC chain (default 30000)
+        iterations: number of iterations for each MCMC chain (default 30000)
         pos_sign: sign for the positive labels in the "label" column.(default "1")
         neg_sign: sign for the negative labels in the "label" column.(default "0")
-        min_rule_len: the minimum number of cardinality for rules to be mined from the data-frame(default 1)
-        max_rule_len: the maximum number of cardinality for rules to be mined from the data-frame(default 1)
+        min_rule_len: minimum number of cardinality for rules to be mined from the data-frame(default 1)
+        max_rule_len: maximum number of cardinality for rules to be mined from the data-frame(default 1)
         min_support_pos: a number between 0 and 1, for the minimum percentage support for the positive
         observations.(default 0.1)
         min_support_neg: a number between 0 and 1, for the minimum percentage support for the negative
         observations.(default 0.1)
         eta:  default 1
         n_chains: default 10
-        alpha: a prior pseudo-count for the positive and negative classes. fixed at 1’s
+        alpha: a prior pseudo-count for the positive(alpha1) and negative(alpha0) classes. default values (1, 1)
         lambda_: a hyper-parameter for the expected length of the rule list(default 10)
+        discretize: apply discretizer to handle continuous features (default True)
+        drop_features: once continuous features are discretized, use this flag to drop them (default False)
 
         References
         ----------

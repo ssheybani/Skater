@@ -14,37 +14,45 @@ class BigDataBRLC(BRLC):
 
     def __init__(self, sub_sample_percentage=0.1, iterations=30000, pos_sign=1, neg_sign=0, min_rule_len=1,
                  max_rule_len=8, min_support_pos=0.10, min_support_neg=0.10, eta=1.0, n_chains=50, alpha=1,
-                 lambda_=8, discretize=True, drop_features=False, tolerance=0.5, penalty_param_svm=0.01,
+                 lambda_=8, discretize=True, drop_features=False, threshold=0.5, penalty_param_svm=0.01,
                  calibration_type='sigmoid', cv_calibration=3, random_state=0, surrogate_estimator='SVM'):
 
         """ BigDataBRLC is a BRLC to handle large data-sets. Advisable to be used when the number of
         input examples>1k. It approximates large datasets with the help of surrogate(metamodel) estimators. For example, it uses
-         surrogate estimator such as SVC(Support Vector Classifier) or RandomForest by default to filter the data
-         points which are closest to the decision boundary. The idea is to identify the minimum training set size
-         (controlled by the parameter sub_sample_percentage) with the goal to maximize accuracy.
-         This helps in reducing the computation time while building the final SBRL.
+        surrogate estimator such as SVC(Support Vector Classifier) or RandomForest by default to filter the data
+        points which are closest to the decision boundary. The idea is to identify the minimum training set size
+        (controlled by the parameter sub_sample_percentage) with the goal to maximize accuracy.
+        This helps in reducing the computation time to build the final BRL.
 
-        :param sub_sample_percentage:
-        :param iterations:
-        :param pos_sign:
-        :param neg_sign:
-        :param min_rule_len:
-        :param max_rule_len:
-        :param min_support_pos:
-        :param min_support_neg:
-        :param eta:
-        :param n_chains:
-        :param alpha:
-        :param lambda_:
-        :param discretize:
-        :param drop_features:
-        :param tolerance:
-        :param penalty_param_svm:
-        :param calibration_type:
+        Parameters
+        ----------
+        sub_sample_percentage: specify the fraction of the training sample to be retained for training BRL
+        pos_sign: sign for the positive labels in the "label" column.(default "1")
+        neg_sign: sign for the negative labels in the "label" column.(default "0")
+        min_rule_len: minimum number of cardinality for rules to be mined from the data-frame(default 1)
+        max_rule_len: maximum number of cardinality for rules to be mined from the data-frame(default 1)
+        min_support_pos: a number between 0 and 1, for the minimum percentage support for the positive
+        observations.(default 0.1)
+        min_support_neg: a number between 0 and 1, for the minimum percentage support for the negative
+        observations.(default 0.1)
+        eta:  default 1
+        n_chains: default 10
+        alpha: a prior pseudo-count for the positive(alpha1) and negative(alpha0) classes. default values (1, 1)
+        lambda_: a hyper-parameter for the expected length of the rule list(default 10)
+        discretize: apply discretizer to handle continuous features (default True)
+        drop_features: once continuous features are discretized, use this flag to drop them (default False)
+        threshold: specify the threshold for the decision boundary. This is the probability level to compute
+        distance of the predictions(for input examples) from the decision boundary.
+        Input examples closest to the decision boundary are sub-sampled. Size of sub-sampled data is controlled using
+        'sub_sample_percentage'
+        penalty_param_svm: float (default=0.01)
+            Regularization parameter('C') for Linear Support Vector Classifier. Lower regularization value forces the
+            optimizer to maximize the hyperplane.
+        calibration_type:
             Reference: https://www.cs.cornell.edu/~alexn/papers/calibration.icml05.crc.rev3.pdf
-        :param cv_calibration:
-        :param random_state:
-        :param surrogate_estimator:
+        cv_calibration: int (default=3)
+        random_state: int (default=0)
+        surrogate_estimator: string (default='SVM')
         :return:
 
         References:
@@ -58,7 +66,7 @@ class BigDataBRLC(BRLC):
         """
 
         self.sample_percentage = sub_sample_percentage
-        self.tol = tolerance
+        self.threhold = threshold
 
         self.surrogate_estimator = RandomForestClassifier(warm_start=True, oob_score=True,
                                                           max_features="sqrt",
@@ -90,7 +98,7 @@ class BigDataBRLC(BRLC):
         est_prob_scores = pd.DataFrame(self.surrogate_estimator.predict_proba(X))
 
         # compute the distance from the decision boundary
-        distance_from_threshold = est_prob_scores[pos_label].apply(lambda x: np.abs(self.tol - x))
+        distance_from_threshold = est_prob_scores[pos_label].apply(lambda x: np.abs(self.threhold - x))
         pos_label_index = np.where(y == pos_label)[0]
         neg_label_index = np.where(y == neg_label)[0]
 
