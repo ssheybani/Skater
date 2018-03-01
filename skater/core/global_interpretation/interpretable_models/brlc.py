@@ -240,7 +240,6 @@ class BRLC(object):
 
 
     def predict_proba(self, X):
-        #TODO: Add support for out of core computation
         """ Computes possible class probabilities for the input 'X'
 
         Parameters
