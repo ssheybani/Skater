@@ -11,7 +11,10 @@ pandas2ri.activate()
 
 
 class BRLC(object):
-    """BRLC(Bayesian Rule List Classifier) is a python wrapper for SBRL(Scalable Bayesian Rule list).
+    """
+    :: Experimental :: The implementation is currently experimental and might change in future
+
+    BRLC(Bayesian Rule List Classifier) is a python wrapper for SBRL(Scalable Bayesian Rule list).
     SBRL is a scalable Bayesian Rule List. It's a generative estimator to build hierarchical interpretable
     decision lists. This python wrapper is an extension to the work done by Professor Cynthia Rudin,
     Benjamin Letham, Hongyu Yang, Margo Seltzer and others. For more information check out the reference section below.
@@ -50,6 +53,31 @@ class BRLC(object):
     .. [2] Yang et.al(2016) Scalable Bayesian Rule Lists (https://arxiv.org/abs/1602.08610)
     .. [3] https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py
 
+
+    Examples
+    --------
+    >>> from skater.core.global_interpretation.interpretable_models.brlc import BRLC
+    >>> import pandas as pd
+    >>> from sklearn.datasets.mldata import fetch_mldata
+    >>> input_df = fetch_mldata("diabetes")
+    ...
+    >>> Xtrain, Xtest, ytrain, ytest = train_test_split(input_df, y, test_size=0.20, random_state=0)
+    >>> sbrl_model = BRLC(min_rule_len=1, max_rule_len=10, iterations=10000, n_chains=20, drop_features=True)
+    >>> # Train a model, by default discretizer is enabled. So, you wish to exclude features then exclude them using
+    >>> # the undiscretize_feature_list parameter
+    >>> model = sbrl_model.fit(Xtrain, ytrain, bin_labels="default")
+    >>> #print the learned model
+    >>> sbrl_inst.print_model()
+    >>> features_to_descritize = Xtrain.columns
+    >>> Xtrain_filtered = sbrl_model.discretizer(Xtrain, features_to_descritize, labels_for_bin="default")
+    >>> predict_scores = sbrl_model.predict_proba(Xtest)
+    >>> _, y_hat  = sbrl_model.predict(Xtest)
+    >>> # save and reload the model and continue with evaluation
+    >>> sbrl_model.save_model("model.pkl")
+    >>> sbrl_model.load_model("model.pkl")
+    >>> # to access all the learned rules
+    >>> sbrl_model.access_learned_rules("all")
+    # For a complete example refer to rule_lists_continuous_features.ipynb or rule_lists_titanic_dataset.ipynb notebook
     """
     _estimator_type = "classifier"
 
@@ -84,21 +112,28 @@ class BRLC(object):
 
         Parameters
         -----------
-        X : pandas.DataFrame
+        X: pandas.DataFrame
             Dataframe containing continuous features
-        column_list : list/tuple
-        no_of_quantiles : integer/list
+        column_list: list/tuple
+        no_of_quantiles: int or list
             Number of quantiles, e.g. deciles(10), quartiles(4) or as a list of quantiles[0, .25, .5, .75, 1.]
             if 'None' then [0, .25, .5, .75, 1.] is used
-        labels_for_bin : labels for the resulting bins
-        precision : int
+        labels_for_bin: labels for the resulting bins
+        precision: int
             precision for storing and creating bins
 
         Returns
         --------
-        new_X : pandas.DataFrame
+        new_X: pandas.DataFrame
             Contains discretized features
 
+        Examples
+        ---------
+        >>> sbrl_model = BRLC(min_rule_len=1, max_rule_len=10, iterations=10000, n_chains=20, drop_features=True)
+        >>> ...
+        >>> features_to_descritize = Xtrain.columns
+        >>> Xtrain_discretized = sbrl_model.discretizer(Xtrain, features_to_descritize, labels_for_bin="default")
+        >>> predict_scores = sbrl_model.predict_proba(Xtrain_discretized)
         """
         if not isinstance(X, pd.DataFrame):
             raise TypeError("Only pandas.DataFrame as input type is currently supported")
@@ -147,6 +182,15 @@ class BRLC(object):
         Returns
         -------
             SBRL model instance: rpy2.robjects.vectors.ListVector
+
+        Examples
+        ---------
+        >>> from skater.core.global_interpretation.interpretable_models.brlc import BRLC
+        >>> sbrl_model = BRLC(min_rule_len=1, max_rule_len=10, iterations=10000, n_chains=20, drop_features=True)
+        >>> # Train a model, by default discretizer is enabled. So, you wish to exclude features then exclude them using
+        >>> # the undiscretize_feature_list parameter
+        >>> model = sbrl_model.fit(Xtrain, ytrain, bin_labels="default")
+
         """
         if len(np.unique(y_true)) != 2:
             raise Exception("Supports only binary classification right now")
@@ -196,15 +240,16 @@ class BRLC(object):
 
 
     def predict_proba(self, X):
-        """
+        #TODO: Add support for out of core computation
+        """ Computes possible class probabilities for the input 'X'
+
         Parameters
         -----------
-            X :  pandas.DataFrame object, representing the data to be making predictions on.
-            `type`  whether the prediction is discrete or probabilistic.
+            X: pandas.DataFrame object
 
         Returns
         -------
-            return a numpy.ndarray of shape (#datapoints, 2), the probability for each observations
+            pandas.DataFrame of shape (#datapoints, 2), the possible probability of each class for each observation
         """
         if not isinstance(X, pd.DataFrame):
             raise exceptions.DataSetError("Only pandas.DataFrame as input type is currently supported")
@@ -215,9 +260,26 @@ class BRLC(object):
 
 
     def predict(self, X=None, prob_score=None, threshold=0.5, pos_label=1):
-        """ Predict the class for input data
-        The predicted class is determined by setting a threshold on the Adjust threshold to
+        """ Predict the class for input 'X'
+        The predicted class is determined by setting a threshold. Adjust threshold to
         balance between sensitivity and specificity
+
+        Parameters
+        -----------
+        X: pandas.DataFrame
+            input examples to be scored
+        prob_score: pandas.DataFrame or None (default=None)
+            If set to None, `predict_proba` is called before computing the class labels.
+            If you have access to probability scores already, use the dataframe of probability scores to compute the
+            final class label
+        threshold: float (default=0.5)
+        pos_label: int (default=1)
+            specify how to identify positive label
+
+        Returns
+        -------
+        y_prob, y_prob['label]: pandas.Series, numpy.ndarray
+            Contains the probability score for the input 'X'
 
         """
         # TODO: Extend it for multi-class classification
@@ -233,8 +295,14 @@ class BRLC(object):
         self.__r_sbrl.print_sbrl(self.__model)
 
 
-    def access_learned_rules(self, rule_indexes):
-        """ Helper function to access all learned decision rules
+    def access_learned_rules(self, rule_indexes="all"):
+        """ Access all learned decision rules. This is useful for building and developing intuition
+
+        Parameters
+        ----------
+        rule_indexes: str (default="all", retrieves all the rules)
+            Specify the index of the rules to be retrieved
+            index could be set as 'all' or a range could be specified e.g. '(1:3)' will retrieve the rules 1 and 2
         """
         if not isinstance(rule_indexes, str):
             raise TypeError('Expected type string {} provided'.format(type(rule_indexes)))
