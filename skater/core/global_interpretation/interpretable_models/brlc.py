@@ -86,7 +86,7 @@ class BRLC(object):
                  eta=1.0, n_chains=10, alpha=1, lambda_=10, discretize=True, drop_features=False):
 
         self.__r_sbrl = importr('sbrl')
-        self.__model = None
+        self.model = None
         self.__as_factor = ro.r['as.factor']
         self.__s_apply = ro.r['lapply']
         self.__r_frame = ro.r['data.frame']
@@ -190,7 +190,6 @@ class BRLC(object):
         >>> # Train a model, by default discretizer is enabled. So, you wish to exclude features then exclude them using
         >>> # the undiscretize_feature_list parameter
         >>> model = sbrl_model.fit(Xtrain, ytrain, bin_labels="default")
-
         """
         if len(np.unique(y_true)) != 2:
             raise Exception("Supports only binary classification right now")
@@ -214,16 +213,16 @@ class BRLC(object):
         self.feature_names = data.columns
         data.loc[:, "label"] = y_true
         data_as_r_frame = self.__r_frame(self.__s_apply(data, self.__as_factor))
-        self.__model = self.__r_sbrl.sbrl(data_as_r_frame, **self.model_params)
-        return self.__model
+        self.model = self.__r_sbrl.sbrl(data_as_r_frame, **self.model_params)
+        return self.model
 
 
     def save_model(self, model_name, compress=True):
         """ Persist the model for future use
         """
         import joblib
-        if self.__model is not None:
-            joblib.dump(self.__model, model_name, compress=compress)
+        if self.model is not None:
+            joblib.dump(self.model, model_name, compress=compress)
         else:
             raise Exception("SBRL model is not fitted yet; no relevant model instance present")
 
@@ -233,7 +232,8 @@ class BRLC(object):
         """
         import joblib
         try:
-            self.__model = joblib.load(serialized_model_name)
+            self.model = joblib.load(serialized_model_name)
+            # update the BRLC model instance with the the uploaded model
         except (OSError, IOError) as err:
             print("Something is not right with the serialization format. Details {}".format(err))
             raise
@@ -254,7 +254,7 @@ class BRLC(object):
             raise exceptions.DataSetError("Only pandas.DataFrame as input type is currently supported")
 
         data_as_r_frame = self.__r_frame(self.__s_apply(X, self.__as_factor))
-        results = self.__r_sbrl.predict_sbrl(self.__model, data_as_r_frame)
+        results = self.__r_sbrl.predict_sbrl(self.model, data_as_r_frame)
         return pandas2ri.ri2py_dataframe(results).T
 
 
@@ -291,7 +291,7 @@ class BRLC(object):
     def print_model(self):
         """ print the decision stumps of the learned estimator
         """
-        self.__r_sbrl.print_sbrl(self.__model)
+        self.__r_sbrl.print_sbrl(self.model)
 
 
     def access_learned_rules(self, rule_indexes="all"):
@@ -307,7 +307,7 @@ class BRLC(object):
             raise TypeError('Expected type string {} provided'.format(type(rule_indexes)))
 
         # Convert model properties into a readable python dict
-        result_dict = dict(zip(self.__model.names, map(list, list(self.__model))))
+        result_dict = dict(zip(self.model.names, map(list, list(self.model))))
 
         indexes_func = lambda indexes: [int(v) for v in indexes.split(':')]
         # original index starts from 0 while the printed index starts from 1, hence adjust the index

@@ -48,6 +48,16 @@ class TestRuleList(unittest.TestCase):
         self.assertEquals(result_score.shape, (77, 2))
 
 
+    def test_model_save_load(self):
+        self.sbrl_inst.save_model("test.pkl", compress=True)
+        # Explicitly assigning the model instance to 'None' to validate loading of persisted model
+        # Care is advised when handing the model instance, it might make the model unstable
+        self.sbrl_inst.model = None
+        self.assertEquals(self.sbrl_inst.model is None, True)
+        self.sbrl_inst.load_model("test.pkl")
+        self.assertEquals(self.sbrl_inst.model is not None, True)
+
+
     @unittest.skip("Disabling these tests as running them could be computationally expensive. But, recommended to run "
                    "these tests during development")
     def test_model_predict(self):
