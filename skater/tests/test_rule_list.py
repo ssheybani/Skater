@@ -49,6 +49,9 @@ class TestRuleList(unittest.TestCase):
 
 
     def test_model_save_load(self):
+        self.sbrl_inst.fit(self.input_data, self.y, undiscretize_feature_list=["PassengerId", "Pclass",
+                                                                               "SibSp", "Parch", "Sex_Encoded",
+                                                                               "Embarked_Encoded"])
         self.sbrl_inst.save_model("test.pkl", compress=True)
         # Explicitly assigning the model instance to 'None' to validate loading of persisted model
         # Care is advised when handing the model instance, it might make the model unstable
