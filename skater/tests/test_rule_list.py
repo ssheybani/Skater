@@ -19,7 +19,7 @@ if sys.version_info >= (3, 5):
 class TestRuleList(unittest.TestCase):
 
     def setUp(self):
-        self.sbrl_inst = BRLC(min_rule_len=1, max_rule_len=2, iterations=10000, n_chains=3, lambda_=12)
+        self.sbrl_inst = BRLC(min_rule_len=1, max_rule_len=2, iterations=10000, n_chains=3)
         self.input_data = pd.read_csv('skater/tests/data/sample_data.csv')
         # data transformation and cleaning ...
         self.input_data["Sex"] = self.input_data["Sex"].astype('category')
@@ -49,7 +49,7 @@ class TestRuleList(unittest.TestCase):
 
 
     def test_model_save_load(self):
-        self.sbrl_inst.fit(self.input_data, self.y, undiscretize_feature_list=["PassengerId", "Pclass",
+        self.sbrl_inst.fit(self.input_data[1:50], self.y[1:50], undiscretize_feature_list=["PassengerId", "Pclass",
                                                                                "SibSp", "Parch", "Sex_Encoded",
                                                                                "Embarked_Encoded"])
         self.sbrl_inst.save_model("test.pkl", compress=True)
