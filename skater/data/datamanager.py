@@ -78,6 +78,7 @@ class DataManager(object):
         else:
             raise ValueError("Unrecognized type for y: {}".format(type(y)))
 
+
     def __init__(self, X, y=None, feature_names=None, index=None, log_level=30):
         """
         The abstraction around using, accessing, sampling data for interpretation purposes.
@@ -449,10 +450,12 @@ class DataManager(object):
                          index=self.index)
         return dm.generate_sample(*args, **kwargs)
 
+
     def set_index(self, index):
         self.index = index
         if self.data_type in (pd.DataFrame, pd.Series):
             self.X.index = index
+
 
     def _labels_by_index(self, data_index):
         """

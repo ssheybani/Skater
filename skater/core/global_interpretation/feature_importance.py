@@ -51,7 +51,7 @@ class FeatureImportance(BaseGlobalInterpretation):
             of processes, where including the progress bar results in 10-20% slowdowns.
         n_samples: int
             How many samples to use when computing importance.
-        method: string
+        method: string (default 'prediction-variance'; 'model-scoring' for estimator specific scoring metric
             How to compute feature importance. 'model-scoring' requires Interpretation.training_labels.
             Note this choice should only rarely makes any significant differences
             prediction-variance: mean absolute value of changes in predictions, given perturbations.

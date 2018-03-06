@@ -24,15 +24,14 @@ before_install:
   # - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
+  - if [[ "$TRAVIS_PYTHON_VERSION" > "3.0" ]]; then
+      bash setup.sh linux-ubuntu;
+    fi
 
 install:
-#  - pip install numpy
-#  - pip install scipy
-#  - pip install matplotlib
-
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib pandas flake8 coverage
   - source activate test-environment
-  - pip install codecov #not on conda
+  - pip install codecov # not on conda
   - pip install coveralls
   - python setup.py install
   - python -c "import scipy"
