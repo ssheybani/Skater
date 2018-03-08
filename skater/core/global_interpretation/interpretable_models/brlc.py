@@ -36,6 +36,7 @@ class BRLC(object):
     min_support_neg: float (default 0.1)
         a number between 0 and 1, for the minimum percentage support for the negative observations.
     eta: int (default=1)
+        a hyper-parameter for the expected cardinality of the rules in the optimal rule list.
     n_chains: int (default=10)
     alpha: int (default=1)
         a prior pseudo-count for the positive(alpha1) and negative(alpha0) classes. Default values (1, 1)

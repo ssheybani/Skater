@@ -89,6 +89,18 @@ Windows.
 
 .. _conda-forge: http://conda-forge.github.io/
 
+
+For Bayesian Rule List
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Temporarily use the below mentioned steps to experiment
+
+::
+
+    bash setup.sh linux-ubuntu
+    sudo python setup.py clean --all install
+
+
 Usage
 ==============
 The code below illustrates a typical workflow with the Skater package.
