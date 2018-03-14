@@ -9,7 +9,7 @@ import contextlib
 class InvokingShScript(install):
     """Custom install setup to help run shell commands (outside shell) before installation"""
 
-    # reference: https://dankeder.com/posts/adding-custom-commands-to-setup-py/
+    # reference:
     # Syntax (long option, short option, description).
     user_options = [
         ('ostype=', None, 'The OS type of the box(linux-ubuntu/mac)'),
@@ -25,7 +25,6 @@ class InvokingShScript(install):
             raise Exception("specify os type ...")
         if self.rl is None:
             raise Exception(" should based learning be enabled? ...")
-
 
     def run(self):
         # install rule based learners when asked
