@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import unittest
 import sys
 
@@ -45,7 +46,16 @@ class TestRuleList(unittest.TestCase):
 
         new_data = self.sbrl_inst.discretizer(self.input_data, column_list=["Age", "Fare"])
         result_score = self.sbrl_inst.predict_proba(new_data)
+        result_labels = self.sbrl_inst.predict(new_data)
+
+        # make sure shape of the dataframe is as expected
         self.assertEquals(result_score.shape, (77, 2))
+        self.assertEquals(result_labels[1].shape, (77, ))
+
+        generated_labels = np.unique(result_labels[1])
+        expected_labels = np.array([0, 1])
+        self.assertEquals(np.array_equal(generated_labels, expected_labels), True)
+
 
 
     def test_model_save_load(self):
@@ -62,22 +72,15 @@ class TestRuleList(unittest.TestCase):
         self.assertEquals(self.sbrl_inst.model is not None, True)
 
 
-    @unittest.skip("Disabling these tests as running them could be computationally expensive. But, recommended to run "
-                   "these tests during development")
-    def test_model_predict(self):
-        self.sbrl_inst.predict(self.input_data)
-
-
-    @unittest.skip("Disabling these tests as running them could be computationally expensive. But, recommended to run "
-                   "these tests during development")
     def test_model_output(self):
-        self.sbrl_inst.fit(self.input_data, self.y)
+        self.sbrl_inst.fit(self.input_data, self.y, undiscretize_feature_list=["PassengerId", "Pclass",
+                                                                               "SibSp", "Parch", "Sex_Encoded",
+                                                                               "Embarked_Encoded"])
         result = self.sbrl_inst.access_learned_rules('23:25')
         self.assertEquals(len(result), 2)
 
 
-    @unittest.skip("Disabling these tests as running them could be computationally expensive. But, recommended to run "
-                   "these tests during development")
+    @unittest.skip("Support for computing validation curve for SBRL is still under development")
     def test_validation(self):
         param_range = [3, 4]
         train_scores, test_scores = compute_validation_curve(self.sbrl_inst, n_folds=2, x=self.input_data, y=self.y,
