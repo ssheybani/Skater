@@ -1,13 +1,13 @@
 Skater
 ===========
-Skater is a python package for model agnostic interpretation of predictive models.
+Skater is a python package for interpreting(via post-hoc evaluation/rule extraction) predictive models.
 With Skater, you can unpack the internal mechanics of arbitrary models; as long
 as you can obtain inputs, and use a function to obtain outputs, you can use
 Skater to learn about the models internal decision policies.
 
 
 The package was originally developed by Aaron Kramer, Pramit Choudhary and internal DataScience Team at DataScience.com
-to help enable practitioners explain and interpret predictive "black boxes" in a human interpretable way.
+to help enable practitioners explain and interpret predictive "black boxes" preferably in a human interpretable way.
 
 📖 Documentation
 ================

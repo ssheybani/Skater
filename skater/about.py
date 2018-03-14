@@ -1,9 +1,8 @@
-# Reference: http://python-packaging.readthedocs.io/en/latest/dependencies.htmlfrom setuptools import setup, find_packages
-# meant to define package metadata in one and only one place
+# Reference: http://python-packaging.readthedocs.io/en/latest/dependencies.html
 
 __title__ = 'skater'
-__version__ = '1.0.3'
-__summary__ = 'Model Agnostic Interpretation Library'
+__version__ = '1.1.0-beta'
+__summary__ = 'Model Interpretation Library'
 __uri__ = 'https://github.com/datascienceinc/skater/'
 __author__ = 'Aaron Kramer, DataScience.com Team, Pramit Choudhary'
 __maintainer__ = 'Pramit Choudhary, Aaron Kramer and community'
