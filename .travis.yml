@@ -31,7 +31,7 @@ install:
   - source activate test-environment
   - pip install codecov # not on conda
   - pip install coveralls
-  - if [[ "$TRAVIS_PYTHON_VERSION" > "3.0" ]]
+  - if [[ "$TRAVIS_PYTHON_VERSION" > "3.0" ]];
     then
         python setup.py install --ostype=linux-ubuntu --rl=True
     else
