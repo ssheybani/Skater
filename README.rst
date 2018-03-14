@@ -92,13 +92,19 @@ Windows.
 
 For Bayesian Rule List
 ~~~~~~~~~~~~~~~~~~~~~~~
-
-Temporarily use the below mentioned steps to experiment
-
+Follow the steps mentioned at the link mentioned below to install conda,
+https://conda.io/docs/user-guide/install/linux.html
 ::
+    Quick summary to install conda
 
-    bash setup.sh linux-ubuntu
-    sudo python setup.py clean --all install
+    1. wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+    2. bash miniconda.sh -b -p $HOME/miniconda
+    3. export PATH="$HOME/miniconda/bin:$PATH"
+    4. conda config --set always_yes yes --set changeps1 no
+    5. conda info -a
+
+    conda install gxx_linux-64
+    sudo python setup.py install --ostype=linux-ubuntu --rl=True
 
 
 Usage
