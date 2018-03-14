@@ -11,7 +11,7 @@ class InvokingShScript(install):
 
     # reference:
     # Syntax (long option, short option, description).
-    user_options = [
+    user_options = install.user_options + [
         ('ostype=', None, 'The OS type of the box(linux-ubuntu/mac)'),
         ('rl=', None, 'Enable rule based learning')
     ]
