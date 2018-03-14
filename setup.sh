@@ -28,6 +28,7 @@ then
     # installs R base as well
     # decent info on installing R manually could be found here at the link mentioned below,
     # https://www.digitalocean.com/community/tutorials/how-to-install-r-on-ubuntu-16-04-2
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
     sudo add-apt-repository -y ppa:marutter/rrutter
     sudo apt-get update
     sudo apt-get upgrade

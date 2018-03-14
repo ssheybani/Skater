@@ -17,6 +17,7 @@ class InvokingShScript(install):
     ]
 
     def initialize_options(self):
+        install.initialize_options(self)
         self.ostype = 'linux-ubuntu'
         self.rl = False
 
@@ -25,6 +26,7 @@ class InvokingShScript(install):
             raise Exception("specify os type ...")
         if self.rl is None:
             raise Exception(" should based learning be enabled? ...")
+        install.finalize_options(self)
 
     def run(self):
         # install rule based learners when asked
