@@ -161,10 +161,19 @@ Testing
 ::
     python -c "from skater.tests.all_tests import run_tests; run_tests()"
 
+Citation
+~~~~~~~~~
+If you decide to use Skater to resolve interpretability needs, please consider citing the project with the below mentioned DOI,
+
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1198885.svg
+   :target: https://doi.org/10.5281/zenodo.1198885
+
+
 R Client
 ==============
 Refer to https://github.com/christophM/iml 
 
+   
 Books
 ===============
 1. Christoph Molnar, Interpretable Machine Learning: https://christophm.github.io/interpretable-ml-book/ 
