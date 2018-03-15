@@ -111,7 +111,7 @@ https://conda.io/docs/user-guide/install/linux.html
     
     Option2:
     1. conda install gxx_linux-64
-    2. sudo pip install -U --no-deps --force-reinstall --install-option="--rl=True" skater==
+    2. sudo pip install -U --no-deps --force-reinstall --install-option="--rl=True" skater==1.1.0b1
 
 
 Usage
