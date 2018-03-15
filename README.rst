@@ -169,6 +169,7 @@ If you decide to use Skater to resolve interpretability needs, please consider c
       author       = {Pramit Choudhary and
                       Aaron Kramer and
                       datascience.com team},
+      contributor  = {Ben Van Dyke, alvinthai, Dave Thompson},
       title        = {{Skater: Model Interpretation Library}},
       month        = mar,
       year         = 2018,
