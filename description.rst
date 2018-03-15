@@ -58,4 +58,7 @@ is recommended that you use a virtual environment (virtualenv, conda environment
 
     pip install -U Skater
 
+    #For enabling Rule based interpretation
+    follow the steps mentioned on the repo
+
 

@@ -1,7 +1,7 @@
 # Reference: http://python-packaging.readthedocs.io/en/latest/dependencies.html
 
 __title__ = 'skater'
-__version__ = '1.1.0-beta'
+__version__ = '1.1.0-b1'
 __summary__ = 'Model Interpretation Library'
 __uri__ = 'https://github.com/datascienceinc/skater/'
 __author__ = 'Aaron Kramer, DataScience.com Team, Pramit Choudhary'
