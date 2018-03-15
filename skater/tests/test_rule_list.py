@@ -40,7 +40,7 @@ class TestRuleList(unittest.TestCase):
 
 
     def test_model_build(self):
-        self.sbrl_inst.fit(self.input_data, self.y, undiscretize_feature_list=["PassengerId", "Pclass",
+        self.sbrl_inst.fit(self.input_data[1:50], self.y[1:50], undiscretize_feature_list=["PassengerId", "Pclass",
                                                                                "SibSp", "Parch", "Sex_Encoded",
                                                                                "Embarked_Encoded"])
 
