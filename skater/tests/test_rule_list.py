@@ -74,9 +74,10 @@ class TestRuleList(unittest.TestCase):
 
 
     def test_model_output(self):
-        self.sbrl_inst.fit(self.input_data, self.y, undiscretize_feature_list=["PassengerId", "Pclass",
-                                                                               "SibSp", "Parch", "Sex_Encoded",
-                                                                               "Embarked_Encoded"])
+        self.sbrl_inst.fit(self.input_data[1:50], self.y[1:50], undiscretize_feature_list=["PassengerId", "Pclass",
+                                                                                           "SibSp", "Parch",
+                                                                                           "Sex_Encoded",
+                                                                                           "Embarked_Encoded"])
         result = self.sbrl_inst.access_learned_rules('23:25')
         self.assertEquals(len(result), 2)
 
