@@ -14,8 +14,7 @@ as you can obtain inputs, and use a function to obtain outputs, you can use
 Skater to learn about the models internal decision policies.
 
 
-The package was originally developed at DataScience.com by Aaron Kramer, Pramit Choudhary and internal DataScience Team 
-to help enable practitioners explain and interpret predictive "black boxes" in a human interpretable way.
+The project was started as a research idea to find ways to enable better interpretability(preferably human interpretability) to predictive "black boxes" both for researchers and practioners.
 
 .. image:: https://travis-ci.org/datascienceinc/Skater.svg?branch=master
     :target: https://travis-ci.com/datascienceinc/Skater
@@ -23,6 +22,11 @@ to help enable practitioners explain and interpret predictive "black boxes" in a
 
 .. image:: https://coveralls.io/repos/github/datascienceinc/Skater/badge.svg?branch=master
     :target: https://coveralls.io/github/datascienceinc/Skater?branch=master
+    
+    
+HighLevel Design 
+================
+.. image:: https://github.com/datascienceinc/Skater/blob/master/presentations/designs/interpretable_mls.png
 
 
 📖 Documentation
@@ -85,6 +89,31 @@ Windows.
 
 .. _conda-forge: http://conda-forge.github.io/
 
+
+For Bayesian Rule List
+~~~~~~~~~~~~~~~~~~~~~~~
+Follow the steps mentioned at the link mentioned below to install conda,
+https://conda.io/docs/user-guide/install/linux.html
+::
+    Quick summary to install conda and setup the python environment(recommended steps for using python3.x)
+
+    1. wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+    2. bash miniconda.sh -b -p $HOME/miniconda
+    3. export PATH="$HOME/miniconda/bin:$PATH"
+    4. conda config --set always_yes yes --set changeps1 no
+    5. conda info -a
+
+    Installation:
+    Option1:
+    1. conda install gxx_linux-64
+    2. git clone the repo
+    3. sudo python setup.py install --ostype=linux-ubuntu --rl=True
+    
+    Option2:
+    1. conda install gxx_linux-64
+    2. sudo pip install -U --no-deps --force-reinstall --install-option="--rl=True" skater==1.1.0b1
+
+
 Usage
 ==============
 The code below illustrates a typical workflow with the Skater package.
@@ -132,5 +161,32 @@ Testing
 ::
     python -c "from skater.tests.all_tests import run_tests; run_tests()"
 
+Citation
+~~~~~~~~~
+If you decide to use Skater to resolve interpretability needs, please consider citing the project with the below mentioned DOI,
+::
+    @misc{pramit_choudhary_2018_1198885,
+      author       = {Pramit Choudhary and
+                      Aaron Kramer and
+                      datascience.com team},
+      contributor  = {Ben Van Dyke, alvinthai, Dave Thompson},
+      title        = {{Skater: Model Interpretation Library}},
+      month        = mar,
+      year         = 2018,
+      doi          = {10.5281/zenodo.1198885},
+      url          = {https://doi.org/10.5281/zenodo.1198885}
+    }
 
-.. |Build Status-master| image:: https://api.travis-ci.com/repositories/datascienceinc/Skater.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1198885.svg
+   :target: https://doi.org/10.5281/zenodo.1198885
+
+
+R Client
+==============
+Refer to https://github.com/christophM/iml 
+
+   
+Books
+===============
+1. Christoph Molnar, Interpretable Machine Learning: https://christophm.github.io/interpretable-ml-book/ 
+2. Dipanjan Sarkar et al., Practical Machine Learning with Python: https://github.com/dipanjanS/practical-machine-learning-with-python

@@ -1,7 +1,46 @@
 # Reference: http://python-packaging.readthedocs.io/en/latest/dependencies.html
 from setuptools import setup, find_packages
+from setuptools.command.install import install
+import subprocess
 import os, io, sys
 import contextlib
+
+
+class InvokingShScript(install):
+    """Custom install setup to help run shell commands (outside shell) before installation"""
+
+    # reference:
+    # Syntax (long option, short option, description).
+    user_options = install.user_options + [
+        ('ostype=', None, 'The OS type of the box(linux-ubuntu/mac)'),
+        ('rl=', None, 'Enable rule based learning')
+    ]
+
+    def initialize_options(self):
+        install.initialize_options(self)
+        self.ostype = 'linux-ubuntu'
+        self.rl = False
+
+    def finalize_options(self):
+        if self.ostype is None:
+            raise Exception("specify os type ...")
+        if self.rl is None:
+            raise Exception(" should based learning be enabled? ...")
+        install.finalize_options(self)
+
+    def run(self):
+        # install rule based learners when asked
+        if self.rl:
+            dir_path = os.path.dirname(os.path.realpath(__file__))
+            shell_script_path = os.path.join(dir_path, 'setup.sh')
+
+            subprocess.check_output([
+            'bash',
+            shell_script_path,
+            self.ostype
+            ])
+        install.do_egg_install(self)
+
 
 @contextlib.contextmanager
 def chdir(new_dir):
@@ -36,6 +75,7 @@ def setup_package():
         version=about['__version__'],
         url=about['__uri__'],
         license=about['__license__'],
+        cmdclass={'install': InvokingShScript},
         install_requires=[
             'scikit-learn>=0.18',
             'pandas>=0.19',
@@ -43,7 +83,10 @@ def setup_package():
             'requests',
             'multiprocess',
             'dill>=0.2.6',
-            'wordcloud==1.3.1'],
+            'wordcloud==1.3.1',
+            'joblib==0.11',
+            'rpy2==2.9.1; python_version>"3.0"',
+            'Jinja2==2.10'],
         extras_require ={'all':'matplotlib'},
         )
 

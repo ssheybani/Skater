@@ -24,17 +24,18 @@ before_install:
   # - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
+  - conda install gxx_linux-64
 
 install:
-#  - pip install numpy
-#  - pip install scipy
-#  - pip install matplotlib
-
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib pandas flake8 coverage
   - source activate test-environment
-  - pip install codecov #not on conda
+  - pip install codecov # not on conda
   - pip install coveralls
-  - python setup.py install
+  - if [[ "$TRAVIS_PYTHON_VERSION" > "3.0" ]]; then
+      python setup.py install --ostype=linux-ubuntu --rl=True;
+    else
+      python setup.py install;
+    fi
   - python -c "import scipy"
   - python -c "import numpy"
   - python -c "import lime"
