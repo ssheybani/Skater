@@ -1,5 +1,5 @@
-from skater.core.local_interpretation.dnni.relevance_scorer import LRP
-from collections import OrderedDict
+from tensorflow.python.ops import nn_grad, math_grad
+import warnings
 
 ACTIVATIONS_OPS = [
     'Relu', 'Elu',  'Softplus', 'Tanh', 'Sigmoid']
@@ -7,14 +7,9 @@ ACTIVATIONS_OPS = [
 _ENABLED_METHOD_CLASS = None
 _GRAD_OVERRIDE_CHECKFLAG = 0
 
-relevance_scorer_type = OrderedDict({
-    'elrp': (LRP, 0)
-})
-
 
 class Initializer(object):
     """
-    Attribution method base class
     """
     def __init__(self, feature_coefficients, X_placeholder, xs, session, keras_learning_phase=None):
         self.feature_coefficients = feature_coefficients

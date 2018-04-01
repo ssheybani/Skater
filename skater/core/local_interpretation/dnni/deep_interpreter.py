@@ -1,9 +1,11 @@
 from skater.core.local_interpretation.dnni.relevance_scorer import GradientBased
-from skater.core.local_interpretation.dnni.initializer import relevance_scorer_type
+from skater.core.local_interpretation.dnni.relevance_scorer import LRP
 from skater.core.local_interpretation.dnni.initializer import Initializer
 
 from tensorflow.python.framework import ops
 import tensorflow as tf
+
+from collections import OrderedDict
 import warnings
 
 @ops.RegisterGradient("DeepInterpretGrad")
@@ -28,6 +30,9 @@ class DeepInterpreter(object):
         self.override_context = self.graph.gradient_override_map(self.get_override_map())
         self.keras_phase_placeholder = None
         self.context_on = False
+        self.relevance_scorer_type = OrderedDict({
+            'elrp': (LRP, 0)
+        })
         if self.session is None:
             raise RuntimeError('Relevant session not retrieved')
 
@@ -52,12 +57,12 @@ class DeepInterpreter(object):
         global _ENABLED_METHOD_CLASS, _GRAD_OVERRIDE_CHECKFLAG
         self.method = method
 
-        method_class, method_flag = relevance_scorer_type[self.method] if self.method in relevance_scorer_type \
+        method_class, method_flag = self.relevance_scorer_type[self.method] if self.method in self.relevance_scorer_type \
                                         else None, None
         if method_class and method_flag is None:
-            raise RuntimeError('Method must be in %s' % list(relevance_scorer_type.keys()))
+            raise RuntimeError('Method must be in %s' % list(self.relevance_scorer_type.keys()))
 
-        print('DeepExplain: running "%s" explanation method (%d)' % (self.method, method_flag))
+        print('DeepInterpreter: running {} explanation method {}'.format(self.method, method_flag))
         _GRAD_OVERRIDE_CHECKFLAG = 0
 
         _ENABLED_METHOD_CLASS = method_class
