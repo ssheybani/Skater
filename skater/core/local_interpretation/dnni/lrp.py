@@ -1,14 +1,10 @@
 from skater.core.local_interpretation.dnni.initializer import Initializer
 import tensorflow as tf
 
-def original_grad(op, grad):
+import warnings
+import tensorflow as tf
 
-    if op.type not in ACTIVATIONS_OPS:
-        warnings.warn('Selected Activation Ops({}) is currently not supported.'.format(op.type))
-    op_name = '_{}Grad'.format(op.type)
-
-    ops_func = getattr(nn_grad, op_name) if hasattr(nn_grad, op_name) else getattr(math_grad, op_name)
-    return ops_func(op, grad)
+from tensorflow.python.ops import nn_grad, math_grad
 
 
 class GradientBased(Initializer):
@@ -24,7 +20,7 @@ class GradientBased(Initializer):
         return results[0]
 
     @classmethod
-    def non_linearity_grad_override(cls, op, grad):
+    def non_linear_grad(cls, op, grad):
         return original_grad(op, grad)
 
 
@@ -40,11 +36,10 @@ class LRP(GradientBased):
                 tf.gradients(self.feature_coefficients, self.X), [self.X])]
 
     @classmethod
-    def non_linear_grad_override(cls, op, grad):
-        output = op.outputs[0]
-        zs = op.inputs[0]
-        stablizer_epsilon = cls.eps * (tf.where(zs >= 0, tf.ones_like(zs, dtype=tf.float32), -1
-                                               * tf.ones_like(zs, dtype=tf.float32)))
-        zs += stablizer_epsilon
-
-        return grad * output / zs
+    def non_linear_grad(cls, op, grad):
+        op_out = op.outputs[0]
+        op_in = op.inputs[0]
+        stablizer_epsilon = cls.eps * (tf.where(op_in >= 0, tf.ones_like(op_in, dtype=tf.float32), -1
+                                               * tf.ones_like(op_in, dtype=tf.float32)))
+        op_in += stablizer_epsilon
+        return grad * op_out / op_out
