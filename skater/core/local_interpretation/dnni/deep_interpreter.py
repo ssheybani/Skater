@@ -1,4 +1,4 @@
-from skater.core.local_interpretation.dnni.lrp import GradientBased
+from skater.core.local_interpretation.dnni.relevance_scorer import GradientBased
 from skater.core.local_interpretation.dnni.initializer import relevance_scorer_type
 from skater.core.local_interpretation.dnni.initializer import Initializer
 

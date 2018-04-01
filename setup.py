@@ -87,7 +87,11 @@ def setup_package():
             'joblib==0.11',
             'rpy2==2.9.1; python_version>"3.0"',
             'Jinja2==2.10'],
-        extras_require ={'all':'matplotlib'},
+        extras_require={
+            'matplot':'matplotlib',
+            'tf': ["tensorflow>=1.0.0"],
+            "tf_gpu": ["tensorflow-gpu>=1.0.0"]
+            }
         )
 
 if __name__ == '__main__':

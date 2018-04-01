@@ -1,11 +1,6 @@
 from skater.core.local_interpretation.dnni.initializer import Initializer
 import tensorflow as tf
 
-import warnings
-import tensorflow as tf
-
-from tensorflow.python.ops import nn_grad, math_grad
-
 
 class GradientBased(Initializer):
     """

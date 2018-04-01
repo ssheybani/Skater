@@ -1,4 +1,4 @@
-from skater.core.local_interpretation.dnni.lrp import LRP
+from skater.core.local_interpretation.dnni.relevance_scorer import LRP
 from collections import OrderedDict
 
 ACTIVATIONS_OPS = [
