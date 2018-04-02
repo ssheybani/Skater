@@ -31,7 +31,7 @@ class DeepInterpreter(object):
         self.session = session
         self.graph = session.graph if graph is None else graph
         self.graph_context = self.graph.as_default()
-        self.override_context = self.graph.gradient_override_map(self._get_override_map())
+        self.override_context = self.graph.gradient_override_map(self._get_gradient_override_map())
         self.keras_phase_placeholder = None
         self.context_on = False
         self.relevance_scorer_type = OrderedDict({
