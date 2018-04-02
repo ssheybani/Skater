@@ -22,7 +22,6 @@ class GradientBased(Initializer):
 
 
 class LRP(GradientBased):
-
     eps = None
     def __init__(self, feature_coefficients, X, xs, session, keras_learning_phase, epsilon=1e-4):
         super(LRP, self).__init__(feature_coefficients, X, xs, session, keras_learning_phase)

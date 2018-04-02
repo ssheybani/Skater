@@ -64,7 +64,7 @@ class DeepInterpreter(object):
             raise RuntimeError('explain can be invoked only within a DeepInterpreter context.')
         global _ENABLED_METHOD_CLASS, _GRAD_OVERRIDE_CHECKFLAG
         self.relevance_type = relevance_type
-        self.logger.info("all supported relevancy scorers {}".format(relevance_scorer_type))
+        self.logger.info("all supported relevancy scorers {}".format(self.relevance_scorer_type))
 
         relevance_type_class = self.relevance_scorer_type[self.relevance_type] \
                                         if self.relevance_type in self.relevance_scorer_type.keys() \
