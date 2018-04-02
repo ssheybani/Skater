@@ -37,10 +37,5 @@ class Initializer(object):
         return ops_func(op, grad)
 
 
-    @staticmethod
-    def get_override_map():
-        return dict((ops_item, 'DeepInterpretGrad') for ops_item in ACTIVATIONS_OPS)
-
-
 
 

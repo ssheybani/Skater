@@ -1,6 +1,7 @@
 from skater.core.local_interpretation.dnni.relevance_scorer import GradientBased
 from skater.core.local_interpretation.dnni.relevance_scorer import LRP
 from skater.core.local_interpretation.dnni.initializer import Initializer
+from skater.core.local_interpretation.dnni.initializer import ACTIVATIONS_OPS
 
 from tensorflow.python.framework import ops
 import tensorflow as tf
@@ -49,6 +50,11 @@ class DeepInterpreter(object):
         self.graph_context.__exit__(type, value, traceback)
         self.override_context.__exit__(type, value, traceback)
         self.context_on = False
+
+
+    @staticmethod
+    def get_override_map():
+        return dict((ops_item, 'DeepInterpretGrad') for ops_item in ACTIVATIONS_OPS)
 
 
     def explain(self, method, T, X, xs, **kwargs):
