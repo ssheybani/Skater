@@ -71,7 +71,7 @@ class DeepInterpreter(object):
                                         else None
         if relevance_type_class is None:
             raise RuntimeError('Method type not found in {}'.formatlist(self.relevance_scorer_type.keys()))
-        self.logger.info('DeepInterpreter: executing relevance type class {}'.format(self.relevance_type_class))
+        self.logger.info('DeepInterpreter: executing relevance type class {}'.format(relevance_type_class))
 
         _GRAD_OVERRIDE_CHECKFLAG = 0
         _ENABLED_METHOD_CLASS = relevance_type_class

@@ -13,7 +13,7 @@ class Initializer(object):
     """
     def __init__(self, feature_coefficients, X, xs, session, keras_learning_phase=None):
         self.feature_coefficients = feature_coefficients
-        self.X_placeholder = X
+        self.X = X
         self.xs = xs
         self.session = session
         self.keras_learning_phase = keras_learning_phase
