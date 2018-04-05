@@ -66,7 +66,6 @@ def setup_package():
 
     setup(
         name=about['__title__'],
-        zip_safe=False,
         packages=find_packages(),
         description=about['__summary__'],
         long_description=readme,
@@ -76,6 +75,7 @@ def setup_package():
         url=about['__uri__'],
         license=about['__license__'],
         cmdclass={'install': InvokingShScript},
+        include_package_data=True,
         install_requires=[
             'scikit-learn>=0.18',
             'pandas>=0.19',
@@ -91,8 +91,8 @@ def setup_package():
             'matplot':'matplotlib',
             'tf': ["tensorflow>=1.0.0"],
             "tf_gpu": ["tensorflow-gpu>=1.0.0"]
-            }
-        )
+            },
+        zip_safe=False)
 
 if __name__ == '__main__':
     setup_package()

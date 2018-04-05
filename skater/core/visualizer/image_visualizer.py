@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 
 def visualize(input_img, xi=None, cmap='bwr', axis=plt, percentile=100, dilation=3.0, alpha=0.8):
     dx, dy = 0.01, 0.01
-    print(input_img.shape[1])
     xx = np.arange(0.0, input_img.shape[1], dx)
     yy = np.arange(0.0, input_img.shape[0], dy)
     xmin, xmax, ymin, ymax = np.amin(xx), np.amax(xx), np.amin(yy), np.amax(yy)
