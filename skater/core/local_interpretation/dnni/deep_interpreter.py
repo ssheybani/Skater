@@ -11,6 +11,7 @@ import warnings
 from skater.util.logger import build_logger
 from skater.util.logger import _INFO
 
+
 @ops.RegisterGradient("DeepInterpretGrad")
 def deep_interpreter_grad(op, grad):
     Initializer.grad_override_checkflag = 1
@@ -23,6 +24,7 @@ def deep_interpreter_grad(op, grad):
 
 class DeepInterpreter(object):
 
+    # Reference: https://github.com/marcoancona/DeepExplain/blob/master/deepexplain/tensorflow/methods.py
     def __init__(self, graph=None, session=tf.get_default_session(), log_level=_INFO):
         self.logger = build_logger(log_level, __name__)
         self.relevance_type = None
@@ -34,7 +36,7 @@ class DeepInterpreter(object):
         self.keras_phase_placeholder = None
         self.context_on = False
         self.relevance_scorer_type = OrderedDict({
-            'elrp': LRP })
+            'elrp': LRP})
         if self.session is None:
             raise RuntimeError('Relevant session not retrieved')
 
@@ -65,8 +67,7 @@ class DeepInterpreter(object):
         self.logger.info("all supported relevancy scorers {}".format(self.relevance_scorer_type))
 
         relevance_type_class = self.relevance_scorer_type[self.relevance_type] \
-                                        if self.relevance_type in self.relevance_scorer_type.keys() \
-                                        else None
+            if self.relevance_type in self.relevance_scorer_type.keys() else None
         if relevance_type_class is None:
             raise RuntimeError('Method type not found in {}'.formatlist(self.relevance_scorer_type.keys()))
         self.logger.info('DeepInterpreter: executing relevance type class {}'.format(relevance_type_class))

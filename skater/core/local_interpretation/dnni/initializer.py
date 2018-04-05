@@ -6,7 +6,7 @@ import warnings
 class Initializer(object):
     """
     """
-    activation_ops = ['Relu', 'Elu',  'Softplus', 'Tanh', 'Sigmoid']
+    activation_ops = ['Relu', 'Elu', 'Softplus', 'Tanh', 'Sigmoid']
     enabled_method_class = None
     grad_override_checkflag = 0
 
@@ -27,13 +27,10 @@ class Initializer(object):
         return self.session.run(feature_wts, feed_dict)
 
 
-    def original_grad(self, op, grad):
-        if op.type not in self.activation_ops:
+    @classmethod
+    def original_grad(cls, op, grad):
+        if op.type not in cls.activation_ops:
             warnings.warn('Selected Activation Ops({}) is currently not supported.'.format(op.type))
         op_name = '_{}Grad'.format(op.type)
         ops_func = getattr(nn_grad, op_name) if hasattr(nn_grad, op_name) else getattr(math_grad, op_name)
         return ops_func(op, grad)
-
-
-
-
