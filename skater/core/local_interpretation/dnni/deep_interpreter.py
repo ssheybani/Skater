@@ -1,7 +1,7 @@
 from skater.core.local_interpretation.dnni.relevance_scorer import GradientBased
 from skater.core.local_interpretation.dnni.relevance_scorer import LRP
 from skater.core.local_interpretation.dnni.initializer import Initializer
-from skater.core.local_interpretation.dnni.initializer import ACTIVATIONS_OPS
+
 
 from tensorflow.python.framework import ops
 import tensorflow as tf
@@ -13,11 +13,10 @@ from skater.util.logger import _INFO
 
 @ops.RegisterGradient("DeepInterpretGrad")
 def deep_interpreter_grad(op, grad):
-    global _ENABLED_METHOD_CLASS, _GRAD_OVERRIDE_CHECKFLAG
-    _GRAD_OVERRIDE_CHECKFLAG = 1
-    if _ENABLED_METHOD_CLASS is not None \
-            and issubclass(_ENABLED_METHOD_CLASS, GradientBased):
-        return _ENABLED_METHOD_CLASS.non_linear_grad(op, grad)
+    Initializer.grad_override_checkflag = 1
+    if Initializer.enabled_method_class is not None \
+            and issubclass(Initializer.enabled_method_class, GradientBased):
+        return Initializer.enabled_method_class.non_linear_grad(op, grad)
     else:
         return Initializer.original_grad(op, grad)
 
@@ -56,13 +55,12 @@ class DeepInterpreter(object):
 
     @staticmethod
     def _get_gradient_override_map():
-        return dict((ops_item, 'DeepInterpretGrad') for ops_item in ACTIVATIONS_OPS)
+        return dict((ops_item, 'DeepInterpretGrad') for ops_item in Initializer.activation_ops)
 
 
     def explain(self, relevance_type, T, X, xs, **kwargs):
         if not self.context_on:
             raise RuntimeError('explain can be invoked only within a DeepInterpreter context.')
-        global _ENABLED_METHOD_CLASS, _GRAD_OVERRIDE_CHECKFLAG
         self.relevance_type = relevance_type
         self.logger.info("all supported relevancy scorers {}".format(self.relevance_scorer_type))
 
@@ -73,15 +71,15 @@ class DeepInterpreter(object):
             raise RuntimeError('Method type not found in {}'.formatlist(self.relevance_scorer_type.keys()))
         self.logger.info('DeepInterpreter: executing relevance type class {}'.format(relevance_type_class))
 
-        _GRAD_OVERRIDE_CHECKFLAG = 0
-        _ENABLED_METHOD_CLASS = relevance_type_class
+        Initializer.grad_override_checkflag = 0
+        Initializer.enabled_method_class = relevance_type_class
 
-        method = _ENABLED_METHOD_CLASS(T, X, xs, self.session, self.keras_phase_placeholder, **kwargs)
+        method = Initializer.enabled_method_class(T, X, xs, self.session, self.keras_phase_placeholder, **kwargs)
         result = method.run()
-        if issubclass(_ENABLED_METHOD_CLASS, GradientBased) and _GRAD_OVERRIDE_CHECKFLAG == 0:
+        if issubclass(Initializer.enabled_method_class, GradientBased) and Initializer.grad_override_checkflag == 0:
             warnings.warn('Results may not reliable, as default gradient seems to have been used. Be careful...')
 
-        _ENABLED_METHOD_CLASS = None
-        _GRAD_OVERRIDE_CHECKFLAG = 0
+        Initializer.enabled_method_class = None
+        Initializer.grad_override_checkflag = 0
         self.keras_phase_placeholder = None
         return result
