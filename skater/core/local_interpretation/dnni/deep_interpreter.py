@@ -55,6 +55,17 @@ class DeepInterpreter(object):
         self.context_on = False
 
 
+    def _set_keras_placeholder_state(self):
+        g = tf.get_default_graph()
+        ops = g.get_operations()
+        for op in ops:
+            if 'keras_learning_phase' in op.name:
+                value = op.outputs[0]
+                if value not in {0, 1}:
+                    raise ValueError('Expected learning phase to be 0 or 1.')
+                self.keras_phase_placeholder = value
+
+
     @staticmethod
     def _get_gradient_override_map():
         return dict((ops_item, 'DeepInterpretGrad') for ops_item in Initializer.activation_ops)
@@ -74,6 +85,9 @@ class DeepInterpreter(object):
 
         Initializer.grad_override_checkflag = 0
         Initializer.enabled_method_class = relevance_type_class
+
+        # Before computing relevance, lets check on the state of the supported ops
+        self._set_keras_placeholder_state()
 
         method = Initializer.enabled_method_class(T, X, xs, self.session, self.keras_phase_placeholder, **kwargs)
         result = method.run()
