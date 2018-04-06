@@ -2,9 +2,10 @@ import numpy as np
 import skimage
 import skimage.io
 from skimage.transform import resize
+from .exceptions import MatplotlibUnavailableError
 
 
-def load_image(path, img_width, img_height):
+def load_image(path, img_height, img_width):
     # load image
     img = skimage.io.imread(path)
     img = img / 255.0
@@ -21,7 +22,8 @@ def load_image(path, img_width, img_height):
     return resized_img
 
 
-def noisy(noise_typ,image):
+def noisy(noise_typ, image):
+    #TODO: function needs to be recoded correctly
     if noise_typ == "gauss":
         row,col,ch= image.shape
         mean = 0
@@ -59,3 +61,17 @@ def noisy(noise_typ,image):
         gauss = gauss.reshape(row,col,ch)
         noisy = image + image * gauss
         return noisy
+
+
+def normalize(X):
+    """ Normalize image of the shape (H, W, D) in the range of 0 and 1
+    """
+    return np.array((X - np.min(X)) / (np.max(X) - np.min(X)))
+
+
+def show_image(X):
+    try:
+        import matplotlib.pyplot as plt
+    except ImportError:
+            raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
+    plt.imshow(X)
