@@ -25,27 +25,19 @@
   
 
   
-  
     <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="skater 0 documentation" href="../index.html"/>
-        <link rel="up" title="API Reference" href="../api.html"/>
-        <link rel="next" title="DataManagers" href="data.html"/>
-        <link rel="prev" title="Interpretation Objects" href="interpretation.html"/> 
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="DataManagers" href="data.html" />
+    <link rel="prev" title="Interpretation Objects" href="interpretation.html" /> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -67,7 +59,7 @@
             
             
               <div class="version">
-                1.0
+                1.1.0-b1
               </div>
             
           
@@ -117,7 +109,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">skater</a>
@@ -125,9 +117,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -191,7 +184,7 @@ InMemoryModel and DeployedModel class, though this API may change in later versi
  9
 10
 11
-12</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_breast_cancer</span>
+12</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_breast_cancer</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostedClassifier</span>
 
 <span class="n">breast_cancer</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">()</span>
@@ -211,7 +204,7 @@ InMemoryModel and DeployedModel class, though this API may change in later versi
 <p>Models that are callable function are exposed via the InMemoryModel object.</p>
 <dl class="method">
 <dt id="skater.model.InMemoryModel.__init__">
-<code class="descclassname">InMemoryModel.</code><code class="descname">__init__</code><span class="sig-paren">(</span><em>prediction_fn</em>, <em>input_formatter=None</em>, <em>output_formatter=None</em>, <em>target_names=None</em>, <em>unique_values=None</em>, <em>examples=None</em>, <em>log_level=30</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/model/local_model.html#InMemoryModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.model.InMemoryModel.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">InMemoryModel.</code><code class="descname">__init__</code><span class="sig-paren">(</span><em>prediction_fn</em>, <em>input_formatter=None</em>, <em>output_formatter=None</em>, <em>target_names=None</em>, <em>feature_names=None</em>, <em>unique_values=None</em>, <em>examples=None</em>, <em>model_type=None</em>, <em>probability=None</em>, <em>log_level=30</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/model/local_model.html#InMemoryModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.model.InMemoryModel.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>This model can be called directly from memory</p>
 <dl class="docutils">
 <dt>prediction_fn: callable</dt>
@@ -225,7 +218,9 @@ and convert them to numpy arrays or dataframes.</dd>
 to the prediction_fn. This usually should take your data type
 and convert them to numpy arrays or dataframes.</dd>
 <dt>target_names: array type</dt>
-<dd>optional names of classes that describe model outputs.</dd>
+<dd>(optional) names of classes that describe model outputs.</dd>
+<dt>feature_names: array type</dt>
+<dd>(optional) Names of features the model consumes.</dd>
 <dt>unique_values: array type</dt>
 <dd><p class="first">The set of possible output values. Only use on classifier models that
 return “best guess” predictions, not probability scores, e.g.</p>
@@ -235,6 +230,12 @@ model.predict(fruit2) -&gt; ‘banana’</p>
 </dd>
 <dt>examples: numpy.array or pandas.dataframe</dt>
 <dd>optional examples to use to make inferences about the function.</dd>
+<dt>model_type: None, “classifier”, “regressor”</dt>
+<dd>Indicates which type of model is being used. If left as None, will try to infer based on the
+signature of the output type.</dd>
+<dt>probability: None, True, False</dt>
+<dd>If using a classifier, indicates whether probabilities are provided
+(as opposed to indicators/labels).</dd>
 <dt>log_level: int</dt>
 <dd>config setting to see model logs. 10 is a good value for seeing debug messages.
 30 is warnings only.</dd>
@@ -248,7 +249,7 @@ model.predict(fruit2) -&gt; ‘banana’</p>
 DeployedModel object.</p>
 <dl class="method">
 <dt id="skater.model.DeployedModel.__init__">
-<code class="descclassname">DeployedModel.</code><code class="descname">__init__</code><span class="sig-paren">(</span><em>uri</em>, <em>input_formatter</em>, <em>output_formatter</em>, <em>target_names=None</em>, <em>unique_values=None</em>, <em>examples=None</em>, <em>feature_names=None</em>, <em>request_kwargs={}</em>, <em>log_level=30</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/model/deployed_model.html#DeployedModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.model.DeployedModel.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">DeployedModel.</code><code class="descname">__init__</code><span class="sig-paren">(</span><em>uri</em>, <em>input_formatter</em>, <em>output_formatter</em>, <em>request_kwargs={}</em>, <em>target_names=None</em>, <em>feature_names=None</em>, <em>unique_values=None</em>, <em>examples=None</em>, <em>model_type=None</em>, <em>probability=None</em>, <em>log_level=30</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/model/deployed_model.html#DeployedModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.model.DeployedModel.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>This model can be called by making http requests
 to the passed in uri.</p>
 <dl class="docutils">
@@ -262,8 +263,15 @@ and convert them to JSON.</dd>
 <dd>This function will run on outputs before returning
 results to interpretation objects. This usually should take
 request objects and convert them to array types.</dd>
+<dt>request_kwargs: dict</dt>
+<dd>any additional request headers that need to be passed, such as api
+keys, content types, etc.</dd>
 <dt>target_names: array type</dt>
-<dd>see skater.model.Model for details</dd>
+<dd>(optional) The names of the target variable/classes. There should be as many
+names as there are outputs per prediction. Defaults to Predicted Value for
+regression and Class 1…n for classification.</dd>
+<dt>feature_names: array type</dt>
+<dd>(optional) Names of features the model consumes.</dd>
 <dt>unique_values: array type</dt>
 <dd><p class="first">The set of possible output values. Only use on classifier models that
 return “best guess” predictions, not probability scores, e.g.</p>
@@ -273,9 +281,12 @@ model.predict(fruit2) -&gt; ‘banana’</p>
 </dd>
 <dt>examples:</dt>
 <dd>optional examples to use to make inferences about the function.</dd>
-<dt>request_kwargs: dict</dt>
-<dd>any additional request headers that need to be passed, such as api
-keys, content types, etc.</dd>
+<dt>model_type: None, “classifier”, “regressor”</dt>
+<dd>Indicates which type of model is being used. If left as None, will try to infer based on the
+signature of the output type.</dd>
+<dt>probability: None, True, False</dt>
+<dd>If using a classifier, indicates whether probabilities are provided
+(as opposed to indicators/labels).</dd>
 <dt>log_level: int</dt>
 <dd>see skater.model.Model for details</dd>
 </dl>
@@ -286,9 +297,7 @@ keys, content types, etc.</dd>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -310,7 +319,7 @@ keys, content types, etc.</dd>
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -329,6 +338,7 @@ keys, content types, etc.</dd>
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
             VERSION:'0',
+            LANGUAGE:'en',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -346,14 +356,13 @@ keys, content types, etc.</dd>
     <script type="text/javascript" src="../_static/js/theme.js"></script>
   
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>
