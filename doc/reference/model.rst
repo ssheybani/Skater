@@ -13,13 +13,13 @@ InMemoryModel and DeployedModel class, though this API may change in later versi
    :linenos:
 
    from sklearn.datasets import load_breast_cancer
-   from sklearn.ensemble import GradientBoostedClassifier
+   from sklearn.ensemble import GradientBoostingClassifier
 
    breast_cancer = load_breast_cancer()
    X = breast_cancer.data
    y = breast_cancer.target
 
-   gb = GradientBoostedClassifier()
+   gb = GradientBoostingClassifier()
    gb.fit(X,y)
 
    from skater.model import InMemoryModel

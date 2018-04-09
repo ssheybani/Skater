@@ -79,7 +79,7 @@ class FeatureImportance(BaseGlobalInterpretation):
             >>> from sklearn.ensemble import RandomForestClassier
             >>> rf = RandomForestClassier()
             >>> rf.fit(X,y)
-            >>> model = InMemoryModel(rf, examples = X)
+            >>> model = InMemoryModel(rf.predict_proba, examples = X)
             >>> interpreter = Interpretation()
             >>> interpreter.load_data(X)
             >>> interpreter.feature_importance.feature_importance(model)
