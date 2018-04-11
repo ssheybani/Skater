@@ -26,6 +26,22 @@ class GradientBased(Initializer):
 
 
 class LRP(GradientBased):
+    """ LRP Implementation computed using backpropagation by applying change rule on a modified gradient function.
+    LRP could be implemented in different ways. This version implements the epsilon-LRP(Eq (58) as stated in [1]
+    or Eq (2) in [2]. Epsilon acts as a numerical stabilizer. 
+
+    Parameters
+    __________
+
+
+    Reference
+    _________
+    .. [1] Bach S, Binder A, Montavon G, Klauschen F, Müller K-R, Samek W (2015)
+       On Pixel-Wise Explanations for Non-Linear Classifier Decisions by Layer-Wise Relevance Propagation.
+       PLoS ONE 10(7): e0130140. https://doi.org/10.1371/journal.pone.0130140
+    .. [2] Ancona M, Ceolini E, Öztireli C, Gross M:
+           Towards better understanding of gradient-based attribution methods for Deep Neural Networks. ICLR, 2018
+    """
     eps = None
 
     def __init__(self, feature_wts, X, xs, session, epsilon=1e-4):

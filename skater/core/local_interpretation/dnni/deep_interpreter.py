@@ -24,12 +24,14 @@ def deep_interpreter_grad(op, grad):
 
 
 class DeepInterpreter(object):
-    """ Interpreter for inferring Deep Learning Models
+    """
+    :: Experimental :: The implementation is currently experimental and might change in future
+    Interpreter for inferring Deep Learning Models
 
     Reference
     ---------
     .. [1] Marco Ancona, Enea Ceolini, Cengiz Öztireli, Markus Gross:
-    ..    TOWARDS BETTER UNDERSTANDING OF GRADIENT-BASED ATTRIBUTION METHODS FOR DEEP NEURAL NETWORKS. ICLR, 2018
+           Towards better understanding of gradient-based attribution methods for Deep Neural Networks. ICLR, 2018
     .. [2] https://github.com/marcoancona/DeepExplain/blob/master/deepexplain/tensorflow/methods.py
 
     """
