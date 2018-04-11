@@ -23,7 +23,7 @@ def load_image(path, img_height, img_width):
     return resized_img
 
 
-def noisy(image, noise_typ='gaussian', random_state=None):
+def add_noise(image, noise_typ='gaussian', random_state=None):
     """ Helper function to add different forms of noise
 
     Parameters
