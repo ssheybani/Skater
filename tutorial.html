@@ -25,26 +25,19 @@
   
 
   
-  
     <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="skater 0 documentation" href="index.html"/>
-        <link rel="next" title="API Reference" href="api.html"/>
-        <link rel="prev" title="Install Skater" href="install.html"/> 
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api.html" />
+    <link rel="prev" title="Install Skater" href="install.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -66,7 +59,7 @@
             
             
               <div class="version">
-                1.0
+                1.1.0-b1
               </div>
             
           
@@ -116,7 +109,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">skater</a>
@@ -124,9 +117,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -175,7 +169,7 @@
 <p>The general workflow within the skater package is to create an interpretation, create a model, and run interpretation algorithms.</p>
 <p>An Interpretation consumes a dataset, and optionally some meta data like feature names and row ids.
 Internally, the Interpretation will generate a DataManager to handle data requests and sampling.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_boston</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_boston</span>
 <span class="n">boston</span> <span class="o">=</span> <span class="n">load_boston</span><span class="p">()</span>
 <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">features</span> <span class="o">=</span> <span class="n">boston</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">boston</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">boston</span><span class="o">.</span><span class="n">feature_names</span>
 
@@ -195,7 +189,7 @@ models and classifiers.</p>
 <p>To create a skater model based on a local function or method, pass in the predict function to an InMemoryModel. A user can optionally pass data samples
 to the examples keyword argument. This is only used to infer output types and formats. Out of the box, skater allows models return numpy arrays and
 pandas dataframes. If you would like support for additional formats, please let us know: <a class="reference external" href="https://github.com/datascienceinc/model-interpretation/issues/117">https://github.com/datascienceinc/model-interpretation/issues/117</a></p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostedRegressor</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostedRegressor</span>
 <span class="n">gb</span> <span class="o">=</span> <span class="n">GradientBoostedRegressor</span><span class="p">()</span>
 <span class="n">gb</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
@@ -205,7 +199,7 @@ pandas dataframes. If you would like support for additional formats, please let 
 </div>
 <p>If your model requires or returns different data structures, you can instead create a function that converts outputs to an appropriate
 data structure.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">predict_as_dataframe</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">predict_as_dataframe</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">gb</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 
 <span class="kn">from</span> <span class="nn">skater.model</span> <span class="kn">import</span> <span class="n">InMemoryModel</span>
@@ -219,20 +213,20 @@ data structure.</p>
 an input formatter and an output formatter, which speak to the requests library for posting and parsing.</p>
 <p>The input formatter takes a pandas DataFrame or a numpy ndarray, and returns an object (such as a dict) that can be converted to json
 to be posted. The output formatter takes a requests.response as an input and returns a numpy ndarray or pandas DataFrame:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">skater.model</span> <span class="kn">import</span> <span class="n">DeployedModel</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">skater.model</span> <span class="kn">import</span> <span class="n">DeployedModel</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
-<span class="k">def</span> <span class="nf">input_formatter</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="k">return</span> <span class="p">{</span><span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">)}</span>
-<span class="k">def</span> <span class="nf">output_formatter</span><span class="p">(</span><span class="n">response</span><span class="p">):</span> <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s">&#39;output&#39;</span><span class="p">])</span>
-<span class="n">uri</span> <span class="o">=</span> <span class="s">&quot;https://yourorg.com/model/endpoint&quot;</span>
+<span class="k">def</span> <span class="nf">input_formatter</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">)}</span>
+<span class="k">def</span> <span class="nf">output_formatter</span><span class="p">(</span><span class="n">response</span><span class="p">):</span> <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s1">&#39;output&#39;</span><span class="p">])</span>
+<span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;https://yourorg.com/model/endpoint&quot;</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">DeployedModel</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">input_formatter</span><span class="p">,</span> <span class="n">output_formatter</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:</span><span class="mi">10</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>If your api requires additional configuration like cookies, use request_kwargs:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">skater.model</span> <span class="kn">import</span> <span class="n">DeployedModel</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">skater.model</span> <span class="kn">import</span> <span class="n">DeployedModel</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
-<span class="n">req_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;cookies&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;cookie-name&#39;</span><span class="p">:</span><span class="s">&#39;cookie&#39;</span><span class="p">}}</span>
+<span class="n">req_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;cookies&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;cookie-name&#39;</span><span class="p">:</span><span class="s1">&#39;cookie&#39;</span><span class="p">}}</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">DeployedModel</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">input_formatter</span><span class="p">,</span> <span class="n">output_formatter</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:</span><span class="mi">10</span><span class="p">],</span> <span class="n">request_kwargs</span><span class="o">=</span><span class="n">req_kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -243,8 +237,8 @@ to be posted. The output formatter takes a requests.response as an input and ret
 If your model requires a different input type, such as the case of a model API
 requiring JSON, or an H20 model requiring a H20Frame, then you’ll need to include
 an input formatter function to the Skater Model object, for example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="k">def</span> <span class="nf">numpy_to_json</span><span class="p">(</span><span class="n">numpy_array</span><span class="p">):</span>
-   <span class="k">return</span> <span class="p">[{</span><span class="s">&#39;data&#39;</span><span class="p">:</span><span class="n">x</span><span class="p">}</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">numpy_array</span><span class="p">]</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">numpy_to_json</span><span class="p">(</span><span class="n">numpy_array</span><span class="p">):</span>
+   <span class="k">return</span> <span class="p">[{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span><span class="n">x</span><span class="p">}</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">numpy_array</span><span class="p">]</span>
 
  <span class="n">skater_model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">,</span> <span class="n">input_formatter</span> <span class="o">=</span> <span class="n">numpy_to_json</span><span class="p">)</span>
 </pre></div>
@@ -259,14 +253,14 @@ that takes your model’s return type, and returns a numpy array or pandas dataf
 with probability scores.</p>
 <p>Skater expects that regression models run on n examples will return numerical arrays
 of shape (n, ) or (n, 1), such as the following regression output run on 3 examples:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.1</span><span class="p">])</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.1</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>Skater expects that classification models with probability scores of k classes run
 on n examples will return numerical arrays of shape (n, k), where elements are
 between 0 and 1 and rows sum to 1, such as the following classifier output run
 on 4 examples with 3 classes:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">.</span><span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">32</span><span class="p">,</span> <span class="o">.</span><span class="mi">68</span><span class="p">],</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">.</span><span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">32</span><span class="p">,</span> <span class="o">.</span><span class="mi">68</span><span class="p">],</span>
          <span class="p">[</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">2</span><span class="p">,</span>  <span class="o">.</span><span class="mi">7</span><span class="p">],</span>
          <span class="p">[</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="o">.</span><span class="mi">5</span><span class="p">,</span>  <span class="o">.</span><span class="mi">0</span><span class="p">],</span>
          <span class="p">[</span><span class="o">.</span><span class="mi">8</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">,</span>  <span class="o">.</span><span class="mi">1</span><span class="p">])</span>
@@ -275,11 +269,11 @@ on 4 examples with 3 classes:</p>
 <p>Skater expects that classification models without probability scores of k classes run
 on n examples will return arrays of shape (n, ) or (n, 1), such as the following
 classifier run on 3 examples with 2 classes:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s">&#39;apple&#39;</span><span class="p">,</span><span class="s">&#39;banana&#39;</span><span class="p">,</span><span class="s">&#39;banana&#39;</span><span class="p">])</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s1">&#39;apple&#39;</span><span class="p">,</span><span class="s1">&#39;banana&#39;</span><span class="p">,</span><span class="s1">&#39;banana&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>or</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>Note that in this last case of classifiers that do not provide probabilities for
@@ -288,17 +282,17 @@ predict. Therefore, these models require <cite>unique_values</cite> keyword argu
 initializing a Skater model, which defines the unique classes that a model might
 return,</p>
 <p>such as:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">unique_classes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">unique_classes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
 <span class="n">skater_model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">classifier</span><span class="o">.</span><span class="n">predict</span><span class="p">,</span> <span class="n">unique_classes</span><span class="o">=</span><span class="n">unique_classes</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>or</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">unique_classes</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;apple&#39;</span><span class="p">,</span><span class="s">&#39;banana&#39;</span><span class="p">]</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">unique_classes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;apple&#39;</span><span class="p">,</span><span class="s1">&#39;banana&#39;</span><span class="p">]</span>
 <span class="n">skater_model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">classifier</span><span class="o">.</span><span class="n">predict</span><span class="p">,</span> <span class="n">unique_classes</span><span class="o">=</span><span class="n">unique_classes</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>With an Interpretation and a Model, one can run all skater interpretation algorithms.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">interpreter</span><span class="o">.</span><span class="n">feature_importance</span><span class="o">.</span><span class="n">feature_importance</span><span class="p">(</span><span class="n">skater_model</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">interpreter</span><span class="o">.</span><span class="n">feature_importance</span><span class="o">.</span><span class="n">feature_importance</span><span class="p">(</span><span class="n">skater_model</span><span class="p">)</span>
 
 <span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">plot_partial_dependence</span><span class="p">([</span><span class="n">features</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">features</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">skater_model</span><span class="p">)</span>
 </pre></div>
@@ -315,9 +309,7 @@ return,</p>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -339,7 +331,7 @@ return,</p>
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -358,6 +350,7 @@ return,</p>
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
             VERSION:'0',
+            LANGUAGE:'en',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -375,14 +368,13 @@ return,</p>
     <script type="text/javascript" src="_static/js/theme.js"></script>
   
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

@@ -25,27 +25,19 @@
   
 
   
-  
     <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="skater 0 documentation" href="../index.html"/>
-        <link rel="up" title="API Reference" href="../api.html"/>
-        <link rel="next" title="Model Objects" href="model.html"/>
-        <link rel="prev" title="API Reference" href="../api.html"/> 
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Model Objects" href="model.html" />
+    <link rel="prev" title="API Reference" href="../api.html" /> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -67,7 +59,7 @@
             
             
               <div class="version">
-                1.0
+                1.1.0-b1
               </div>
             
           
@@ -125,7 +117,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">skater</a>
@@ -133,9 +125,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -187,7 +180,7 @@
 <div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
 3
-4</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">skater</span> <span class="kn">import</span> <span class="n">Interpretation</span><span class="p">()</span>
+4</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">skater</span> <span class="kn">import</span> <span class="n">Interpretation</span><span class="p">()</span>
 <span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
 <span class="n">interpreter</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 <span class="n">interpreter</span><span class="o">.</span><span class="n">feature_importance</span><span class="o">.</span><span class="n">feature_importance</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
@@ -204,7 +197,7 @@ and observation names, as well as providing various sampling algorithms.</p>
 For more details on what the DataManager does, please see the relevant documentation [PROVIDE LINK].</p>
 <dl class="method">
 <dt id="skater.core.explanations.Interpretation.load_data">
-<code class="descclassname">Interpretation.</code><code class="descname">load_data</code><span class="sig-paren">(</span><em>training_data</em>, <em>feature_names=None</em>, <em>index=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/explanations.html#Interpretation.load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.explanations.Interpretation.load_data" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">Interpretation.</code><code class="descname">load_data</code><span class="sig-paren">(</span><em>training_data</em>, <em>training_labels=None</em>, <em>feature_names=None</em>, <em>index=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/explanations.html#Interpretation.load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.explanations.Interpretation.load_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a DataSet object from inputs, ties to interpretation object.
 This will be exposed to all submodules.</p>
 <dl class="docutils">
@@ -244,9 +237,12 @@ more we’ll see predictions change as a function of perturbing a feature.</p>
 <dd><p>Contains methods for feature importance. Subclass of BaseGlobalInterpretation.</p>
 <dl class="method">
 <dt id="skater.core.global_interpretation.feature_importance.FeatureImportance.feature_importance">
-<code class="descname">feature_importance</code><span class="sig-paren">(</span><em>model_instance</em>, <em>ascending=True</em>, <em>filter_classes=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/feature_importance.html#FeatureImportance.feature_importance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.feature_importance.FeatureImportance.feature_importance" title="Permalink to this definition">¶</a></dt>
+<code class="descname">feature_importance</code><span class="sig-paren">(</span><em>model_instance</em>, <em>ascending=True</em>, <em>filter_classes=None</em>, <em>n_jobs=-1</em>, <em>progressbar=True</em>, <em>n_samples=5000</em>, <em>method='prediction-variance'</em>, <em>scorer_type='default'</em>, <em>use_scaling=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/feature_importance.html#FeatureImportance.feature_importance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.feature_importance.FeatureImportance.feature_importance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes feature importance of all features related to a model instance.
 Supports classification, multi-class classification, and regression.</p>
+<p>Wei, Pengfei, Zhenzhou Lu, and Jingwen Song.
+“Variable Importance Analysis: A Comprehensive Review”.
+Reliability Engineering &amp; System Safety 142 (2015): 399-432.</p>
 <dl class="docutils">
 <dt>model_instance: skater.model.model.Model subtype</dt>
 <dd>the machine learning model “prediction” function to explain, such that
@@ -256,14 +252,39 @@ predictions = predict_fn(data).</dd>
 <dt>filter_classes: array type</dt>
 <dd>The classes to run partial dependence on. Default None invokes all classes.
 Only used in classification models.</dd>
+<dt>n_jobs: int</dt>
+<dd>How many concurrent processes to use. Defaults -1, which grabs as many as are available.
+Use 1 to avoid multiprocessing altogether.</dd>
+<dt>progressbar: bool</dt>
+<dd>Whether to display progress. This affects which function we use to operate on the pool
+of processes, where including the progress bar results in 10-20% slowdowns.</dd>
+<dt>n_samples: int</dt>
+<dd>How many samples to use when computing importance.</dd>
+<dt>method: string (default ‘prediction-variance’; ‘model-scoring’ for estimator specific scoring metric</dt>
+<dd>How to compute feature importance. ‘model-scoring’ requires Interpretation.training_labels.
+Note this choice should only rarely makes any significant differences
+prediction-variance: mean absolute value of changes in predictions, given perturbations.
+model-scoring: difference in log_loss or MAE of training_labels given perturbations.</dd>
+<dt>scorer_type: string</dt>
+<dd><p class="first">only used when method=’model-scoring’, and in this case defines which scoring function to use.
+Default value is ‘default’, which evaluates to:</p>
+<blockquote>
+<div>regressors: mean absolute error
+classifiers with probabilities: cross entropy
+classifiers without probabilities: f1 score</div></blockquote>
+<p class="last">See Skater.model.scorers for details.</p>
+</dd>
+<dt>use_scaling: bool</dt>
+<dd>Whether to weight the importance values by the strength of the perturbations.
+Generally doesn’t effect results unless n_samples is very small.</dd>
 </dl>
 <p>importances : Sorted Series</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">RandomForestClassier</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestClassier</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">rf</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">feature_importance</span><span class="o">.</span><span class="n">feature_importance</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
@@ -273,11 +294,11 @@ Only used in classification models.</dd>
 
 <dl class="method">
 <dt id="skater.core.global_interpretation.feature_importance.FeatureImportance.plot_feature_importance">
-<code class="descname">plot_feature_importance</code><span class="sig-paren">(</span><em>predict_fn</em>, <em>filter_classes=None</em>, <em>ascending=True</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/feature_importance.html#FeatureImportance.plot_feature_importance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.feature_importance.FeatureImportance.plot_feature_importance" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot_feature_importance</code><span class="sig-paren">(</span><em>modelinstance</em>, <em>filter_classes=None</em>, <em>ascending=True</em>, <em>ax=None</em>, <em>progressbar=True</em>, <em>n_jobs=-1</em>, <em>n_samples=5000</em>, <em>method='prediction-variance'</em>, <em>scorer_type='default'</em>, <em>use_scaling=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/feature_importance.html#FeatureImportance.plot_feature_importance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.feature_importance.FeatureImportance.plot_feature_importance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes feature importance of all features related to a model instance,
 then plots the results. Supports classification, multi-class classification, and regression.</p>
 <dl class="docutils">
-<dt>predict_fn: skater.model.model.Model subtype</dt>
+<dt>modelinstance: skater.model.model.Model subtype</dt>
 <dd>estimator “prediction” function to explain the predictive model. Could be probability scores
 or target values</dd>
 <dt>filter_classes: array type</dt>
@@ -288,20 +309,45 @@ Only used in classification models.</dd>
 <dt>ax: matplotlib.axes._subplots.AxesSubplot</dt>
 <dd>existing subplot on which to plot feature importance. If none is provided,
 one will be created.</dd>
+<dt>progressbar: bool</dt>
+<dd>Whether to display progress. This affects which function we use to operate on the pool
+of processes, where including the progress bar results in 10-20% slowdowns.</dd>
+<dt>n_jobs: int</dt>
+<dd>How many concurrent processes to use. Defaults -1, which grabs as many as are available.
+Use 1 to avoid multiprocessing altogether.</dd>
+<dt>n_samples: int</dt>
+<dd>How many samples to use when computing importance.</dd>
+<dt>method: string</dt>
+<dd>How to compute feature importance. ‘model-scoring’ requires Interpretation.training_labels
+prediction-variance: mean absolute value of changes in predictions, given perturbations.
+model-scoring: difference in log_loss or MAE of training_labels given perturbations.
+Note this vary rarely makes any significant differences</dd>
+<dt>scorer_type: string</dt>
+<dd><p class="first">only used when method=’model-scoring’, and in this case defines which scoring function to use.
+Default value is ‘default’, which evaluates to:</p>
+<blockquote>
+<div>regressors: mean absolute error
+classifiers with probabilities: cross entropy
+classifiers without probabilities: f1 score</div></blockquote>
+<p class="last">See Skater.model.scorers for details.</p>
+</dd>
+<dt>use_scaling: bool</dt>
+<dd>Whether to weight the importance values by the strength of the perturbations.
+Generally doesn’t effect results unless n_samples is very small.</dd>
 </dl>
 <p>f: figure instance
 ax: matplotlib.axes._subplots.AxesSubplot</p>
 <blockquote>
 <div>could be used to for further modification to the plots</div></blockquote>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">RandomForestClassier</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestClassier</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">rf</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">feature_importance</span><span class="o">.</span><span class="n">plot_feature_importance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">feature_importance</span><span class="o">.</span><span class="n">plot_feature_importance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -318,6 +364,9 @@ in a regression model).</p>
 <dt id="skater.core.global_interpretation.partial_dependence.PartialDependence">
 <em class="property">class </em><code class="descclassname">skater.core.global_interpretation.partial_dependence.</code><code class="descname">PartialDependence</code><span class="sig-paren">(</span><em>interpreter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/partial_dependence.html#PartialDependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.partial_dependence.PartialDependence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Contains methods for partial dependence. Subclass of BaseGlobalInterpretation</p>
+<p>Partial dependence adapted from:</p>
+<p>T. Hastie, R. Tibshirani and J. Friedman,
+Elements of Statistical Learning Ed. 2, Springer, 2009.</p>
 <dl class="staticmethod">
 <dt id="skater.core.global_interpretation.partial_dependence.PartialDependence.compute_3d_gradients">
 <em class="property">static </em><code class="descname">compute_3d_gradients</code><span class="sig-paren">(</span><em>pdp</em>, <em>mean_col</em>, <em>feature_1</em>, <em>feature_2</em>, <em>scaled=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/partial_dependence.html#PartialDependence.compute_3d_gradients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.compute_3d_gradients" title="Permalink to this definition">¶</a></dt>
@@ -339,7 +388,7 @@ in a regression model).</p>
 
 <dl class="method">
 <dt id="skater.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence">
-<code class="descname">partial_dependence</code><span class="sig-paren">(</span><em>feature_ids</em>, <em>modelinstance</em>, <em>filter_classes=None</em>, <em>grid=None</em>, <em>grid_resolution=30</em>, <em>n_jobs=-1</em>, <em>grid_range=None</em>, <em>sample=True</em>, <em>sampling_strategy=’random-choice’</em>, <em>n_samples=1000</em>, <em>bin_count=50</em>, <em>samples_per_bin=10</em>, <em>return_metadata=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/partial_dependence.html#PartialDependence.partial_dependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence" title="Permalink to this definition">¶</a></dt>
+<code class="descname">partial_dependence</code><span class="sig-paren">(</span><em>feature_ids</em>, <em>modelinstance</em>, <em>filter_classes=None</em>, <em>grid=None</em>, <em>grid_resolution=30</em>, <em>n_jobs=-1</em>, <em>grid_range=None</em>, <em>sample=True</em>, <em>sampling_strategy='random-choice'</em>, <em>n_samples=1000</em>, <em>bin_count=50</em>, <em>return_metadata=False</em>, <em>progressbar=True</em>, <em>variance_type='estimate'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/partial_dependence.html#PartialDependence.partial_dependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Approximates the partial dependence of the predict_fn with respect to the
 variables passed.</p>
 <dl class="docutils">
@@ -394,6 +443,7 @@ sampling_strategy = ‘uniform-over-similarity-ranks’. If using
 sampling_strategy = ‘uniform’, use n_samples.
 total samples = bin_count * samples per bin.</dd>
 </dl>
+<p>variance_type: string</p>
 <p>return_metadata: boolean</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -403,7 +453,7 @@ total samples = bin_count * samples per bin.</dd>
 </tr>
 </tbody>
 </table>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">RandomForestClassier</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="k">import</span> <span class="n">load_boston</span>
@@ -413,14 +463,14 @@ total samples = bin_count * samples per bin.</dd>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">features</span> <span class="o">=</span> <span class="n">boston</span><span class="o">.</span><span class="n">feature_names</span>
 </pre></div>
 </div>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestClassier</span><span class="p">()</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestClassier</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">rf</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">feature_ids</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ZN&#39;</span><span class="p">,</span><span class="s">&#39;CRIM&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">feature_ids</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ZN&#39;</span><span class="p">,</span><span class="s1">&#39;CRIM&#39;</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">partial_dependence</span><span class="p">(</span><span class="n">features</span><span class="p">,</span><span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -428,7 +478,7 @@ total samples = bin_count * samples per bin.</dd>
 
 <dl class="method">
 <dt id="skater.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence">
-<code class="descname">plot_partial_dependence</code><span class="sig-paren">(</span><em>feature_ids</em>, <em>modelinstance</em>, <em>filter_classes=None</em>, <em>grid=None</em>, <em>grid_resolution=30</em>, <em>grid_range=None</em>, <em>n_jobs=-1</em>, <em>sample=True</em>, <em>sampling_strategy=’random-choice’</em>, <em>n_samples=1000</em>, <em>bin_count=50</em>, <em>samples_per_bin=10</em>, <em>with_variance=False</em>, <em>figsize=(16</em>, <em>10)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/partial_dependence.html#PartialDependence.plot_partial_dependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot_partial_dependence</code><span class="sig-paren">(</span><em>feature_ids</em>, <em>modelinstance</em>, <em>filter_classes=None</em>, <em>grid=None</em>, <em>grid_resolution=30</em>, <em>grid_range=None</em>, <em>n_jobs=-1</em>, <em>sample=True</em>, <em>sampling_strategy='random-choice'</em>, <em>n_samples=1000</em>, <em>bin_count=50</em>, <em>with_variance=False</em>, <em>figsize=(16</em>, <em>10)</em>, <em>progressbar=True</em>, <em>variance_type='estimate'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/partial_dependence.html#PartialDependence.plot_partial_dependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes partial_dependence of a set of variables. Essentially approximates
 the partial partial_dependence of the predict_fn with respect to the variables
 passed.</p>
@@ -486,23 +536,27 @@ plots for visibility. If you have a use case where you’d like error bars for
 3D pdp plots, let us know!</dd>
 <dt>plot_title(string):</dt>
 <dd>title for pdp plots</dd>
+<dt>variance_type: string</dt>
+<dd>if variance plotting is enabled, determines which variance to include.
+estimate: the variance of the partial dependence estimates
+prediction: the variances of the predictions at the given point</dd>
 </dl>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">GradientBoostingRegressor</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">GradientBoostingRegressor</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.datasets.california_housing</span> <span class="k">import</span> <span class="n">fetch_california_housing</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">cal_housing</span> <span class="o">=</span> <span class="n">fetch_california_housing</span><span class="p">()</span>
 <span class="go"># split 80/20 train-test</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x_train</span><span class="p">,</span> <span class="n">x_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">cal_housing</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
 <span class="gp">&gt;&gt;&gt; </span>                            <span class="n">cal_housing</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">names</span> <span class="o">=</span> <span class="n">cal_housing</span><span class="o">.</span><span class="n">feature_names</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s">&quot;Training the estimator...&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Training the estimator...&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">estimator</span> <span class="o">=</span> <span class="n">GradientBoostingRegressor</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>                            <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s">&#39;huber&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>                            <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s1">&#39;huber&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s">&quot;Feature name: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">names</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Feature name: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">names</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">names</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s">&quot;Input feature name: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">names</span><span class="p">[</span><span class="mi">5</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Input feature name: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">names</span><span class="p">[</span><span class="mi">5</span><span class="p">]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">plot_partial_dependence</span><span class="p">([</span><span class="n">names</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">names</span><span class="p">[</span><span class="mi">5</span><span class="p">]],</span> <span class="n">model</span><span class="p">,</span>
@@ -525,7 +579,7 @@ surrogates around a point correspond to anchorLIME.</p>
 <h3>LIME<a class="headerlink" href="#lime" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer">
-<em class="property">class </em><code class="descclassname">skater.core.local_interpretation.lime.lime_tabular.</code><code class="descname">LimeTabularExplainer</code><span class="sig-paren">(</span><em>training_data</em>, <em>training_labels=None</em>, <em>feature_names=None</em>, <em>categorical_features=None</em>, <em>categorical_names=None</em>, <em>kernel_width=None</em>, <em>verbose=False</em>, <em>class_names=None</em>, <em>feature_selection=’auto’</em>, <em>discretize_continuous=True</em>, <em>discretizer=’quartile’</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">skater.core.local_interpretation.lime.lime_tabular.</code><code class="descname">LimeTabularExplainer</code><span class="sig-paren">(</span><em>training_data</em>, <em>mode='classification'</em>, <em>training_labels=None</em>, <em>feature_names=None</em>, <em>categorical_features=None</em>, <em>categorical_names=None</em>, <em>kernel_width=None</em>, <em>verbose=False</em>, <em>class_names=None</em>, <em>feature_selection='auto'</em>, <em>discretize_continuous=True</em>, <em>discretizer='quartile'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Explains predictions on tabular (i.e. matrix) data.
 For numerical features, perturb them by sampling from a Normal(0,1) and
 doing the inverse operation of mean-centering and scaling, according to the
@@ -535,7 +589,7 @@ feature that is 1 when the value is the same as the instance being
 explained.</p>
 <dl class="method">
 <dt id="skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_instance">
-<code class="descname">explain_instance</code><span class="sig-paren">(</span><em>data_row</em>, <em>classifier_fn</em>, <em>labels=(1</em>, <em>)</em>, <em>top_labels=None</em>, <em>num_features=10</em>, <em>num_samples=5000</em>, <em>distance_metric=’euclidean’</em>, <em>model_regressor=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer.explain_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_instance" title="Permalink to this definition">¶</a></dt>
+<code class="descname">explain_instance</code><span class="sig-paren">(</span><em>data_row</em>, <em>predict_fn</em>, <em>labels=(1</em>, <em>)</em>, <em>top_labels=None</em>, <em>num_features=10</em>, <em>num_samples=5000</em>, <em>distance_metric='euclidean'</em>, <em>model_regressor=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer.explain_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_instance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates explanations for a prediction.</p>
 <p>First, we generate neighborhood data by randomly perturbing features
 from the instance (see __data_inverse). We then learn locally weighted
@@ -544,10 +598,15 @@ in an interpretable way (see lime_base.py).</p>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><p class="first">data_row: 1d numpy array, corresponding to a row
-classifier_fn: classifier prediction probability function, which</p>
+predict_fn: prediction function. For classifiers, this should be a</p>
 <blockquote>
-<div>takes a numpy array and outputs prediction probabilities.  For
-ScikitClassifiers , this is classifier.predict_proba.</div></blockquote>
+<div><p>function that takes a numpy array and outputs prediction
+probabilities. For regressors, this takes a numpy array and
+returns the predictions. For ScikitClassifiers, this is</p>
+<blockquote>
+<div><cite>classifier.predict_proba()</cite>. For ScikitRegressors, this
+is <cite>regressor.predict()</cite>.</div></blockquote>
+</div></blockquote>
 <p>labels: iterable with labels to be explained.
 top_labels: if not None, ignore labels and produce explanations for</p>
 <blockquote>
@@ -566,24 +625,6 @@ explanations.</dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_regressor_instance">
-<code class="descname">explain_regressor_instance</code><span class="sig-paren">(</span><em>data_row</em>, <em>predict_fn</em>, <em>num_features=10</em>, <em>num_samples=5000</em>, <em>distance_metric=’euclidean’</em>, <em>model_regressor=None</em>, <em>testing=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer.explain_regressor_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_regressor_instance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates explanations for a prediction.
-First, we generate neighborhood data by randomly perturbing features
-from the instance (see __data_inverse). We then learn locally weighted
-linear models on this neighborhood data to explain changes in the prediction
-in an interpretable way (see lime_base.py).
-Args:</p>
-<blockquote>
-<div><p>data_row: 1d numpy array, corresponding to a row
-predict_fn: prediction function, which</p>
-<blockquote>
-<div>takes a numpy array and expected values.  For
-ScikitRegressors , this is classifier.predict.</div></blockquote>
-</div></blockquote>
-</dd></dl>
-
 </dd></dl>
 
 </div>
@@ -592,9 +633,7 @@ ScikitRegressors , this is classifier.predict.</div></blockquote>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -616,7 +655,7 @@ ScikitRegressors , this is classifier.predict.</div></blockquote>
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -635,6 +674,7 @@ ScikitRegressors , this is classifier.predict.</div></blockquote>
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
             VERSION:'0',
+            LANGUAGE:'en',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -652,14 +692,13 @@ ScikitRegressors , this is classifier.predict.</div></blockquote>
     <script type="text/javascript" src="../_static/js/theme.js"></script>
   
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>
