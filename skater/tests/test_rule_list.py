@@ -24,20 +24,20 @@ class TestRuleList(unittest.TestCase):
         cls.sbrl_inst = BRLC(min_rule_len=1, max_rule_len=2, iterations=10000, n_chains=3)
         cls.input_data = pd.read_csv('skater/tests/data/sample_data.csv')
         # data transformation and cleaning ...
-        cls.input_data["Sex"] = self.input_data["Sex"].astype('category')
-        cls.input_data["Sex_Encoded"] = self.input_data["Sex"].cat.codes
-        cls.input_data["Embarked"] = self.input_data["Embarked"].astype('category')
-        cls.input_data["Embarked_Encoded"] = self.input_data["Embarked"].cat.codes
-        cls.input_data = self.input_data.drop(['Ticket', 'Cabin', 'Name', 'Sex', 'Embarked'], axis=1)
+        cls.input_data["Sex"] = cls.input_data["Sex"].astype('category')
+        cls.input_data["Sex_Encoded"] = cls.input_data["Sex"].cat.codes
+        cls.input_data["Embarked"] = cls.input_data["Embarked"].astype('category')
+        cls.input_data["Embarked_Encoded"] = cls.input_data["Embarked"].cat.codes
+        cls.input_data = cls.input_data.drop(['Ticket', 'Cabin', 'Name', 'Sex', 'Embarked'], axis=1)
         # Remove NaN values
-        cls.input_data = self.input_data.dropna()
-        cls.y = self.input_data['Survived']
-        cls.input_data = self.input_data.drop(['Survived'], axis=1)
+        cls.input_data = cls.input_data.dropna()
+        cls.y = cls.input_data['Survived']
+        cls.input_data = cls.input_data.drop(['Survived'], axis=1)
         # Train a model
         cls.sbrl_inst.fit(cls.input_data[1:50], cls.y[1:50], undiscretize_feature_list=["PassengerId", "Pclass",
-                                                                                           "SibSp", "Parch",
-                                                                                           "Sex_Encoded",
-                                                                                           "Embarked_Encoded"])
+                                                                                        "SibSp", "Parch",
+                                                                                        "Sex_Encoded",
+                                                                                        "Embarked_Encoded"])
 
 
     def test_discretizer(self):
