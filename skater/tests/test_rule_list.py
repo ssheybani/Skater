@@ -32,6 +32,10 @@ class TestRuleList(unittest.TestCase):
         self.input_data = self.input_data.dropna()
         self.y = self.input_data['Survived']
         self.input_data = self.input_data.drop(['Survived'], axis=1)
+        self.sbrl_inst.fit(self.input_data[1:50], self.y[1:50], undiscretize_feature_list=["PassengerId", "Pclass",
+                                                                                           "SibSp", "Parch",
+                                                                                           "Sex_Encoded",
+                                                                                           "Embarked_Encoded"])
 
 
     def test_discretizer(self):
@@ -40,16 +44,11 @@ class TestRuleList(unittest.TestCase):
 
 
     def test_model_build(self):
-        self.sbrl_inst.fit(self.input_data[1:50], self.y[1:50],
-                           undiscretize_feature_list=["PassengerId", "Pclass",
-                                                      "SibSp", "Parch", "Sex_Encoded",
-                                                      "Embarked_Encoded"])
-
         new_data = self.sbrl_inst.discretizer(self.input_data, column_list=["Age", "Fare"])
         result_score = self.sbrl_inst.predict_proba(new_data)
         result_labels = self.sbrl_inst.predict(new_data)
 
-        # make sure shape of the dataframe is as expected
+        # make sure shape of the data-frame is as expected
         self.assertEquals(result_score.shape, (77, 2))
         self.assertEquals(result_labels[1].shape, (77, ))
 
@@ -58,12 +57,7 @@ class TestRuleList(unittest.TestCase):
         self.assertEquals(np.array_equal(generated_labels, expected_labels), True)
 
 
-
     def test_model_save_load(self):
-        self.sbrl_inst.fit(self.input_data[1:50], self.y[1:50], undiscretize_feature_list=["PassengerId", "Pclass",
-                                                                                           "SibSp", "Parch",
-                                                                                           "Sex_Encoded",
-                                                                                           "Embarked_Encoded"])
         self.sbrl_inst.save_model("test.pkl", compress=True)
         # Explicitly assigning the model instance to 'None' to validate loading of persisted model
         # Care is advised when handing the model instance, it might make the model unstable
@@ -74,10 +68,6 @@ class TestRuleList(unittest.TestCase):
 
 
     def test_model_output(self):
-        self.sbrl_inst.fit(self.input_data[1:50], self.y[1:50], undiscretize_feature_list=["PassengerId", "Pclass",
-                                                                                           "SibSp", "Parch",
-                                                                                           "Sex_Encoded",
-                                                                                           "Embarked_Encoded"])
         result = self.sbrl_inst.access_learned_rules('23:25')
         self.assertEquals(len(result), 2)
 
