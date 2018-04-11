@@ -1,7 +1,8 @@
+# -*- coding: UTF-8 -*-
+
 import numpy as np
 import skimage
 import skimage.io
-from skimage.transform import resize
 from .exceptions import MatplotlibUnavailableError
 
 
@@ -22,45 +23,43 @@ def load_image(path, img_height, img_width):
     return resized_img
 
 
-def noisy(noise_typ, image):
-    #TODO: function needs to be recoded correctly
-    if noise_typ == "gauss":
-        row,col,ch= image.shape
-        mean = 0
-        var = 0.1
-        sigma = var**0.5
-        gauss = np.random.normal(mean,sigma,(row,col,ch))
-        gauss = gauss.reshape(row,col,ch)
-        noisy = image + gauss
-        return noisy
-    elif noise_typ == "s&p":
-        row,col,ch = image.shape
-        s_vs_p = 0.5
-        amount = 0.004
-        out = np.copy(image)
-        # Salt mode
-        num_salt = np.ceil(amount * image.size * s_vs_p)
-        coords = [np.random.randint(0, i - 1, int(num_salt))
-                  for i in image.shape]
-        out[coords] = 1
+def noisy(image, noise_typ='gaussian', random_state=None):
+    """ Helper function to add different forms of noise
 
-        # Pepper mode
-        num_pepper = np.ceil(amount* image.size * (1. - s_vs_p))
-        coords = [np.random.randint(0, i - 1, int(num_pepper))
-                  for i in image.shape]
-        out[coords] = 0
-        return out
-    elif noise_typ == "poisson":
-        vals = len(np.unique(image))
-        vals = 2 ** np.ceil(np.log2(vals))
-        noisy = np.random.poisson(image * vals) / float(vals)
-        return noisy
-    elif noise_typ =="speckle":
-        row,col,ch = image.shape
-        gauss = np.random.randn(row,col,ch)
-        gauss = gauss.reshape(row,col,ch)
-        noisy = image + image * gauss
-        return noisy
+    Parameters
+    -----------
+    image: numpy.ndarray
+        input image
+    noise_typ: string ( default 'gaussian' )
+        - 'gaussian'  Gaussian-distributed additive noise.
+        - 'localvar'  Gaussian-distributed additive noise, with specified
+                      local variance at each point of `image`
+        - 'poisson'   Poisson-distributed noise generated from the data.
+        - 'salt'      Replaces random pixels with 1.
+        - 'pepper'    Replaces random pixels with 0 (for unsigned images) or
+                      -1 (for signed images).
+        - 's&p'       Replaces random pixels with either 1 or `low_val`, where
+                      `low_val` is 0 for unsigned images or -1 for signed
+                      images.
+        - 'speckle'   Multiplicative noise using out = image + n*image, where
+                      n is uniform noise with specified mean & variance.
+    random_state: int
+        seed for setting repeatable state before generating noise
+
+    Returns
+    -------
+    numpy.ndarray
+
+    References
+    ----------
+    .. [1] http://scikit-image.org/docs/stable/api/skimage.util.html#random-noise
+    """
+    return skimage.util.random_noise(image, mode=noise_typ, seed=random_state)
+
+
+def image_transformation():
+    # https://www.kaggle.com/tomahim/image-manipulation-augmentation-with-skimage
+    pass
 
 
 def normalize(X):

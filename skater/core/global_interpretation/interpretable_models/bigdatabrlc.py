@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import LinearSVC
 from sklearn.calibration import CalibratedClassifierCV

@@ -1,4 +1,4 @@
-# Reference: https://github.com/marcoancona/DeepExplain/blob/master/deepexplain/tensorflow/methods.py
+# -*- coding: UTF-8 -*-
 from skater.core.local_interpretation.dnni.initializer import Initializer
 import tensorflow as tf
 
@@ -6,6 +6,9 @@ import tensorflow as tf
 class GradientBased(Initializer):
     """
     Base class for gradient-based relevance computation
+
+    Reference
+    - https://github.com/marcoancona/DeepExplain/blob/master/deepexplain/tensorflow/methods.py
     """
     def compute_gradients(self):
         return tf.gradients(self.feature_wts, self.X)
@@ -25,8 +28,8 @@ class GradientBased(Initializer):
 class LRP(GradientBased):
     eps = None
 
-    def __init__(self, feature_wts, X, xs, session, keras_learning_phase, epsilon=1e-4):
-        super(LRP, self).__init__(feature_wts, X, xs, session, keras_learning_phase)
+    def __init__(self, feature_wts, X, xs, session, epsilon=1e-4):
+        super(LRP, self).__init__(feature_wts, X, xs, session)
         assert epsilon > 0.0, 'LRP epsilon must be > 0'
         LRP.eps = epsilon
 

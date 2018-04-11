@@ -36,7 +36,7 @@ def relevance_wt_assigner(raw_txt, wts_as_dict):
         max_wt = np.max(np.abs(list(feature_scores.values())))
         wts_as_dict = {word: feature_scores[word]/max_wt for word in feature_scores.keys()}
         # transform dict into list of tuples (word, relevance_wts)
-        # TODO look into removing the below occurring side effect
+        # TODO: look into removing the below occurring side effect
         relevance_wts = []
         for word in raw_txt.split():
             # Clean up the raw word for irregularities

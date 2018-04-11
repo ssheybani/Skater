@@ -1,20 +1,21 @@
 from matplotlib.cm import get_cmap
-from skater.core.local_interpretation.text_interpreter import relevance_wt_assigner
-from wordcloud import (WordCloud, get_single_color_func)
 import matplotlib as mpl
-import numpy as np
 from PIL import Image
+from wordcloud import (WordCloud, get_single_color_func)
 
+import numpy as np
 import codecs
 
+from skater.core.local_interpretation.text_interpreter import relevance_wt_assigner
 
-def build_explainer(text, feature_relevance_wts, font_size='10pt', file_name='rendered', metainf='',
-                    pos_clr_name='Greens', neg_clr_name='Reds', highlight_oov=False):
+
+def build_explainer(text, feature_relevance_wts, font_size='12pt', file_name='rendered', metainf='',
+                    pos_clr_name='Reds', neg_clr_name='Blues', highlight_oov=False):
     """
     Generate a html doc highlighting positive / negative words based on the original text and relevance scores
     Inputs:
         - text: the raw text in which the words should be highlighted
-        - scores: a dictionary with {word: score} or a list with tuples [(word, score)]
+        - feature_relevance_wts: a dictionary with {word: score} or a list with tuples [(word, score)]
         - file_name: the name (path) of the file
         - metainf: an optional string which will be added at the top of the file (e.g. true class of the document)
         - highlight_oov: if True, out-of-vocabulary words will be highlighted in yellow (default False)
@@ -22,7 +23,7 @@ def build_explainer(text, feature_relevance_wts, font_size='10pt', file_name='re
 
     References
     ----------
-    # * http://matplotlib.org/examples/color/colormaps_reference.html
+    * http://matplotlib.org/examples/color/colormaps_reference.html
     * https://github.com/cod3licious/textcatvis
     """
     # TODO: Add support for better visualization and plotting - e.g bokeh
@@ -35,7 +36,7 @@ def build_explainer(text, feature_relevance_wts, font_size='10pt', file_name='re
     alpha = 0.2 if highlight_oov else 0.
     norm = mpl.colors.Normalize(0., 1.)
 
-    html_str = u'<body><div style="white-space: pre-wrap; font-size: {}; font-family: Verdana;">'.format(font_size)
+    html_str = u'<body><div style=background-color:#F5F5F5; white-space: pre-wrap; font-size: {}; font-family: Verdana;">'.format(font_size)
     html_str += '%s\n\n' % metainf if metainf else html_str
 
     rest_text = text
@@ -45,8 +46,6 @@ def build_explainer(text, feature_relevance_wts, font_size='10pt', file_name='re
         html_str += rest_text[:rest_text.find(word)]
         # cut off the identified word
         rest_text = rest_text[rest_text.find(word) + len(word):]
-
-
         if wts is not None:
             if wts < 0:
                 rgbac = cmap_neg(norm(-wts))

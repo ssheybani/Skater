@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 from skater.core.local_interpretation.dnni.relevance_scorer import GradientBased
 from skater.core.local_interpretation.dnni.relevance_scorer import LRP
 from skater.core.local_interpretation.dnni.initializer import Initializer
@@ -23,8 +24,16 @@ def deep_interpreter_grad(op, grad):
 
 
 class DeepInterpreter(object):
+    """ Interpreter for inferring Deep Learning Models
 
-    # Reference: https://github.com/marcoancona/DeepExplain/blob/master/deepexplain/tensorflow/methods.py
+    Reference
+    ---------
+    .. [1] Marco Ancona, Enea Ceolini, Cengiz Öztireli, Markus Gross:
+    ..    TOWARDS BETTER UNDERSTANDING OF GRADIENT-BASED ATTRIBUTION METHODS FOR DEEP NEURAL NETWORKS. ICLR, 2018
+    .. [2] https://github.com/marcoancona/DeepExplain/blob/master/deepexplain/tensorflow/methods.py
+
+    """
+
     def __init__(self, graph=None, session=tf.get_default_session(), log_level=_INFO):
         self.logger = build_logger(log_level, __name__)
         self.relevance_type = None
@@ -33,7 +42,6 @@ class DeepInterpreter(object):
         self.graph = session.graph if graph is None else graph
         self.graph_context = self.graph.as_default()
         self.override_context = self.graph.gradient_override_map(self._get_gradient_override_map())
-        self.keras_phase_placeholder = None
         self.context_on = False
         self.relevance_scorer_type = OrderedDict({
             'elrp': LRP})
@@ -53,17 +61,6 @@ class DeepInterpreter(object):
         self.graph_context.__exit__(type, value, traceback)
         self.override_context.__exit__(type, value, traceback)
         self.context_on = False
-
-
-    def _set_keras_placeholder_state(self):
-        g = tf.get_default_graph()
-        ops = g.get_operations()
-        for op in ops:
-            if 'keras_learning_phase' in op.name:
-                value = op.outputs[0]
-                if value not in {0, 1}:
-                    raise ValueError('Expected learning phase to be 0 or 1.')
-                self.keras_phase_placeholder = value
 
 
     @staticmethod
@@ -86,15 +83,15 @@ class DeepInterpreter(object):
         Initializer.grad_override_checkflag = 0
         Initializer.enabled_method_class = relevance_type_class
 
-        # Before computing relevance, lets check on the state of the supported ops
-        self._set_keras_placeholder_state()
+        method = Initializer.enabled_method_class(T, X, xs, self.session, **kwargs)
+        self.logger.info('DeepInterpreter: executing method {}'.format(method))
 
-        method = Initializer.enabled_method_class(T, X, xs, self.session, self.keras_phase_placeholder, **kwargs)
         result = method.run()
         if issubclass(Initializer.enabled_method_class, GradientBased) and Initializer.grad_override_checkflag == 0:
-            warnings.warn('Results may not reliable, as default gradient seems to have been used. Be careful...')
+            warnings.warn('Results may not reliable: As default gradient seems to have been used. '
+                          'or you might have forgotten to create the graph within the DeepInterpreter context. '
+                          'Be careful...')
 
         Initializer.enabled_method_class = None
         Initializer.grad_override_checkflag = 0
-        self.keras_phase_placeholder = None
         return result
