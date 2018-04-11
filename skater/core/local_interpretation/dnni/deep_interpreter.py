@@ -49,14 +49,14 @@ class DeepInterpreter(object):
         self.relevance_type = None
         self.batch_size = None
         self.session = session
+        if self.session is None:
+            raise RuntimeError('Relevant session not retrieved')
         self.graph = session.graph if graph is None else graph
         self.graph_context = self.graph.as_default()
         self.override_context = self.graph.gradient_override_map(self._get_gradient_override_map())
         self.context_on = False
-        self.relevance_scorer_type = OrderedDict({
+        self.__supported_relevance_type_dict = OrderedDict({
             'elrp': LRP})
-        if self.session is None:
-            raise RuntimeError('Relevant session not retrieved')
 
 
     def __enter__(self):
@@ -82,12 +82,12 @@ class DeepInterpreter(object):
         if not self.context_on:
             raise RuntimeError('explain can be invoked only within a DeepInterpreter context.')
         self.relevance_type = relevance_type
-        self.logger.info("all supported relevancy scorers {}".format(self.relevance_scorer_type))
+        self.logger.info("all supported relevancy scorers {}".format(self.__supported_relevance_type_dict))
 
-        relevance_type_class = self.relevance_scorer_type[self.relevance_type] \
-            if self.relevance_type in self.relevance_scorer_type.keys() else None
+        relevance_type_class = self.__supported_relevance_type_dict[self.relevance_type] \
+            if self.relevance_type in self.__supported_relevance_type_dict.keys() else None
         if relevance_type_class is None:
-            raise RuntimeError('Method type not found in {}'.formatlist(self.relevance_scorer_type.keys()))
+            raise RuntimeError('Method type not found in {}'.formatlist(self.__supported_relevance_type_dict.keys()))
         self.logger.info('DeepInterpreter: executing relevance type class {}'.format(relevance_type_class))
 
         Initializer.grad_override_checkflag = 0
