@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 from skater.core.local_interpretation.dnni.initializer import Initializer
 import tensorflow as tf
+import numpy as np
 
 
 class GradientBased(Initializer):
@@ -28,7 +29,7 @@ class GradientBased(Initializer):
 class LRP(GradientBased):
     """ LRP Implementation computed using backpropagation by applying change rule on a modified gradient function.
     LRP could be implemented in different ways. This version implements the epsilon-LRP(Eq (58) as stated in [1]
-    or Eq (2) in [2]. Epsilon acts as a numerical stabilizer. 
+    or Eq (2) in [2]. Epsilon acts as a numerical stabilizer.
 
     Parameters
     __________
@@ -51,6 +52,7 @@ class LRP(GradientBased):
 
 
     def default_relevance_score(self):
+        # computing dot product of the feature wts of the input data and the gradients of the prediction label
         return [g * x for g, x in zip(
                 tf.gradients(self.feature_wts, self.X), [self.X])]
 
@@ -78,4 +80,13 @@ class IntegratedGradients(GradientBased):
         self._set_check_baseline()
 
         relevance_scores = self.default_relevance_score()
-        pass
+        gradient = None
+        alpha_list = list(np.linspace(start=1. / self.steps, stop=1.0, num=self.steps))
+        for alpha in alpha_list:
+            xs_scaled = self.xs * alpha
+            # compute the gradient for each alpha value
+            _scores = self.session_run(relevance_scores, xs_scaled)
+            gradient = _scores if gradient is None else [g + a for g, a in zip(gradient, _scores)]
+
+        results = [(x - b) * (g / self.steps) for g, x, b in zip(gradient, [self.xs], [self.baseline])]
+        return results[0]

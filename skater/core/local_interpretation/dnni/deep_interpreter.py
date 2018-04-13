@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 from skater.core.local_interpretation.dnni.relevance_scorer import GradientBased
 from skater.core.local_interpretation.dnni.relevance_scorer import LRP
+from skater.core.local_interpretation.dnni.relevance_scorer import IntegratedGradients
 from skater.core.local_interpretation.dnni.initializer import Initializer
 
 
@@ -56,7 +57,8 @@ class DeepInterpreter(object):
         self.override_context = self.graph.gradient_override_map(self._get_gradient_override_map())
         self.context_on = False
         self.__supported_relevance_type_dict = OrderedDict({
-            'elrp': LRP})
+            'elrp': LRP,
+            'integ_grad': IntegratedGradients})
 
 
     def __enter__(self):
