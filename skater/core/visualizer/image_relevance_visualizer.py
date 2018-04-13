@@ -8,7 +8,7 @@ from skater.util.image_ops import normalize
 
 
 def visualize(relevance_score, original_input_img=None, edge_detector_type='sobel', cmap='bwr', axis=plt,
-              percentile=100, alpha=0.8):
+              percentile=100, alpha_edges=0.8, alpha_bgcolor=1):
 
     dx, dy = 0.01, 0.01
     xx = np.arange(0.0, relevance_score.shape[1], dx)
@@ -23,14 +23,15 @@ def visualize(relevance_score, original_input_img=None, edge_detector_type='sobe
 
     # draw the edges of the image before overlaying the learned relevance
     if edges is not None:
-        axis.imshow(edges, extent=extent, interpolation='nearest', cmap=xi_cmap, alpha=alpha)
+        axis.imshow(edges, extent=extent, interpolation='nearest', cmap=xi_cmap, alpha=alpha_edges)
 
     abs_max = np.percentile(np.abs(relevance_score), percentile)
     abs_min = abs_max
 
     relevance_score = relevance_score[:, :, 0] if len(relevance_score.shape) == 3 else relevance_score
     # Plot the image with relevance scores
-    axis.imshow(relevance_score, extent=extent, interpolation='nearest', cmap=cmap, vmin=-abs_min, vmax=abs_max)
+    axis.imshow(relevance_score, extent=extent, interpolation='nearest', cmap=cmap,
+                vmin=-abs_min, vmax=abs_max, alpha=alpha_bgcolor)
     axis.axis('off')
     return axis
 

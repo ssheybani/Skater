@@ -2,6 +2,7 @@
 
 from tensorflow.python.ops import nn_grad, math_grad
 import warnings
+import numpy as np
 
 
 
@@ -23,6 +24,17 @@ class Initializer(object):
         feed_dict = {}
         feed_dict[self.X] = xs
         return self.session.run(feature_wts, feed_dict)
+
+
+    def _set_check_baseline(self):
+        if self.baseline is None:
+            self.baseline = np.zeros((1,) + self.xs.shape[1:])
+        else:
+            if self.baseline.shape == self.xs.shape[1:]:
+                self.baseline = np.expand_dims(self.baseline, 0)
+            else:
+                raise RuntimeError('Baseline shape %s does not match expected shape %s'
+                                   % (self.baseline.shape, self.xs.shape[1:]))
 
 
     @classmethod

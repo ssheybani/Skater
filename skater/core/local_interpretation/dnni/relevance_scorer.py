@@ -10,12 +10,12 @@ class GradientBased(Initializer):
     Reference
     - https://github.com/marcoancona/DeepExplain/blob/master/deepexplain/tensorflow/methods.py
     """
-    def compute_gradients(self):
+    def default_relevance_score(self):
         return tf.gradients(self.feature_wts, self.X)
 
 
     def run(self):
-        relevance_scores = self.compute_gradients()
+        relevance_scores = self.default_relevance_score()
         results = self.session_run(relevance_scores, self.xs)
         return results[0]
 
@@ -50,7 +50,7 @@ class LRP(GradientBased):
         LRP.eps = epsilon
 
 
-    def compute_gradients(self):
+    def default_relevance_score(self):
         return [g * x for g, x in zip(
                 tf.gradients(self.feature_wts, self.X), [self.X])]
 
@@ -63,3 +63,19 @@ class LRP(GradientBased):
                                                 -1 * tf.ones_like(op_in, dtype=tf.float32))
         op_in += stabilizer_epsilon
         return grad * op_out / op_in
+
+
+class IntegratedGradients(GradientBased):
+
+    def __init__(self, T, X, xs, session, steps=100, baseline=None):
+        super(IntegratedGradients, self).__init__(T, X, xs, session)
+        self.steps = steps
+        self.baseline = baseline
+
+
+    def run(self):
+        # Apply the baseline specified or use default
+        self._set_check_baseline()
+
+        relevance_scores = self.default_relevance_score()
+        pass

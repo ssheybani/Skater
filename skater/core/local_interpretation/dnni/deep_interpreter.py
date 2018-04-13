@@ -10,7 +10,7 @@ import tensorflow as tf
 from collections import OrderedDict
 import warnings
 from skater.util.logger import build_logger
-from skater.util.logger import _INFO
+from skater.util.logger import _WARNING
 
 
 @ops.RegisterGradient("DeepInterpretGrad")
@@ -44,7 +44,7 @@ class DeepInterpreter(object):
 
     """
 
-    def __init__(self, graph=None, session=tf.get_default_session(), log_level=_INFO):
+    def __init__(self, graph=None, session=tf.get_default_session(), log_level=_WARNING):
         self.logger = build_logger(log_level, __name__)
         self.relevance_type = None
         self.batch_size = None
