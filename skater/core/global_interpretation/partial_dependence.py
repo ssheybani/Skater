@@ -243,7 +243,7 @@ class PartialDependence(BaseGlobalInterpretation):
         >>> rf.fit(X,y)
 
 
-        >>> model = InMemoryModel(rf, examples = X)
+        >>> model = InMemoryModel(rf.predict_proba, examples = X)
         >>> interpreter = Interpretation()
         >>> interpreter.load_data(X)
         >>> feature_ids = ['ZN','CRIM']
