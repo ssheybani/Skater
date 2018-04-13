@@ -49,39 +49,40 @@ class TestDNNI(unittest.TestCase):
         return loaded_model
 
 
-    def setUp(self):
-        self.batch_size = 128
-        self.num_classes = 10
-        self.epochs = 2
+    @classmethod
+    def setUpClass(cls):
+        cls.batch_size = 128
+        cls.num_classes = 10
+        cls.epochs = 2
         # input image dimensions
-        self.img_rows, self.img_cols = 28, 28
+        cls.img_rows, cls.img_cols = 28, 28
         # shuffled and split between train and test sets
-        (self.x_train, self.y_train), (self.x_test, self.y_test) = mnist.load_data()
+        (cls.x_train, cls.y_train), (cls.x_test, cls.y_test) = mnist.load_data()
         if K.image_data_format() == 'channels_first':
-            self.x_train = self.x_train.reshape(self.x_train.shape[0], 1, self.img_rows, self.img_cols)
-            self.x_test = self.x_test.reshape(self.x_test.shape[0], 1, self.img_rows, self.img_cols)
-            self.input_shape = (1, self.img_rows, self.img_cols)
+            cls.x_train = cls.x_train.reshape(cls.x_train.shape[0], 1, cls.img_rows, cls.img_cols)
+            cls.x_test = cls.x_test.reshape(cls.x_test.shape[0], 1, cls.img_rows, cls.img_cols)
+            cls.input_shape = (1, cls.img_rows, cls.img_cols)
         else:
-            self.x_train = self.x_train.reshape(self.x_train.shape[0], self.img_rows, self.img_cols, 1)
-            self.x_test = self.x_test.reshape(self.x_test.shape[0], self.img_rows, self.img_cols, 1)
-            self.input_shape = (self.img_rows, self.img_cols, 1)
+            cls.x_train = cls.x_train.reshape(cls.x_train.shape[0], cls.img_rows, cls.img_cols, 1)
+            cls.x_test = cls.x_test.reshape(cls.x_test.shape[0], cls.img_rows, cls.img_cols, 1)
+            cls.input_shape = (cls.img_rows, cls.img_cols, 1)
 
-        self.x_train = self.x_train.astype('float32')
-        self.x_test = self.x_test.astype('float32')
-        self.x_train /= 255
-        self.x_test /= 255
-        self.x_train = (self.x_train - 0.5) * 2
-        self.x_test = (self.x_test - 0.5) * 2
+        cls.x_train = cls.x_train.astype('float32')
+        cls.x_test = cls.x_test.astype('float32')
+        cls.x_train /= 255
+        cls.x_test /= 255
+        cls.x_train = (cls.x_train - 0.5) * 2
+        cls.x_test = (cls.x_test - 0.5) * 2
 
         # convert class vectors to binary class matrices
-        self.y_train = keras.utils.to_categorical(self.y_train, self.num_classes)
-        self.y_test = keras.utils.to_categorical(self.y_test, self.num_classes)
+        cls.y_train = keras.utils.to_categorical(cls.y_train, cls.num_classes)
+        cls.y_test = keras.utils.to_categorical(cls.y_test, cls.num_classes)
 
         # build a simple CovNet model
-        self.model = self.build_model()
+        cls.model = cls.build_model()
 
         # save the model
-        self._save()
+        cls._save()
 
 
     def test_deep_interpreter_cnn(self):
