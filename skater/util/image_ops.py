@@ -12,6 +12,8 @@ from .exceptions import MatplotlibUnavailableError
 from skater.util.logger import build_logger
 from skater.util.logger import _INFO
 
+__all__ = ['add_noise', 'image_transformation', 'flip_pixels', 'normalize', 'show_image']
+
 
 logger = build_logger(_INFO, __name__)
 
