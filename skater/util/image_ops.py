@@ -111,12 +111,19 @@ def normalize(X):
     return np.array((X - np.min(X)) / (np.max(X) - np.min(X)))
 
 
-def show_image(X, axis=None, cmap=None, bins=None, stats=False):
+def show_image(X, cmap=None, bins=None):
+    font = {'family': 'avenir',
+            'color': 'black',
+            'weight': 'normal',
+            'size': 14,
+            }
     try:
         import matplotlib.pyplot as plt
-        axis = plt if axis is None else axis
+        fig, ax = plt.subplots(1, 2, figsize=(16, 8))
+        ax[0].imshow(X, cmap=cmap)
+        ax[0].set_title('Original')
+        ax[1].hist(X.ravel(), bins=bins, histtype='step')
+        ax[1].set_xlabel('Pixel intensity', fontdict=font)
+        fig.subplots_adjust(wspace=0.3)
     except ImportError:
-            raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
-    axis.imshow(X, cmap=cmap)
-    bins = X.shape[1] if None else bins
-    axis.hist(X.ravel(), bins=bins, histtype='step') if stats else None
+        raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on the system."))
