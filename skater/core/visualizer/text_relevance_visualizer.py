@@ -26,7 +26,7 @@ def build_explainer(text, feature_relevance_wts, font_size='12pt', file_name='re
     * http://matplotlib.org/examples/color/colormaps_reference.html
     * https://github.com/cod3licious/textcatvis
     """
-    # TODO: Add support for better visualization and plotting - e.g bokeh
+    # TODO: Add support for better visualization and plotting - e.g bokeh, plotly
     # color-maps
     cmap_pos = get_cmap(pos_clr_name)
     cmap_neg = get_cmap(neg_clr_name)

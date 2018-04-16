@@ -3,8 +3,14 @@
 import numpy as np
 import skimage
 import skimage.io
-from .exceptions import MatplotlibUnavailableError
+import matplotlib.pyplot as plt
 
+from .exceptions import MatplotlibUnavailableError
+from skater.util.logger import build_logger
+from skater.util.logger import _INFO
+
+
+logger = build_logger(_INFO, __name__)
 
 def load_image(path, img_height, img_width):
     # load image
@@ -61,6 +67,43 @@ def image_transformation():
     # https://www.kaggle.com/tomahim/image-manipulation-augmentation-with-skimage
     pass
 
+# Helper functions for filtering based on conditional type
+greater_than = lambda X, value: np.where(X > value)
+less_than = lambda X, value: np.where(X < value)
+in_between = lambda X, min_value, max_value: np.where((X >= min_value) & (X <= max_value))
+
+
+def remove_pixels(X, num_of_pixel, filtered_pixel=None):
+    try:
+        if len(filtered_pixel) > 0 & isinstance(filtered_pixel, tuple):
+            f_pixels = filtered_pixel
+            logger.info("Number of pixels matching the condition : {}".format(len(f_pixels[0])))
+            logger.info("Number of pixels specified to be replaced : {}".format(num_of_pixel))
+
+            if len(f_pixels) == 3:
+                # uniformly random
+                h = np.random.choice(f_pixels[0], num_of_pixel)
+                w = np.random.choice(f_pixels[1], num_of_pixel)
+                c = np.random.choice(f_pixels[2], num_of_pixel)
+
+                # for the selected pixels, set the pixel intensity to 0
+                for h_i, w_i, c_i in zip(h, w, c):
+                    X[h_i, w_i, c_i] = 0
+            elif len(f_pixels) == 2:
+                # uniformly random
+                h = np.random.choice(f_pixels[0], num_of_pixel)
+                w = np.random.choice(f_pixels[1], num_of_pixel)
+
+                # for the selected pixels, set the pixel intensity to 0
+                for h_i, w_i, c_i in zip(h, w):
+                    X[h_i, w_i] = 0
+            else:
+                logger.info("Ambiguity in the shape of the input image : {}".format(input_img.shape))
+    except:
+        raise ValueError("No matching pixel for the specified condition")
+    return X
+
+
 
 def normalize(X):
     """ Normalize image of the shape (H, W, D) in the range of 0 and 1
@@ -68,9 +111,12 @@ def normalize(X):
     return np.array((X - np.min(X)) / (np.max(X) - np.min(X)))
 
 
-def show_image(X):
+def show_image(X, axis=None, cmap=None, bins=None, stats=False):
     try:
         import matplotlib.pyplot as plt
+        axis= plt if axis is None else axis
     except ImportError:
             raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
-    plt.imshow(X)
+    axis.imshow(X, cmap=cmap)
+    bins = X.shape[1] if None else bins
+    axis.hist(X.ravel(), bins=bins, histtype='step') if stats else None

@@ -26,7 +26,7 @@ class Initializer(object):
         return self.session.run(feature_wts, feed_dict)
 
 
-    def _set_check_baseline(self):
+    def _set_baseline(self):
         if self.baseline is None:
             self.baseline = np.zeros((1,) + self.xs.shape[1:])
         else:

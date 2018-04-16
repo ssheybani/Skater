@@ -77,15 +77,15 @@ class IntegratedGradients(GradientBased):
 
     def run(self):
         # Apply the baseline specified or use default
-        self._set_check_baseline()
+        self._set_baseline()
 
-        relevance_scores = self.default_relevance_score()
+        t_grad = self.default_relevance_score()
         gradient = None
         alpha_list = list(np.linspace(start=1. / self.steps, stop=1.0, num=self.steps))
         for alpha in alpha_list:
             xs_scaled = self.xs * alpha
             # compute the gradient for each alpha value
-            _scores = self.session_run(relevance_scores, xs_scaled)
+            _scores = self.session_run(t_grad, xs_scaled)
             gradient = _scores if gradient is None else [g + a for g, a in zip(gradient, _scores)]
 
         results = [(x - b) * (g / self.steps) for g, x, b in zip(gradient, [self.xs], [self.baseline])]

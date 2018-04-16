@@ -21,7 +21,7 @@ def visualize(relevance_score, original_input_img=None, edge_detector_type='sobe
 
     edges = _edge_detection(original_input_img, edge_detector_type) if original_input_img is not None else None
 
-    # draw the edges of the image before overlaying the learned relevance
+    # draw the edges of the image before overlaying rest of the image
     if edges is not None:
         axis.imshow(edges, extent=extent, interpolation='nearest', cmap=xi_cmap, alpha=alpha_edges)
 
