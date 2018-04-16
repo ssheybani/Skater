@@ -94,6 +94,9 @@ def image_transformation(X, method_type='blur', **kwargs):
 # Helper functions for filtering based on conditional type
 greater_than = lambda X, value: np.where(X > value)
 less_than = lambda X, value: np.where(X < value)
+equal_to = lambda X, value: np.where(X == value)
+greater_than_or_equal = lambda X, value: np.where(X >= value)
+less_than_equal = lambda X, value: np.where(X < value)
 in_between = lambda X, min_value, max_value: np.where((X >= min_value) & (X <= max_value))
 
 
