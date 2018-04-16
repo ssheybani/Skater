@@ -3,6 +3,10 @@
 import numpy as np
 import skimage
 import skimage.io
+from scipy import ndimage
+from skimage import util
+from skimage.transform import rotate
+from skimage import exposure
 
 from .exceptions import MatplotlibUnavailableError
 from skater.util.logger import build_logger
@@ -63,9 +67,26 @@ def add_noise(image, noise_typ='gaussian', random_state=None):
     return skimage.util.random_noise(image, mode=noise_typ, seed=random_state)
 
 
-def image_transformation():
+def _rescale_intensity(X, q=(0.2, 99.8)):
+    v_min, v_max = np.percentile(X, q)
+    return exposure.rescale_intensity(X, in_range=(v_min, v_max))
+
+
+def image_transformation(X, method_type='blur', **kwargs):
     # https://www.kaggle.com/tomahim/image-manipulation-augmentation-with-skimage
-    pass
+    transformation_dict = {
+        'blur': normalize(ndimage.uniform_filter(X)),
+        'invert': normalize(util.invert(X)),
+        'rotate': rotate(X, angle=kwargs['angle'] if 'angle' in kwargs else 60),
+        'rescale_intensity': _rescale_intensity(X, q=kwargs['percentile']),
+        'gamma_correction': exposure.adjust_gamma(X, gamma=0.4, gain=0.9),
+        'log_correction': exposure.adjust_log(X),
+        'sigmoid_correction': exposure.adjust_sigmoid(X),
+        'horizontal_flip': X[:, ::-1],
+        'vertical_flip': X[::-1, :],
+        'rgb2gray': skimage.color.rgb2gray(X)
+    }
+    return transformation_dict[method_type]
 
 
 # Helper functions for filtering based on conditional type
@@ -74,7 +95,7 @@ less_than = lambda X, value: np.where(X < value)
 in_between = lambda X, min_value, max_value: np.where((X >= min_value) & (X <= max_value))
 
 
-def remove_pixels(X, num_of_pixel, filtered_pixel=None):
+def flip_pixels(X, num_of_pixel, filtered_pixel=None, replace_with=0):
     try:
         if len(filtered_pixel) > 0 & isinstance(filtered_pixel, tuple):
             f_pixels = filtered_pixel
@@ -97,7 +118,7 @@ def remove_pixels(X, num_of_pixel, filtered_pixel=None):
 
                 # for the selected pixels, set the pixel intensity to 0
                 for h_i, w_i, c_i in zip(h, w):
-                    X[h_i, w_i] = 0
+                    X[h_i, w_i] = replace_with
             else:
                 logger.info("Ambiguity in the shape of the input image : {}".format(X.shape))
     except:
