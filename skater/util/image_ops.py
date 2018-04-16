@@ -12,7 +12,8 @@ from .exceptions import MatplotlibUnavailableError
 from skater.util.logger import build_logger
 from skater.util.logger import _INFO
 
-__all__ = ['add_noise', 'image_transformation', 'flip_pixels', 'normalize', 'show_image']
+__all__ = ['add_noise', 'image_transformation', 'flip_pixels', 'normalize', 'show_image', 'greater_than', 'less_than',
+           'equal_to', 'greater_than_or_equal', 'less_than_equal', 'in_between']
 
 
 logger = build_logger(_INFO, __name__)
@@ -76,11 +77,13 @@ def _rescale_intensity(X, q=(0.2, 99.8)):
 
 def image_transformation(X, method_type='blur', **kwargs):
     # https://www.kaggle.com/tomahim/image-manipulation-augmentation-with-skimage
+    q = kwargs['percentile'] if 'percentile' in kwargs else (0.2, 99.8)
+    angle = kwargs['angle'] if 'angle' in kwargs else 60
     transformation_dict = {
         'blur': normalize(ndimage.uniform_filter(X)),
         'invert': normalize(util.invert(X)),
-        'rotate': rotate(X, angle=kwargs['angle'] if 'angle' in kwargs else 60),
-        'rescale_intensity': _rescale_intensity(X, q=kwargs['percentile']),
+        'rotate': rotate(X, angle=angle),
+        'rescale_intensity': _rescale_intensity(X, q=q),
         'gamma_correction': exposure.adjust_gamma(X, gamma=0.4, gain=0.9),
         'log_correction': exposure.adjust_log(X),
         'sigmoid_correction': exposure.adjust_sigmoid(X),
