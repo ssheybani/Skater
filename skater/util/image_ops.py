@@ -104,6 +104,9 @@ in_between = lambda X, min_value, max_value: np.where((X >= min_value) & (X <= m
 
 
 def flip_pixels(X, num_of_pixel, filtered_pixel=None, replace_with=0):
+    # make a deep copy of the original image
+    import copy
+    X_modified = copy.deepcopy(X)
     try:
         if len(filtered_pixel) > 0 & isinstance(filtered_pixel, tuple):
             f_pixels = filtered_pixel
@@ -118,7 +121,7 @@ def flip_pixels(X, num_of_pixel, filtered_pixel=None, replace_with=0):
 
                 # for the selected pixels, set the pixel intensity to 0
                 for h_i, w_i, c_i in zip(h, w, c):
-                    X[h_i, w_i, c_i] = 0
+                    X_modified[h_i, w_i, c_i] = 0
             elif len(f_pixels) == 2:
                 # uniformly random
                 h = np.random.choice(f_pixels[0], num_of_pixel)
@@ -126,12 +129,12 @@ def flip_pixels(X, num_of_pixel, filtered_pixel=None, replace_with=0):
 
                 # for the selected pixels, set the pixel intensity to 0
                 for h_i, w_i, c_i in zip(h, w):
-                    X[h_i, w_i] = replace_with
+                    X_modified[h_i, w_i] = replace_with
             else:
                 logger.info("Ambiguity in the shape of the input image : {}".format(X.shape))
     except:
         raise ValueError("No matching pixel for the specified condition")
-    return X
+    return X_modified
 
 
 def normalize(X):
