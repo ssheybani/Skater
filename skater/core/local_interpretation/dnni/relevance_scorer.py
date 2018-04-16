@@ -72,18 +72,17 @@ class IntegratedGradients(GradientBased):
     def __init__(self, T, X, xs, session, steps=100, baseline=None):
         super(IntegratedGradients, self).__init__(T, X, xs, session)
         self.steps = steps
-        self.baseline = baseline
+        # Using black image as a default baseline, as suggested in the paper
+        # Mukund Sundararajan, Ankir Taly, Qibi Yan. Axiomatic Attribution for Deep Networks(ICML2017)
+        self.baseline = np.zeros((1,) + self.xs.shape[1:]) if baseline is None else baseline
 
 
     def run(self):
-        # Apply the baseline specified or use default
-        self._set_baseline()
-
         t_grad = self.default_relevance_score()
         gradient = None
         alpha_list = list(np.linspace(start=1. / self.steps, stop=1.0, num=self.steps))
         for alpha in alpha_list:
-            xs_scaled = self.xs * alpha
+            xs_scaled = (self.xs - self.baseline) * alpha
             # compute the gradient for each alpha value
             _scores = self.session_run(t_grad, xs_scaled)
             gradient = _scores if gradient is None else [g + a for g, a in zip(gradient, _scores)]
