@@ -3,7 +3,6 @@
 import numpy as np
 import skimage
 import skimage.io
-import matplotlib.pyplot as plt
 
 from .exceptions import MatplotlibUnavailableError
 from skater.util.logger import build_logger
@@ -12,6 +11,7 @@ from skater.util.logger import _INFO
 
 logger = build_logger(_INFO, __name__)
 
+
 def load_image(path, img_height, img_width):
     # load image
     img = skimage.io.imread(path)
@@ -19,7 +19,7 @@ def load_image(path, img_height, img_width):
     assert (0 <= img).all() and (img <= 1.0).all()
 
     # Crop image from the center
-    short_edge = min(img.shape[:2])
+    short_edge = np.min(img.shape[:2])
     yy = int((img.shape[0] - short_edge) / 2)
     xx = int((img.shape[1] - short_edge) / 2)
     crop_img = img[yy: yy + short_edge, xx: xx + short_edge]
@@ -67,6 +67,7 @@ def image_transformation():
     # https://www.kaggle.com/tomahim/image-manipulation-augmentation-with-skimage
     pass
 
+
 # Helper functions for filtering based on conditional type
 greater_than = lambda X, value: np.where(X > value)
 less_than = lambda X, value: np.where(X < value)
@@ -98,11 +99,10 @@ def remove_pixels(X, num_of_pixel, filtered_pixel=None):
                 for h_i, w_i, c_i in zip(h, w):
                     X[h_i, w_i] = 0
             else:
-                logger.info("Ambiguity in the shape of the input image : {}".format(input_img.shape))
+                logger.info("Ambiguity in the shape of the input image : {}".format(X.shape))
     except:
         raise ValueError("No matching pixel for the specified condition")
     return X
-
 
 
 def normalize(X):
@@ -114,7 +114,7 @@ def normalize(X):
 def show_image(X, axis=None, cmap=None, bins=None, stats=False):
     try:
         import matplotlib.pyplot as plt
-        axis= plt if axis is None else axis
+        axis = plt if axis is None else axis
     except ImportError:
             raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
     axis.imshow(X, cmap=cmap)
