@@ -79,7 +79,7 @@ class TestDNNI(unittest.TestCase):
         cls.y_test = keras.utils.to_categorical(cls.y_test, cls.num_classes)
 
         # build a simple CovNet model
-        cls.model = cls.build_model()
+        cls.model = cls._build_model()
 
         # save the model
         cls._save()
