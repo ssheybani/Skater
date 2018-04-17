@@ -89,9 +89,7 @@ def setup_package():
             'Jinja2==2.10',
             'bs4'],
         extras_require={
-            'matplot':'matplotlib',
-            'tf': ["tensorflow>=1.0.0"],
-            "tf_gpu": ["tensorflow-gpu>=1.0.0"]
+            'all':'matplotlib'
             },
         zip_safe=False)
 
