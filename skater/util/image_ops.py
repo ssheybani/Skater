@@ -103,7 +103,11 @@ less_than_equal = lambda X, value: np.where(X < value)
 in_between = lambda X, min_value, max_value: np.where((X >= min_value) & (X <= max_value))
 
 
-def flip_pixels(X, num_of_pixel, filtered_pixel=None, replace_with=0):
+def flip_pixels(X, num_of_pixel, filtered_pixel=None, replace_with=0, random_state=0):
+    # make a deep copy of the original image
+    import copy
+    X_modified = copy.deepcopy(X)
+    np.random.seed(random_state)
     try:
         if len(filtered_pixel) > 0 & isinstance(filtered_pixel, tuple):
             f_pixels = filtered_pixel
@@ -112,26 +116,26 @@ def flip_pixels(X, num_of_pixel, filtered_pixel=None, replace_with=0):
 
             if len(f_pixels) == 3:
                 # uniformly random
-                h = np.random.choice(f_pixels[0], num_of_pixel)
-                w = np.random.choice(f_pixels[1], num_of_pixel)
-                c = np.random.choice(f_pixels[2], num_of_pixel)
+                h = np.random.choice(f_pixels[0], num_of_pixel, replace=False)
+                w = np.random.choice(f_pixels[1], num_of_pixel, replace=False)
+                c = np.random.choice(f_pixels[2], num_of_pixel, replace=False)
 
                 # for the selected pixels, set the pixel intensity to 0
                 for h_i, w_i, c_i in zip(h, w, c):
-                    X[h_i, w_i, c_i] = 0
+                    X_modified[h_i, w_i, c_i] = replace_with
             elif len(f_pixels) == 2:
                 # uniformly random
-                h = np.random.choice(f_pixels[0], num_of_pixel)
-                w = np.random.choice(f_pixels[1], num_of_pixel)
+                h = np.random.choice(f_pixels[0], num_of_pixel, replace=False)
+                w = np.random.choice(f_pixels[1], num_of_pixel, replace=False)
 
                 # for the selected pixels, set the pixel intensity to 0
-                for h_i, w_i, c_i in zip(h, w):
-                    X[h_i, w_i] = replace_with
+                for h_i, w_i in zip(h, w):
+                    X_modified[h_i, w_i] = replace_with
             else:
                 logger.info("Ambiguity in the shape of the input image : {}".format(X.shape))
     except:
-        raise ValueError("No matching pixel for the specified condition")
-    return X
+        logger.info("No matching pixel for the specified condition")
+    return X_modified
 
 
 def normalize(X):
@@ -141,17 +145,19 @@ def normalize(X):
 
 
 def show_image(X, cmap=None, bins=None):
+    import copy
     font = {'family': 'avenir',
             'color': 'black',
             'weight': 'normal',
             'size': 14,
             }
+    _X = copy.deepcopy(X)
     try:
         import matplotlib.pyplot as plt
         fig, ax = plt.subplots(1, 2, figsize=(16, 8))
-        ax[0].imshow(X, cmap=cmap)
+        ax[0].imshow(_X, cmap=cmap)
         ax[0].set_title('Original')
-        ax[1].hist(X.ravel(), bins=bins, histtype='step')
+        ax[1].hist(_X.ravel(), bins=bins, histtype='step')
         ax[1].set_xlabel('Pixel intensity', fontdict=font)
         fig.subplots_adjust(wspace=0.3)
     except ImportError:
