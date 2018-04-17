@@ -11,35 +11,37 @@ from skater.core.local_interpretation.dnni.deep_interpreter import DeepInterpret
 
 class TestDNNI(unittest.TestCase):
 
-    def _build_model(self):
+    @classmethod
+    def _build_model(cls):
         # Build and train a network.
         model = Sequential()
-        model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=self.input_shape))
+        model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=cls.input_shape))
         model.add(Conv2D(64, (3, 3), activation='relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
         model.add(Dropout(0.25))
         model.add(Flatten())
         model.add(Dense(128, activation='relu'))
         model.add(Dropout(0.5))
-        model.add(Dense(self.num_classes))
+        model.add(Dense(cls.num_classes))
         model.add(Activation('softmax'))
 
         model.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.Adadelta(),
                       metrics=['accuracy'])
-        model.fit(self.x_train, self.y_train, batch_size=self.batch_size, epochs=self.epochs,
-                  verbose=1, validation_data=(self.x_test, self.y_test))
+        model.fit(cls.x_train, cls.y_train, batch_size=cls.batch_size, epochs=cls.epochs,
+                  verbose=1, validation_data=(cls.x_test, cls.y_test))
         return model
 
 
-    def _save(self):
-        model_yaml = self.model.to_yaml()
+    @classmethod
+    def _save(cls):
+        model_yaml = cls.model.to_yaml()
         with open("sample_model.yaml", "w") as f_h:
             f_h.write(model_yaml)
         # serialize weights to HDF5
-        self.model.save_weights("sample_model.h5")
+        cls.model.save_weights("sample_model.h5")
 
-
-    def _load(self):
+    @classmethod
+    def _load(cls):
         f_h = open('sample_model.yaml', 'r')
         persisted_yaml_model = f_h.read()
         f_h.close()
