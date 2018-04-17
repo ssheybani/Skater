@@ -37,15 +37,15 @@ install:
       python setup.py install;
     fi
   - if [[ "$TRAVIS_PYTHON_VERSION" > "3.0" ]]; then
-      pip3 install tensorflow==1.4.0; then
-    else
       pip3 install tensorflow==1.4.0;
+    else
+      pip install tensorflow==1.4.0;
     fi
   - python=$TRAVIS_PYTHON_VERSION -W ignore -c "import tensorflow as tf"
   - if [[ "$TRAVIS_PYTHON_VERSION" > "3.0" ]]; then
-       pip3 install keras==2.0.8; then
-    else
        pip3 install keras==2.0.8;
+    else
+       pip install keras==2.0.8;
     fi
   - python==$TRAVIS_PYTHON_VERSION -W ignore -c "import keras as k"
   - python -c "import scipy"
