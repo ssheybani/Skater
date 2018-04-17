@@ -9,8 +9,8 @@ from skater.core.local_interpretation.text_interpreter import auto_feature_selec
     query_top_features_by_class, understand_estimator, vectorize_as_tf_idf, get_feature_names
 from skater.util.text_ops import cleaner
 from skater.util.dataops import convert_dataframe_to_dict
-
 from skater.util.text_ops import preprocessor
+
 
 class TestTextInterpreter(unittest.TestCase):
     """
@@ -38,12 +38,12 @@ class TestTextInterpreter(unittest.TestCase):
         self.y_test = data_test.target
 
         self.param_dict_vectorizer = {
-            'sublinear_tf':True,
+            'sublinear_tf': True,
             'max_df': 0.5,
             'stop_words': 'english',
             'smooth_idf': True,
-            'ngram_range':(1, 3),
-            #'max_features': 10 (didn't give the right result)
+            'ngram_range': (1, 3),
+            # 'max_features': 10 (didn't give the right result)
         }
 
 
@@ -56,25 +56,23 @@ class TestTextInterpreter(unittest.TestCase):
 
     def test_utils(self):
         # converting of dataframe to dict
-        data = np.array([['','feature_name','relevance_scores'],
-                         ['R1','F1',20],
-                         ['R2','F2',40]])
-        test_df = pd.DataFrame(data=data[1:,1:],
-                  index=data[1:,0],
-                  columns=data[0,1:])
+        data = np.array([['', 'feature_name', 'relevance_scores'],
+                         ['R1', 'F1', 20],
+                         ['R2', 'F2', 40]])
+        test_df = pd.DataFrame(data=data[1:, 1:], index=data[1:, 0], columns=data[0, 1:])
         test_dict = convert_dataframe_to_dict("feature_name", "relevance_scores", test_df)
         self.assertEquals(test_dict['F1'], '20')
 
 
     def test_get_feature_names(self):
         vectorizer, X_train = vectorize_as_tf_idf(self.X_train, **self.param_dict_vectorizer)
-        feature_names =  get_feature_names(vectorizer_inst=vectorizer)
+        feature_names = get_feature_names(vectorizer_inst=vectorizer)
         self.assertEquals(len(feature_names), 126384)
 
 
     def test_understand_estimator(self):
         vectorizer, X_train = vectorize_as_tf_idf(self.X_train, **self.param_dict_vectorizer)
-        feature_names =  get_feature_names(vectorizer_inst=vectorizer)
+        feature_names = get_feature_names(vectorizer_inst=vectorizer)
 
         select_type_inst, X_new_train, selected_feature = auto_feature_selection(X_train, self.y_train,
                                                                                  feature_names=feature_names)
@@ -88,7 +86,7 @@ class TestTextInterpreter(unittest.TestCase):
                                                            summarizer_type='mean', min_threshold=0.1)
 
         relevance_dict, relevance_df, _ = understand_estimator(clf, 0, features_to_consider, selected_feature,
-                                             top_k=len(features_to_consider), relevance_type='default')
+                                                               top_k=len(features_to_consider), relevance_type='default')
 
         self.assertEquals(len(relevance_df.columns), 3)
         # validate the construction of the data-frame
@@ -109,8 +107,8 @@ class TestTextInterpreter(unittest.TestCase):
 
         relevance_dict, relevance_df, _ = understand_estimator(clf, 1, features_to_consider, selected_feature,
                                                                top_k=len(features_to_consider), relevance_type='default')
-        self.assertEquals("{:.2f}".format(relevance_df[relevance_df['features']=='sounds'].coef_scores_wts.values[0]),
-                          '0.55')
+        self.assertEquals("{:.2f}".format(relevance_df[relevance_df['features'] == 'sounds']
+                                          .coef_scores_wts.values[0]), '0.55')
 
 
 if __name__ == '__main__':

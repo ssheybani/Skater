@@ -7,7 +7,8 @@ _ERROR = logging.ERROR
 _WARNING = logging.WARNING
 _INFO = logging.INFO
 _DEBUG = logging.DEBUG
-_NOTSET	= logging.NOTSET
+_NOTSET = logging.NOTSET
+
 
 def build_logger(log_level, logger_name, capture_warning=True):
     logger = logging.Logger(logger_name)

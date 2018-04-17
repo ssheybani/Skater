@@ -14,7 +14,7 @@ def preprocessor(text):
 
     # convert to lowercase and append all emoticons behind (with space in between)
     # replace('-','') removes nose of emoticons
-    text = re.sub('[\W]+', ' ', text.lower()) + ' ' + ' '.join(emoticons).replace('-','')
+    text = re.sub('[\W]+', ' ', text.lower()) + ' ' + ' '.join(emoticons).replace('-', '')
     return text
 
 
@@ -35,4 +35,4 @@ def cleaner(text, to_lower=True, norm_num=False, char_to_strip=' |(|)|,', non_al
 
 
 # returns indexes where ground truth and predicted value does not match
-query_for_false_predictions = lambda predictions, ground_truth:  np.where(ground_truth != predictions)
+query_for_false_predictions = lambda predictions, ground_truth: np.where(ground_truth != predictions)
