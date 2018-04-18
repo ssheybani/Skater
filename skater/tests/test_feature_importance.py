@@ -145,8 +145,10 @@ class TestFeatureImportance(unittest.TestCase):
         self.assertEquals(np.isclose(importances.sum(), 1), True)
 
 
+    @unittest.skip("Related to plotting ...")
     def test_plot_feature_importance(self):
         self.interpreter.feature_importance.plot_feature_importance(self.regressor_predict_fn)
+
 
     def test_feature_importance_sampling(self):
         """

@@ -1,8 +1,6 @@
 import keras
 from keras.datasets import mnist
 from keras.models import Sequential, Model, load_model, model_from_yaml
-from keras.layers import Dense, Dropout, Flatten, Activation
-from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 
 import unittest
@@ -11,48 +9,45 @@ from skater.core.local_interpretation.dnni.deep_interpreter import DeepInterpret
 
 class TestDNNI(unittest.TestCase):
 
-    @classmethod
-    def _build_model(cls):
-        # Build and train a network.
-        model = Sequential()
-        model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=cls.input_shape))
-        model.add(Conv2D(64, (3, 3), activation='relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.25))
-        model.add(Flatten())
-        model.add(Dense(128, activation='relu'))
-        model.add(Dropout(0.5))
-        model.add(Dense(cls.num_classes))
-        model.add(Activation('softmax'))
+    # The below architecture maps to the pre_trained_models/mnist_cnn/model_mnist_cnn_epoch_3*
+    # @classmethod
+    # def _build_mnist_CNN_model(cls):
+    #     from keras.layers import Dense, Dropout, Flatten, Activation
+    #     from keras.layers import Conv2D, MaxPooling2D
+    #
+    #     Build and train a network.
+    #     model = Sequential()
+    #     model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=cls.input_shape))
+    #     model.add(Conv2D(64, (3, 3), activation='relu'))
+    #     model.add(MaxPooling2D(pool_size=(2, 2)))
+    #     model.add(Dropout(0.25))
+    #     model.add(Flatten())
+    #     model.add(Dense(128, activation='relu'))
+    #     model.add(Dropout(0.5))
+    #     model.add(Dense(cls.num_classes))
+    #     model.add(Activation('softmax'))
+    #
+    #     model.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.Adadelta(),
+    #                   metrics=['accuracy'])
+    #     model.fit(cls.x_train, cls.y_train, batch_size=cls.batch_size, epochs=cls.epochs,
+    #               verbose=1, validation_data=(cls.x_test, cls.y_test))
+    #     return model
 
-        model.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.Adadelta(),
-                      metrics=['accuracy'])
-        model.fit(cls.x_train, cls.y_train, batch_size=cls.batch_size, epochs=cls.epochs,
-                  verbose=1, validation_data=(cls.x_test, cls.y_test))
-        return model
-
-
-    @classmethod
-    def _save(cls):
-        model_yaml = cls.model.to_yaml()
-        with open("sample_model.yaml", "w") as f_h:
-            f_h.write(model_yaml)
-        # serialize weights to HDF5
-        cls.model.save_weights("sample_model.h5")
 
     @classmethod
-    def _load(cls):
-        f_h = open('sample_model.yaml', 'r')
+    def _load(cls, model_name):
+        f_h = open('{}.yaml'.format(model_name), 'r')
         persisted_yaml_model = f_h.read()
         f_h.close()
         loaded_model = model_from_yaml(persisted_yaml_model)
         # load weights into retrieved model instance
-        loaded_model.load_weights("sample_model.h5")
+        loaded_model.load_weights("{}.h5".format(model_name))
         return loaded_model
 
 
     @classmethod
     def setUpClass(cls):
+        # MNIST dataset used for building pre_trained_models/mnist_cnn/model_mnist_cnn_epoch_3
         cls.batch_size = 128
         cls.num_classes = 10
         cls.epochs = 2
@@ -80,19 +75,14 @@ class TestDNNI(unittest.TestCase):
         cls.y_train = keras.utils.to_categorical(cls.y_train, cls.num_classes)
         cls.y_test = keras.utils.to_categorical(cls.y_test, cls.num_classes)
 
-        # build a simple CovNet model
-        cls.model = cls._build_model()
-
-        # save the model
-        cls._save()
-
 
     def test_deep_interpreter_cnn(self):
         K.set_learning_phase(0)
         with DeepInterpreter(session=K.get_session()) as di:
             # 1. Load the persisted model
             # 2. Retrieve the input tensor from the loaded model
-            retrieved_model = self._load()
+
+            retrieved_model = self._load('skater/tests/pre_trained_models/mnist_cnn/premodel_mnist_cnn_epoch_3')
             input_tensor = retrieved_model.layers[0].input
             output_tensor = retrieved_model.layers[-2].output
 

@@ -58,7 +58,7 @@ def build_explainer(text, feature_relevance_wts, font_size='12pt', file_name='re
     # after the last word, add the rest of the text
     html_str += rest_text
     html_str += u'</div></body>'
-    with codecs.open('{}.html'.format(file_name), 'w',  encoding='utf8') as f:
+    with codecs.open('{}.html'.format(file_name), 'w', encoding='utf8') as f:
         f.write(html_str)
 
 
@@ -91,9 +91,7 @@ class _GroupedColorFunc(object):
     def get_color_func(self, word):
         """Returns a single_color_func associated with the word"""
         try:
-            color_func = next(
-                    color_func for (color_func, words) in self.color_func_to_words
-                    if word in words)
+            color_func = next(color_func for (color_func, words) in self.color_func_to_words if word in words)
         except StopIteration:
             color_func = self.default_color_func
         return color_func
