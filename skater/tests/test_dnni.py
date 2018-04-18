@@ -82,7 +82,7 @@ class TestDNNI(unittest.TestCase):
             # 1. Load the persisted model
             # 2. Retrieve the input tensor from the loaded model
 
-            retrieved_model = self._load('skater/tests/pre_trained_models/mnist_cnn/premodel_mnist_cnn_epoch_3')
+            retrieved_model = self._load('skater/tests/pre_trained_models/mnist_cnn/model_mnist_cnn_epoch_3')
             input_tensor = retrieved_model.layers[0].input
             output_tensor = retrieved_model.layers[-2].output
 
