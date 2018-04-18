@@ -71,7 +71,6 @@ class TestFeatureImportance(unittest.TestCase):
                                                           probability=True)
 
 
-
     @staticmethod
     def feature_column_name_formatter(columnname):
         return "feature: {}".format(columnname)
@@ -91,13 +90,13 @@ class TestFeatureImportance(unittest.TestCase):
 
     def test_feature_importance_progressbar(self):
         importances = self.interpreter.feature_importance.feature_importance(self.regressor_predict_fn,
-                                                                             progressbar=True)
+                                                                             progressbar=False)
         self.assertEquals(np.isclose(importances.sum(), 1), True)
 
 
     def test_feature_importance_entropy_with_and_without_scaling(self):
         importances = self.interpreter.feature_importance.feature_importance(self.regressor_predict_fn,
-                                                                             progressbar=True,
+                                                                             progressbar=False,
                                                                              use_scaling=True)
         self.assertEquals(np.isclose(importances.sum(), 1), True)
 

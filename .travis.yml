@@ -27,7 +27,7 @@ before_install:
   - conda install gxx_linux-64
 
 install:
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib pandas flake8 coverage
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib pandas h5py flake8 coverage
   - source activate test-environment
   - pip install codecov # not on conda
   - pip install coveralls
@@ -37,15 +37,16 @@ install:
       python setup.py install;
     fi
   - if [[ "$TRAVIS_PYTHON_VERSION" > "3.0" ]]; then
-      pip3 install tensorflow==1.4.0;
+      python -m pip install tensorflow==1.4.0;
+      python -W ignore -c "import tensorflow as tf";
     else
-      pip install tensorflow==1.4.0;
+      python -m pip install tensorflow==1.4.0;
+      python -W ignore -c "import tensorflow as tf";
     fi
-  - python -W ignore -c "import tensorflow as tf"
   - if [[ "$TRAVIS_PYTHON_VERSION" > "3.0" ]]; then
-       pip3 install keras==2.0.8;
+       python -m pip install keras==2.0.8;
     else
-       pip install keras==2.0.8;
+       python -m pip install keras==2.0.8;
     fi
   - python -W ignore -c "import keras as k"
   - python -c "import scipy"

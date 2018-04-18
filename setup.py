@@ -87,7 +87,7 @@ def setup_package():
             'joblib==0.11',
             'rpy2==2.9.1; python_version>"3.0"',
             'Jinja2==2.10',
-            'bs4', 'h5py'],
+            'bs4'],
         extras_require={
             'all':'matplotlib'
             },
