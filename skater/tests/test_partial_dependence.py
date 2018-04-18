@@ -92,10 +92,6 @@ class TestPartialDependence(unittest.TestCase):
             interpreter.partial_dependence.partial_dependence([self.categorical_feature_names[0]], self.categorical_model)
         except:
             self.fail("PD computation function failed with categorical features")
-        try:
-            interpreter.partial_dependence.plot_partial_dependence([self.categorical_feature_names], self.categorical_model)
-        except:
-            self.fail("PDP plotting function failed with categorical features")
 
 
     def test_partial_dependence_binary_classification(self):
