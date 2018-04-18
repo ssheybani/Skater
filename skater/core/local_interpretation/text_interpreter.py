@@ -17,7 +17,7 @@ def _handling_ngrams_wts(original_feat_dict):
     # Currently, when feature dictionary contains continuous sequences such as 2-gram/3-gram etc. sequences as features,
     # a short term solution is to further split them into additional keys.
     # e.g. {'stay ball dropped': 0.5} will be split into a new dict as {'stay':0.5, 'ball': 0.5, 'dropped': 0.5}
-    # TODO: this is just a temporary solution for handling n-grams, figure out a better solution    
+    # TODO: this is just a temporary solution for handling n-grams, figure out a better solution
     for k in list(original_feat_dict.keys()):
         additional_keys = k.split()
     for a_k in additional_keys:
@@ -34,9 +34,9 @@ def relevance_wt_assigner(raw_txt, wts_as_dict):
     if isinstance(wts_as_dict, dict):
         feature_scores = _handling_ngrams_wts(wts_as_dict)
         max_wt = np.max(np.abs(list(feature_scores.values())))
-        wts_as_dict = {word: feature_scores[word]/max_wt for word in feature_scores.keys()}
+        wts_as_dict = {word: feature_scores[word] / max_wt for word in feature_scores.keys()}
         # transform dict into list of tuples (word, relevance_wts)
-        # TODO look into removing the below occurring side effect
+        # TODO: look into removing the below occurring side effect
         relevance_wts = []
         for word in raw_txt.split():
             # Clean up the raw word for irregularities
@@ -55,7 +55,7 @@ def vectorize_as_tf_idf(data, **kwargs):
     # TODO: extend support to other forms of Vectorization schemes - Feature Hashing
     # Converting raw document to tf-idf feature matrix
     tfidf_vec = TfidfVectorizer(sublinear_tf=kwargs['sublinear_tf'], max_df=kwargs['max_df'],
-                    stop_words=kwargs['stop_words'], smooth_idf=kwargs['smooth_idf'],
+                                stop_words=kwargs['stop_words'], smooth_idf=kwargs['smooth_idf'],
                                 ngram_range=kwargs['ngram_range'])
     X = tfidf_vec.fit_transform(data)
     return tfidf_vec, X
@@ -128,11 +128,11 @@ def query_top_features_in_doc(data, y, features, feature_selection_choice='defau
     """
     row = np.squeeze(data.toarray())
     return _compute_top_features(X=row, y=y, features=features, feature_selection_type=feature_selection_choice,
-                                     top_k=top_k)
+                                 top_k=top_k)
 
 
-def query_top_features_overall(data, y_true, feature_list, min_threshold=0.1, feature_selection='default',
-                                      summarizer_type='mean', top_k=25):
+def query_top_features_overall(data, y_true, feature_list, min_threshold=0.1,
+                               feature_selection='default', summarizer_type='mean', top_k=25):
     """ Compute and query for top features in the whole corpus
     """
     # TODO add summarizer type as a sub-argument
@@ -160,11 +160,11 @@ def query_top_features_overall(data, y_true, feature_list, min_threshold=0.1, fe
         return temp_df
 
 
-def query_top_features_by_class(X, y, feature_names, class_index,
-                                       summarizer_type='mean', topk_features=25, min_threshold=0.1):
+def query_top_features_by_class(X, y, feature_names, class_index, summarizer_type='mean',
+                                topk_features=25, min_threshold=0.1):
     """ Compute and query for top features in the whole corpus wrt individual classes
     """
-    indexes = list(np.where(y==class_index))
+    indexes = list(np.where(y == class_index))
     feature_df = query_top_features_overall(data=X[indexes[0]], y_true=y[indexes[0]], feature_list=feature_names,
                                             min_threshold=min_threshold, summarizer_type=summarizer_type,
                                             top_k=topk_features)
@@ -219,19 +219,19 @@ def understand_estimator(estimator, class_label_index, feature_wts, feature_name
 
     # Currently, support for sklearn based estimator
     # TODO: extend it for estimator from other frameworks - MLLib, H20, vw
-    coef_array = np.squeeze(-estimator.coef_[0]) if estimator.coef_.shape[0]==1 and class_label_index==1 \
-                                                                    else np.squeeze(estimator.coef_[class_label_index])
+    coef_array = np.squeeze(-estimator.coef_[0]) if estimator.coef_.shape[0] == 1 and class_label_index == 1 \
+        else np.squeeze(estimator.coef_[class_label_index])
     no_of_features = top_k
     _, _, feature_coef_list = _default_feature_selection(X=coef_array, y=0, feature_names=feature_names,
                                                          k_features=no_of_features)
 
     feature_coef_df = pd.DataFrame(feature_coef_list, columns=['features', 'coef_scores_wts'])
-    bias = estimator.intercept_[0]/no_of_features if estimator.coef_.shape[0]==1 and class_label_index==1 \
-        else estimator.intercept_[class_label_index]/no_of_features
+    bias = estimator.intercept_[0] / no_of_features if estimator.coef_.shape[0] == 1 and class_label_index == 1 \
+        else estimator.intercept_[class_label_index] / no_of_features
 
     if relevance_type == 'default':
         feature_df_dict, feature_df, feature_coef_df = _based_on_learned_estimator(feature_coef_df,
-                                                                                       bias, no_of_features)
+                                                                                   bias, no_of_features)
     elif relevance_type == 'SLRP':
         feature_df_dict, feature_df, feature_coef_df = _single_layer_lrp(feature_coef_df, bias,
                                                                          feature_wts, top_k)
