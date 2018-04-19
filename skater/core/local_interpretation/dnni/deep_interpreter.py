@@ -12,15 +12,21 @@ from collections import OrderedDict
 import warnings
 from skater.util.logger import build_logger
 from skater.util.logger import _WARNING
+from skater.util.logger import _INFO
 
+logger = build_logger(_INFO, __name__)
 
 @ops.RegisterGradient("DeepInterpretGrad")
 def deep_interpreter_grad(op, grad):
+    logger.debug("Computing gradient using DeepInterpretGrad")
     Initializer.grad_override_checkflag = 1
     if Initializer.enabled_method_class is not None \
             and issubclass(Initializer.enabled_method_class, GradientBased):
+        logger.debug("Computing gradient using DeepInterpretGrad: {}".
+                     format(Initializer.enabled_method_class.non_linear_grad))
         return Initializer.enabled_method_class.non_linear_grad(op, grad)
     else:
+        logger.debug("Computing gradient using DeepInterpretGrad: {}".format(Initializer.original_grad))
         return Initializer.original_grad(op, grad)
 
 
@@ -44,6 +50,7 @@ class DeepInterpreter(object):
     .. [2] https://github.com/marcoancona/DeepExplain/blob/master/deepexplain/tensorflow/methods.py
 
     """
+    __name__ = "DeepInterpreter"
 
     def __init__(self, graph=None, session=tf.get_default_session(), log_level=_WARNING):
         self.logger = build_logger(log_level, __name__)
@@ -52,6 +59,8 @@ class DeepInterpreter(object):
         self.session = session
         if self.session is None:
             raise RuntimeError('Relevant session not retrieved')
+        else:
+            self.logger.info("Current session: {}".format(session.__dict__))
         self.graph = session.graph if graph is None else graph
         self.graph_context = self.graph.as_default()
         self.override_context = self.graph.gradient_override_map(self._get_gradient_override_map())
