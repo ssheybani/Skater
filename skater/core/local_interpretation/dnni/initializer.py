@@ -14,7 +14,7 @@ class Initializer(object):
     enabled_method_class = None
     grad_override_checkflag = 0
 
-    logger =  build_logger(_INFO, __name__)
+    logger = build_logger(_INFO, __name__)
 
     def __init__(self, feature_wts, X, xs, session):
         self.feature_wts = feature_wts

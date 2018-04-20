@@ -9,7 +9,7 @@ import codecs
 from skater.core.local_interpretation.text_interpreter import relevance_wt_assigner
 
 
-def build_explainer(text, feature_relevance_wts, font_size='12pt', file_name='rendered', metainf='',
+def build_visual_explainer(text, feature_relevance_wts, font_size='12pt', file_name='rendered', metainf='',
                     pos_clr_name='Reds', neg_clr_name='Blues', highlight_oov=False):
     """
     Generate a html doc highlighting positive / negative words based on the original text and relevance scores
@@ -37,7 +37,7 @@ def build_explainer(text, feature_relevance_wts, font_size='12pt', file_name='re
     norm = mpl.colors.Normalize(0., 1.)
 
     html_str = u'<body><div style=background-color:#F5F5F5; white-space: pre-wrap; font-size: {}; font-family: Verdana;">'.format(font_size)
-    html_str += '%s\n\n' % metainf if metainf else html_str
+    html_str += '%s\n\n' % metainf % '%s\n\n' if metainf else html_str
 
     rest_text = text
     relevance_wts = relevance_wt_assigner(text, feature_relevance_wts)

@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-from skater.core.local_interpretation.dnni.relevance_scorer import GradientBased
+from skater.core.local_interpretation.dnni.relevance_scorer import BaseGradient
 from skater.core.local_interpretation.dnni.relevance_scorer import LRP
 from skater.core.local_interpretation.dnni.relevance_scorer import IntegratedGradients
 from skater.core.local_interpretation.dnni.initializer import Initializer
@@ -16,12 +16,13 @@ from skater.util.logger import _INFO
 
 logger = build_logger(_INFO, __name__)
 
+
 @ops.RegisterGradient("DeepInterpretGrad")
 def deep_interpreter_grad(op, grad):
     logger.debug("Computing gradient using DeepInterpretGrad")
     Initializer.grad_override_checkflag = 1
     if Initializer.enabled_method_class is not None \
-            and issubclass(Initializer.enabled_method_class, GradientBased):
+            and issubclass(Initializer.enabled_method_class, BaseGradient):
         logger.debug("Computing gradient using DeepInterpretGrad: {}".
                      format(Initializer.enabled_method_class.non_linear_grad))
         return Initializer.enabled_method_class.non_linear_grad(op, grad)
