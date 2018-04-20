@@ -109,7 +109,7 @@ class DeepInterpreter(object):
         self.logger.info('DeepInterpreter: executing method {}'.format(method))
 
         result = method.run()
-        if issubclass(Initializer.enabled_method_class, GradientBased) and Initializer.grad_override_checkflag == 0:
+        if issubclass(Initializer.enabled_method_class, BaseGradient) and Initializer.grad_override_checkflag == 0:
             warnings.warn('Results may not reliable: As default gradient seems to have been used. '
                           'or you might have forgotten to create the graph within the DeepInterpreter context. '
                           'Be careful...')

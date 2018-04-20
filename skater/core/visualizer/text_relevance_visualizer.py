@@ -9,7 +9,7 @@ import codecs
 from skater.core.local_interpretation.text_interpreter import relevance_wt_assigner
 
 
-def build_visual_explainer(text, feature_relevance_wts, font_size='12pt', file_name='rendered', metainf='',
+def build_visual_explainer(text, feature_relevance_wts, font_size='12pt', file_name='rendered', title='',
                     pos_clr_name='Reds', neg_clr_name='Blues', highlight_oov=False):
     """
     Generate a html doc highlighting positive / negative words based on the original text and relevance scores
@@ -36,21 +36,19 @@ def build_visual_explainer(text, feature_relevance_wts, font_size='12pt', file_n
     alpha = 0.2 if highlight_oov else 0.
     norm = mpl.colors.Normalize(0., 1.)
 
-    html_str = u'<body><div style=background-color:#F5F5F5; white-space: pre-wrap; font-size: {}; font-family: Verdana;">'.format(font_size)
+    html_str = u'<body><h3>{}</h3>'\
+               u'<div style=background-color:#F5F5F5; white-space: pre-wrap; font-size: {}; font-family: Verdana;">'\
+        .format(title, font_size)
     html_str += '%s\n\n' % metainf % '%s\n\n' if metainf else html_str
 
     rest_text = text
     relevance_wts = relevance_wt_assigner(text, feature_relevance_wts)
     for word, wts in relevance_wts:
-        # was anything before the identified word? add it unchanged to the html
         html_str += rest_text[:rest_text.find(word)]
         # cut off the identified word
         rest_text = rest_text[rest_text.find(word) + len(word):]
         if wts is not None:
-            if wts < 0:
-                rgbac = cmap_neg(norm(-wts))
-            else:
-                rgbac = cmap_pos(norm(wts))
+            rgbac = cmap_neg(norm(-wts)) if wts < 0 else cmap_pos(norm(wts))
             # adjusting opacity for in-dictionary words
             alpha = 0.5
         html_str += u'<span style="background-color: rgba(%i, %i, %i, %.1f)">%s</span>' \
