@@ -1,7 +1,9 @@
 from matplotlib.cm import get_cmap
 import matplotlib as mpl
+from matplotlib.patches import Patch
 from PIL import Image
 from wordcloud import (WordCloud, get_single_color_func)
+from skater.data.datamanager import DataManager as DM
 
 import numpy as np
 import codecs
@@ -37,8 +39,10 @@ def build_visual_explainer(text, feature_relevance_wts, font_size='12pt', file_n
     norm = mpl.colors.Normalize(0., 1.)
 
     html_str = u'<body><h3>{}</h3>'\
-               u'<div style=background-color:#F5F5F5; white-space: pre-wrap; font-size: {}; font-family: Verdana;">'\
-        .format(title, font_size)
+               u'<div style=background-color:#F5F5F5; ' \
+               u'white-space: pre-wrap; ' \
+               u'font-size: {}; ' \
+               u'font-family: Avenir Black>'.format(title, font_size)
 
     rest_text = text
     relevance_wts = relevance_wt_assigner(text, feature_relevance_wts)
@@ -124,6 +128,32 @@ def generate_word_cloud(relevant_feature_wts, pos_clr_name='blue',
     wc.generate_from_frequencies(relevant_feature_wts)
     wc.to_file('word_cloud.png') if save_to_file else None
     return wc
+
+
+def plot_feature_relevance(feature_relevance_scores, top_k=10, plt=None, color_map=('Red', 'Blue'),
+                           fig_size=(4, 4), font_name="Avenir Black"):
+    # Validate the input data format. Currently supported types include (pandas.DataFrame)
+    pos_color = color_map[0]
+    neg_color = color_map[1]
+    DM._check_input(feature_relevance_scores)
+    df = feature_relevance_scores.sort_values(by='relevance_scores', ascending=False)
+    df['positive'] = df['relevance_scores'] > 0
+
+    # Setting the style globally for the plot
+    # For other style check the reference here `plt.style.available`
+    plt.style.use('bmh')
+    ax = plt.subplot(111)
+    # filter the top k features wrt each signed category (Positive / Negative ) features
+    df_filtered = df.groupby('positive').head(top_k)
+    color_list = df_filtered['positive'].map({True: pos_color, False: neg_color})
+    df_filtered['relevance_scores'].plot(ax=ax, kind='barh', color=color_list, figsize=fig_size)
+    custom_lines = [Patch(facecolor=pos_color, edgecolor='r'), Patch(facecolor=neg_color, edgecolor='b')]
+
+    ax.legend(custom_lines, ['positive', 'negative'], loc='best')
+    ax.yaxis.set_visible(False)
+    # Display the feature names on the plot
+    for index, f_x in enumerate(df_filtered['features']):
+        ax.text(0, index + 0.5, f_x, ha='right', fontsize='14', fontname=font_name)
 
 
 def _render_html(file_name):
