@@ -301,6 +301,7 @@ class DataManager(object):
             self.X = add_column_numpy_array(self.X, newval)
             self.feature_ids.append(i)
 
+
     def __getitem__(self, key):
         if issubclass(self.data_type, pd.DataFrame) or issubclass(self.data_type, pd.Series):
             return self.__getitem_pandas__(key)
@@ -309,9 +310,11 @@ class DataManager(object):
         else:
             raise ValueError("Can't get item for data of type {}".format(self.data_type))
 
+
     def __getitem_pandas__(self, i):
         """if you passed in a pandas dataframe, it has columns which are strings."""
         return self.X[i]
+
 
     def __getitem_ndarray__(self, i):
         """if you passed in a pandas dataframe, it has columns which are strings."""
@@ -468,3 +471,18 @@ class DataManager(object):
 
         # do we need to coerce labels to a particular data type?
         return self.y[numeric_index]
+
+    @classmethod
+    def _check_input(cls, dataset):
+        """
+        Ensures that dataset is pandas dataframe, and dataset is not empty
+        :param dataset: skater.__datatypes__
+        :return:
+        """
+        if not isinstance(dataset, (pd.DataFrame)):
+            err_msg = "dataset must be a pandas.DataFrame"
+            raise(exceptions.DataSetError(err_msg))
+
+        if len(dataset) == 0:
+            err_msg = "dataset is empty"
+            raise (exceptions.DataSetError(err_msg))

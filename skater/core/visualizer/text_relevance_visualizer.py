@@ -3,15 +3,20 @@ import matplotlib as mpl
 from matplotlib.patches import Patch
 from PIL import Image
 from wordcloud import (WordCloud, get_single_color_func)
+
 from skater.data.datamanager import DataManager as DM
+from skater.util.exceptions import MatplotlibUnavailableError
 
 import numpy as np
+import pandas as pd
 import codecs
 
 from skater.core.local_interpretation.text_interpreter import relevance_wt_assigner
+from skater.util.dataops import convert_dataframe_to_dict
+from skater.util.text_ops import generate_word_list
 
 
-def build_visual_explainer(text, feature_relevance_wts, font_size='12pt', file_name='rendered', title='',
+def build_visual_explainer(text, relevance_scores, font_size='12pt', file_name='rendered', title='',
                            pos_clr_name='Reds', neg_clr_name='Blues', highlight_oov=False):
     """
     Generate a html doc highlighting positive / negative words based on the original text and relevance scores
@@ -29,6 +34,19 @@ def build_visual_explainer(text, feature_relevance_wts, font_size='12pt', file_n
     * https://github.com/cod3licious/textcatvis
     """
     # TODO: Add support for better visualization and plotting - e.g bokeh, plotly
+
+    # Process the raw text to a word list
+    _words = generate_word_list(text)
+    features_df = pd.DataFrame({'features': _words})
+    scores_df = pd.DataFrame({'relevance_scores': relevance_scores.tolist()})
+    words_scores_df = features_df.join(scores_df)
+    # assign column names to df containing 'words | relevance score'
+    words_scores_df.columns = ['features', 'relevance_scores']
+    words_scores_dict = convert_dataframe_to_dict('features', 'relevance_scores', words_scores_df)
+
+    # generate plot displaying feature relevance rank ordered
+    plot_feature_relevance(words_scores_df)
+
     # color-maps
     cmap_pos = get_cmap(pos_clr_name)
     cmap_neg = get_cmap(neg_clr_name)
@@ -38,14 +56,15 @@ def build_visual_explainer(text, feature_relevance_wts, font_size='12pt', file_n
     alpha = 0.2 if highlight_oov else 0.
     norm = mpl.colors.Normalize(0., 1.)
 
+    # build the html structure
     html_str = u'<body><h3>{}</h3>'\
-               u'<div style=background-color:#F5F5F5; ' \
+               u'<div class="row" style=background-color:#F5F5F5; ' \
                u'white-space: pre-wrap; ' \
                u'font-size: {}; ' \
                u'font-family: Avenir Black>'.format(title, font_size)
 
     rest_text = text
-    relevance_wts = relevance_wt_assigner(text, feature_relevance_wts)
+    relevance_wts = relevance_wt_assigner(text, words_scores_dict)
     for word, wts in relevance_wts:
         html_str += rest_text[:rest_text.find(word)]
         # cut off the identified word
@@ -58,7 +77,11 @@ def build_visual_explainer(text, feature_relevance_wts, font_size='12pt', file_n
                     % (round(255 * rgbac[0]), round(255 * rgbac[1]), round(255 * rgbac[2]), alpha, word)
     # after the last word, add the rest of the text
     html_str += rest_text
-    html_str += u'</div></body>'
+    html_str += u'</div>'
+
+    # Embed the feature relevance scores as a plot
+    html_str += u'<div><img src="./feature_relevance.png"</div>'
+    html_str += u'</body>'
     with codecs.open('{}.html'.format(file_name), 'w', encoding='utf8') as f:
         f.write(html_str)
 
@@ -130,12 +153,19 @@ def generate_word_cloud(relevant_feature_wts, pos_clr_name='blue',
     return wc
 
 
-def plot_feature_relevance(feature_relevance_scores, top_k=10, plt=None, color_map=('Red', 'Blue'),
-                           fig_size=(4, 4), font_name="Avenir Black"):
+def plot_feature_relevance(feature_relevance_scores, top_k=10, color_map=('Red', 'Blue'),
+                           fig_size=(4, 4), font_name="Avenir Black", txt_font_size='14'):
+
+    try:
+        import matplotlib.pyplot as plt
+    except ImportError:
+        raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on the system."))
+
     # Validate the input data format. Currently supported types include (pandas.DataFrame)
+    DM._check_input(feature_relevance_scores)
+
     pos_color = color_map[0]
     neg_color = color_map[1]
-    DM._check_input(feature_relevance_scores)
     df = feature_relevance_scores.sort_values(by='relevance_scores', ascending=False)
     df['positive'] = df['relevance_scores'] > 0
 
@@ -153,7 +183,9 @@ def plot_feature_relevance(feature_relevance_scores, top_k=10, plt=None, color_m
     ax.yaxis.set_visible(False)
     # Display the feature names on the plot
     for index, f_x in enumerate(df_filtered['features']):
-        ax.text(0, index + 0.5, f_x, ha='right', fontsize='14', fontname=font_name)
+        ax.text(0, index + 0.5, f_x, ha='right', fontsize=txt_font_size, fontname=font_name)
+    plt.savefig('feature_relevance.png')
+
 
 
 def _render_html(file_name):

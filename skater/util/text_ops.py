@@ -36,3 +36,7 @@ def cleaner(text, to_lower=True, norm_num=False, char_to_strip=' |(|)|,', non_al
 
 # returns indexes where ground truth and predicted value does not match
 query_for_false_predictions = lambda predictions, ground_truth: np.where(ground_truth != predictions)
+
+
+# Convert string to a words list
+generate_word_list = lambda x, token_type: x.strip().split(token_type)
