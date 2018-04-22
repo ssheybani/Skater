@@ -151,7 +151,7 @@ class DataManager(object):
                 the 5th and 95th percentiles, respectively.
 
         Returns
-        ----------
+        -------
         grid(numpy.ndarray): 	There are as many rows as there are feature_ids
                                 There are as many columns as specified by grid_resolution
         """
