@@ -28,7 +28,7 @@ def cleaner(text, to_lower=True, norm_num=False, char_to_strip=' |(|)|,', non_al
     # remove non-alpha numeric characters [!, $, #, or %] and normalize whitespace
     text = re.sub(r"[^A-Za-z0-9-" + non_alphanumeric_exceptions + "]", " ", text)
     # replace leftover unwanted white space
-    text = re.sub(r"\s+", " ", text)
+    text = whitespace_normalizer(text)
     # remove trailing or leading white spaces
     text = text.strip(char_to_strip)
     return text
@@ -37,6 +37,8 @@ def cleaner(text, to_lower=True, norm_num=False, char_to_strip=' |(|)|,', non_al
 # returns indexes where ground truth and predicted value does not match
 query_for_false_predictions = lambda predictions, ground_truth: np.where(ground_truth != predictions)
 
+# whitespace normalizer
+whitespace_normalizer = lambda x: re.sub(r"\s+", " ", x)
 
 # Convert string to a words list
-generate_word_list = lambda x, token_type: x.strip().split(token_type)
+generate_word_list = lambda x, token_type: whitespace_normalizer(x).split(token_type)

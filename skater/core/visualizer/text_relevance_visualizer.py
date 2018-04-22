@@ -49,9 +49,10 @@ def build_visual_explainer(text, relevance_scores, font_size='12pt', file_name='
     # TODO: Add support for better visualization and plotting frameworks- e.g bokeh, plotly
 
     # Process the raw text to a word list
-    _words = generate_word_list(text)
+    _words = generate_word_list(text, ' ')
     features_df = pd.DataFrame({'features': _words})
     scores_df = pd.DataFrame({'relevance_scores': relevance_scores.tolist()})
+    # Merge the data-frame column-wise
     words_scores_df = features_df.join(scores_df)
     # assign column names to df containing 'words | relevance score'
     words_scores_df.columns = ['features', 'relevance_scores']
