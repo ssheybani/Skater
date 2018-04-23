@@ -113,10 +113,11 @@ def build_visual_explainer(text, relevance_scores, font_size='12pt', file_name='
     html_str += u'<div align="center"><img src="./{}?{}"</div>'.\
         format(f_name, build_visual_explainer.plot_counter) if f_name is not None else ''
     html_str += u'</body>'
-    with codecs.open('{}.html'.format(file_name), 'w', encoding='utf8') as f:
+    file_name_with_extension = '{}.html'.format(file_name)
+    with codecs.open(file_name_with_extension, 'w', encoding='utf8') as f:
         f.write(html_str)
         logger.info("Visual Explainer built, "
-                    "use show_in_notebook to render in Jupyter style Notebooks: {}".format(file_name))
+                    "use show_in_notebook to render in Jupyter style Notebooks: {}".format(file_name_with_extension))
 
 
 class _GroupedColorFunc(object):
