@@ -76,8 +76,8 @@ class FeatureImportance(BaseGlobalInterpretation):
         --------
             >>> from skater.model import InMemoryModel
             >>> from skater.core.explanations import Interpretation
-            >>> from sklearn.ensemble import RandomForestClassier
-            >>> rf = RandomForestClassier()
+            >>> from sklearn.ensemble import RandomForestClassifier
+            >>> rf = RandomForestClassifier()
             >>> rf.fit(X,y)
             >>> model = InMemoryModel(rf.predict_proba, examples = X)
             >>> interpreter = Interpretation()
@@ -229,8 +229,8 @@ class FeatureImportance(BaseGlobalInterpretation):
         --------
             >>> from skater.model import InMemoryModel
             >>> from skater.core.explanations import Interpretation
-            >>> from sklearn.ensemble import RandomForestClassier
-            >>> rf = RandomForestClassier()
+            >>> from sklearn.ensemble import RandomForestClassifier
+            >>> rf = RandomForestClassifier()
             >>> rf.fit(X,y)
             >>> model = InMemoryModel(rf.predict_proba, examples = X)
             >>> interpreter = Interpretation()
