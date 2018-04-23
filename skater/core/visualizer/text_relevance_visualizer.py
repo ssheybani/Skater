@@ -3,31 +3,43 @@ import matplotlib as mpl
 from matplotlib.patches import Patch
 from PIL import Image
 from wordcloud import (WordCloud, get_single_color_func)
-
-from skater.data.datamanager import DataManager as DM
-from skater.util.exceptions import MatplotlibUnavailableError
-
 import numpy as np
 import pandas as pd
 import codecs
 
+from skater.data.datamanager import DataManager as DM
+from skater.util.exceptions import MatplotlibUnavailableError
+from skater.util.logger import build_logger
+from skater.util.logger import _INFO
 from skater.core.local_interpretation.text_interpreter import relevance_wt_assigner
 from skater.util.dataops import convert_dataframe_to_dict
 from skater.util.text_ops import generate_word_list
 
+logger = build_logger(_INFO, __name__)
+
 
 def __set_plot_feature_relevance_keyword(**plot_kw):
+    plot_name = plot_kw['plot_name'] if 'plot_name' in plot_kw.keys() else 'feature_relevance.png'
     top_k = plot_kw['top_k'] if 'top_k' in plot_kw.keys() else 10
     color_map = plot_kw['color_map'] if 'color_map' in plot_kw.keys() else ('Red', 'Blue')
     fig_size = plot_kw['fig_size'] if 'fig_size' in plot_kw.keys() else (20, 10)
     font_name = plot_kw['font_name'] if 'font_name' in plot_kw.keys() else "Avenir Black"
     txt_font_size = plot_kw['txt_font_size'] if 'txt_font_size' in plot_kw.keys() else '14'
-    return top_k, color_map, fig_size, font_name, txt_font_size
+    return plot_name, top_k, color_map, fig_size, font_name, txt_font_size
 
 
+# Reference: https://stackoverflow.com/questions/30618002/static-variable-in-a-function-with-python-decorator
+def static_var(varname, value):
+    def decorate(func):
+        setattr(func, varname, value)
+        return func
+    return decorate
 
+
+@static_var("plot_counter", 0)
 def build_visual_explainer(text, relevance_scores, font_size='12pt', file_name='rendered', title='',
-                           pos_clr_name='Reds', neg_clr_name='Blues', highlight_oov=False, enable_plot=False, **plot_kw):
+                           pos_clr_name='Reds', neg_clr_name='Blues', highlight_oov=False,
+                           enable_plot=False, **plot_kw):
     """
     Build a visualizer explainer highlighting the positive(color code: Red(default)) and
     negative(color code: Blue(default)) effect of the input features
@@ -52,15 +64,17 @@ def build_visual_explainer(text, relevance_scores, font_size='12pt', file_name='
     _words = generate_word_list(text, ' ')
     features_df = pd.DataFrame({'features': _words})
     scores_df = pd.DataFrame({'relevance_scores': relevance_scores.tolist()})
-    # Merge the data-frame column-wise
+    # Merge the data-frame column-wise, assert if the length of the word list and relevance
+    # score data-frame does not match. This is important as currently the join is done on the index
+    assert len(_words) == scores_df.shape[0]
     words_scores_df = features_df.join(scores_df)
     # assign column names to df containing 'words | relevance score'
     words_scores_df.columns = ['features', 'relevance_scores']
     words_scores_dict = convert_dataframe_to_dict('features', 'relevance_scores', words_scores_df)
 
     # generate plot displaying feature relevance rank ordered
-
-    plot_feature_relevance(words_scores_df, **plot_kw) if enable_plot else None
+    f_name = plot_feature_relevance(words_scores_df, **plot_kw) if enable_plot else None
+    logger.info("Relevance plot name: {}".format(f_name))
 
     # color-maps
     cmap_pos = get_cmap(pos_clr_name)
@@ -95,10 +109,14 @@ def build_visual_explainer(text, relevance_scores, font_size='12pt', file_name='
     html_str += u'</div>'
 
     # Embed the feature relevance scores as a plot
-    html_str += u'<div align="center"><img src="./feature_relevance.png"</div>'
+    build_visual_explainer.plot_counter += 1
+    html_str += u'<div align="center"><img src="./{}?{}"</div>'.\
+        format(f_name, build_visual_explainer.plot_counter) if f_name is not None else ''
     html_str += u'</body>'
     with codecs.open('{}.html'.format(file_name), 'w', encoding='utf8') as f:
         f.write(html_str)
+        logger.info("Visual Explainer built, "
+                    "use show_in_notebook to render in Jupyter style Notebooks: {}".format(file_name))
 
 
 class _GroupedColorFunc(object):
@@ -188,7 +206,7 @@ def plot_feature_relevance(feature_relevance_scores, **plot_kw):
     # Validate the input data format. Currently supported types include (pandas.DataFrame)
     DM._check_input(feature_relevance_scores)
     # set the params needed for the plot
-    file_name, top_k, color_map, fig_size, font_name, txt_font_size = __set_plot_feature_relevance_keyword(**plot_kw)
+    f_name, top_k, color_map, fig_size, font_name, txt_font_size = __set_plot_feature_relevance_keyword(**plot_kw)
 
     # set the colors
     pos_color = color_map[0]
@@ -199,8 +217,10 @@ def plot_feature_relevance(feature_relevance_scores, **plot_kw):
 
     # Setting the style globally for the plot
     # For other style check the reference here `plt.style.available`
+    plt.clf()
     plt.style.use('bmh')
-    ax = plt.subplot(111)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
     # filter the top k features wrt each signed category (Positive / Negative ) features
     df_filtered = df.groupby('positive').head(top_k)
     color_list = df_filtered['positive'].map({True: pos_color, False: neg_color})
@@ -212,8 +232,9 @@ def plot_feature_relevance(feature_relevance_scores, **plot_kw):
     # Display the feature names on the plot
     for index, f_x in enumerate(df_filtered['features']):
         ax.text(0, index + 0.5, f_x, ha='right', fontsize=txt_font_size, fontname=font_name)
-    plt.savefig(file_name)
-
+    plt.savefig(f_name)
+    logger.info("Rank order feature relevance based on input created and saved as {}".format(f_name))
+    return f_name
 
 
 def _render_html(file_name):
