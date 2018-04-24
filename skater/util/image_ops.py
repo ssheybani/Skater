@@ -144,7 +144,7 @@ def normalize(X):
     return np.array((X - np.min(X)) / (np.max(X) - np.min(X)))
 
 
-def show_image(X, cmap=None, bins=None):
+def show_image(X, cmap=None, bins=None, title='Original'):
     import copy
     font = {'family': 'avenir',
             'color': 'black',
@@ -156,7 +156,7 @@ def show_image(X, cmap=None, bins=None):
         import matplotlib.pyplot as plt
         fig, ax = plt.subplots(1, 2, figsize=(16, 8))
         ax[0].imshow(_X, cmap=cmap)
-        ax[0].set_title('Original')
+        ax[0].set_title(title)
         ax[1].hist(_X.ravel(), bins=bins, histtype='step')
         ax[1].set_xlabel('Pixel intensity', fontdict=font)
         fig.subplots_adjust(wspace=0.3)

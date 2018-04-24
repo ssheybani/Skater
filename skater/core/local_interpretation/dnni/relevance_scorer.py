@@ -59,7 +59,7 @@ class LRP(BaseGradient):
     """
     __name__ = "LRP"
     eps = None
-    logger = build_logger(_DEBUG, __name__)
+    logger = build_logger(_INFO, __name__)
 
     def __init__(self, feature_wts, X, xs, session, epsilon=1e-4):
         super(LRP, self).__init__(feature_wts, X, xs, session)

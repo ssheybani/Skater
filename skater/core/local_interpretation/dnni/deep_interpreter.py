@@ -56,6 +56,7 @@ class DeepInterpreter(object):
     def __init__(self, graph=None, session=tf.get_default_session(), log_level=_WARNING):
         self.logger = build_logger(log_level, __name__)
         self.relevance_type = None
+        self.use_case_str = None
         self.batch_size = None
         self.session = session
         if self.session is None:
@@ -67,8 +68,9 @@ class DeepInterpreter(object):
         self.override_context = self.graph.gradient_override_map(self._get_gradient_override_map())
         self.context_on = False
         self.__supported_relevance_type_dict = OrderedDict({
-            'elrp': LRP,
-            'integ_grad': IntegratedGradients})
+            'elrp': {'use_case_type': ['image'], 'method': LRP},
+            'ig': {'use_case_type': ['image', 'txt'], 'method': IntegratedGradients}
+        })
 
 
     def __enter__(self):
@@ -90,16 +92,31 @@ class DeepInterpreter(object):
         return dict((ops_item, 'DeepInterpretGrad') for ops_item in Initializer.activation_ops)
 
 
-    def explain(self, relevance_type, T, X, xs, **kwargs):
+    def _validate_relevance_type(self, type_name, use_case_str):
+        supported_type = self.__supported_relevance_type_dict[type_name] \
+            if type_name in self.__supported_relevance_type_dict.keys() else None
+        if supported_type is None:
+            raise RuntimeError('Method type not found in {}'.format(list(self.__supported_relevance_type_dict.keys())))
+        else:
+            use_case_list = self.__supported_relevance_type_dict[type_name]['use_case_type']
+            if use_case_str not in use_case_list:
+                raise RuntimeError('Method to use-case map is not supported {}')
+            else:
+                return self.__supported_relevance_type_dict[type_name]['method']
+
+
+    def explain(self, relevance_type, T, X, xs, use_case=None, **kwargs):
         if not self.context_on:
             raise RuntimeError('explain can be invoked only within a DeepInterpreter context.')
-        self.relevance_type = relevance_type
+
         self.logger.info("all supported relevancy scorers {}".format(self.__supported_relevance_type_dict))
 
-        relevance_type_class = self.__supported_relevance_type_dict[self.relevance_type] \
-            if self.relevance_type in self.__supported_relevance_type_dict.keys() else None
+        # Validate if the specified relevance type is supported.
+        self.relevance_type = relevance_type
+        self.use_case_str = use_case
+        relevance_type_class = self._validate_relevance_type(self.relevance_type, self.use_case_str)
         if relevance_type_class is None:
-            raise RuntimeError('Method type not found in {}'.formatlist(self.__supported_relevance_type_dict.keys()))
+            raise RuntimeError('Method type not found in {}'.format(list(self.__supported_relevance_type_dict.keys())))
         self.logger.info('DeepInterpreter: executing relevance type class {}'.format(relevance_type_class))
 
         Initializer.grad_override_checkflag = 0
