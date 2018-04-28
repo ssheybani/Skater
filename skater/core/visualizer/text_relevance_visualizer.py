@@ -2,7 +2,6 @@ from matplotlib.cm import get_cmap
 import matplotlib as mpl
 from matplotlib.patches import Patch
 import pandas as pd
-import codecs
 
 from skater.data.datamanager import DataManager as DM
 from skater.util.exceptions import MatplotlibUnavailableError
@@ -33,8 +32,10 @@ def static_var(varname, value):
     return decorate
 
 
+# The counter is added for a weird caching error that occurs when including images to html
+# https://stackoverflow.com/questions/1431512/is-there-a-way-to-force-browsers-to-refresh-download-images
 @static_var("plot_counter", 0)
-def build_visual_explainer(text, relevance_scores, font_size='12pt', file_name='rendered', title='',
+def build_visual_explainer(text, relevance_scores, font_size='12pt', file_name='rendered', title='Word Relevance',
                            pos_clr_name='Reds', neg_clr_name='Blues', alpha=0.7, highlight_oov=False,
                            enable_plot=False, **plot_kw):
     """
@@ -65,7 +66,7 @@ def build_visual_explainer(text, relevance_scores, font_size='12pt', file_name='
     h_str = _build_str(text, words_scores_dict, f_name, title, font_size, pos_clr_name,
                        neg_clr_name, alpha, highlight_oov)
     # build html
-    _build_html(htmlstr=h_str, file_name=file_name)
+    _build_html_file(html_str=h_str, file_name=file_name)
 
 
 def _build_str(text, words_scores_dict, plot_file_name, title, font_size,
@@ -79,20 +80,21 @@ def _build_str(text, words_scores_dict, plot_file_name, title, font_size,
     # color-maps for the words
     cmap_pos = get_cmap(pos_clr_name)
     cmap_neg = get_cmap(neg_clr_name)
-    # Highlight with 'yellow' if the word is not present in the word dictionary
+    # Highlight with 'yellow' if the word is not present in
+    # the word dictionary or not contributing to actual prediction
     rgba = (1., 1., 0)
     norm = mpl.colors.Normalize(0., 1.)
 
-    html_str = u'<body><h3>{}</h3>' \
-               u'<div class="row" style=background-color:#F5F5F5' \
-               u'white-space: pre-wrap; ' \
-               u'font-size: {}; ' \
-               u'font-family: Avenir Black>'.format(title, font_size)
+    html_content = u'<body><h3>{}</h3>' \
+                   u'<div class="row" style=background-color:#F5F5F5' \
+                   u'white-space: pre-wrap; ' \
+                   u'font-size: {}; ' \
+                   u'font-family: Avenir Black>'.format(title, font_size)
 
     rest_text = text
     relevance_wts = relevance_wt_assigner(text, words_scores_dict)
     for word, wts in relevance_wts:
-        html_str += rest_text[: rest_text.find(word)]
+        html_content += rest_text[: rest_text.find(word)]
         # cut off the identified word
         rest_text = rest_text[rest_text.find(word) + len(word):]
         # adjust opacity for non-vocabulary words
@@ -102,26 +104,27 @@ def _build_str(text, words_scores_dict, plot_file_name, title, font_size,
             rgba = cmap_neg(norm(-wts)) if wts < 0 else cmap_pos(norm(wts))
             # adjusting opacity for in-dictionary words
             alpha = alpha_value
-        html_str += u'<span style="background-color: rgba({:d}, {:d}, {:d}, {:.1f})">{}</span>' \
-                    .format(round(255 * rgba[0]), round(255 * rgba[1]), round(255 * rgba[2]), alpha, word)
+        html_content += u'<span style="background-color: rgba({:d}, {:d}, {:d}, {:.1f})">{}</span>'\
+            .format(round(255 * rgba[0]), round(255 * rgba[1]), round(255 * rgba[2]), alpha, word)
     # rest of the text
-    html_str += rest_text
-    html_str += u'</div>'
+    html_content += rest_text
+    html_content += u'</div>'
 
     # Embed the feature relevance scores as a plot
     build_visual_explainer.plot_counter += 1
-    html_str += u'<div align="center"><img src="./{}?{}"</div>'. \
+    html_content += u'<div align="center"><img src="./{}?{}"</div>'. \
         format(plot_file_name, build_visual_explainer.plot_counter) if plot_file_name is not None else ''
-    html_str += u'</body>'
-    return html_str
+    html_content += u'</body>'
+    return html_content
 
 
-def _build_html(htmlstr, file_name):
+def _build_html_file(html_str, file_name):
     file_name_with_extension = '{}.html'.format(file_name)
-    with codecs.open(file_name_with_extension, 'w', encoding='utf8') as f:
-        f.write(htmlstr)
-        logger.info("Visual Explainer built, "
-                    "use show_in_notebook to render in Jupyter style Notebooks: {}".format(file_name_with_extension))
+    f = open(file_name_with_extension, 'w', encoding='utf8')
+    f.write(html_str)
+    f.close()
+    logger.info("Visual Explainer built",
+                "use show_in_notebook to render in Jupyter style Notebooks: {}".format(file_name_with_extension))
 
 
 def plot_feature_relevance(feature_relevance_scores, **plot_kw):
