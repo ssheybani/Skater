@@ -47,7 +47,8 @@ class DeepInterpreter(object):
     Reference
     ---------
     .. [1] Marco Ancona, Enea Ceolini, Cengiz Öztireli, Markus Gross:
-           Towards better understanding of gradient-based attribution methods for Deep Neural Networks. ICLR, 2018
+           Towards better understanding of gradient-based attribution methods for Deep Neural Networks. ICLR, 2018.
+           http://arxiv.org/abs/1711.06104
     .. [2] https://github.com/marcoancona/DeepExplain/blob/master/deepexplain/tensorflow/methods.py
 
     """
@@ -106,6 +107,79 @@ class DeepInterpreter(object):
 
 
     def explain(self, relevance_type, T, X, xs, use_case=None, **kwargs):
+        """ Helps in computing the relevance scores for DNNs
+
+        Parameters
+        ----------
+        relevance_type: str
+         Currently, relevance score could be computed using e-LRP('elrp') for image only or Integrated Gradient('ig')
+         for image or text
+        T: tensorflow.python.framework.ops.Tensor
+        X: tensorflow.python.framework.ops.Tensor
+        xs: numpy.array
+        use_case: str 'image' or 'txt
+        kwargs: optional
+
+        Returns
+        -------
+        result: numpy.ndarray
+        Computed relevance score for the input
+
+        Examples
+        --------
+        >>> from skater.core.local_interpretation.dnni.deep_interpreter import DeepInterpreter
+        >>> ...
+        >>> import keras
+        >>> from keras.datasets import mnist
+        >>>from keras.models import Sequential, Model, load_model, model_from_yaml
+        >>> from keras.layers import Dense, Dropout, Flatten, Activation
+        >>> from keras.layers import Conv2D, MaxPooling2D
+        >>> from keras import backend as K
+        >>> import tensorflow as tf
+        >>> import matplotlib.pyplot as plt
+        >>> sess = tf.Session()
+        >>> K.set_session(sess)
+        >>> ... # Load dataset
+        >>> # A simple network for MNIST data-set using Keras
+        >>> model = Sequential()
+        >>> model.add(Conv2D(32, kernel_size=(3, 3),
+        >>>         activation='relu',
+        >>>         input_shape=input_shape))
+        >>> model.add(Conv2D(64, (3, 3), activation='relu'))
+        >>> model.add(MaxPooling2D(pool_size=(2, 2)))
+        >>> model.add(Dropout(0.25))
+        >>> model.add(Flatten())
+        >>> model.add(Dense(128, activation='relu'))
+        >>> model.add(Dropout(0.5))
+        >>> model.add(Dense(num_classes))
+        >>> model.add(Activation('softmax'))
+        >>> ... # Compile and train the model
+        >>> K.set_learning_phase(0)
+        >>> with DeepInterpreter(session=K.get_session()) as di:
+        >>>   # 1. Load the persisted model
+        >>>   # 2. Retrieve the input tensor from the loaded model
+        >>>   yaml_file = open('model_sample.yaml', 'r')
+        >>>   loaded_model_yaml = yaml_file.read()
+        >>>   yaml_file.close()
+        >>>   loaded_model = model_from_yaml(loaded_model_yaml)
+        >>>   # load weights into new model
+        >>>   loaded_model.load_weights("model_mnist_cnn_3.h5")
+        >>>   print("Loaded model from disk")
+        >>>   input_tensor = loaded_model.layers[0].input
+        >>>   output_tensor = loaded_model.layers[-2].output
+
+        >>>    # 3. We will using the last dense layer(pre-softmax) as the output layer
+        >>>    # 4. Instantiate a model with the new input and output tensor
+        >>>    new_model = Model(inputs=input_tensor, outputs=output_tensor)
+        >>>    target_tensor = new_model(input_tensor)
+        >>>    xs = input_x
+        >>>    ys = input_y
+        >>>    print("X shape: {}".format(xs.shape))
+        >>>    print("Y shape: {}".format(ys.shape))
+        >>>    # Original Predictions
+        >>>    print(loaded_model.predict_classes(xs))
+        >>>    relevance_scores = di.explain('elrp', target_tensor * ys, input_tensor, xs, use_case='image')
+        """
         if not self.context_on:
             raise RuntimeError('explain can be invoked only within a DeepInterpreter context.')
 
