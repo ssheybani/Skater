@@ -8,7 +8,6 @@ except ImportError:
 import numpy as np
 from skater.util.logger import build_logger
 from skater.util.logger import _INFO
-from skater.util.logger import _DEBUG
 
 
 class BaseGradient(Initializer):
@@ -75,8 +74,7 @@ class LRP(BaseGradient):
         LRP.logger.debug("Computing non-linear gradient with activation type {}".format(op.type))
         op_out = op.outputs[0]
         op_in = op.inputs[0]
-        stabilizer_epsilon = cls.eps * tf.where(op_in >= 0, tf.ones_like(op_in, dtype=tf.float32),
-                                                -1 * tf.ones_like(op_in, dtype=tf.float32))
+        stabilizer_epsilon = cls.eps * tf.sign(op_in)
         op_in += stabilizer_epsilon
         return grad * op_out / op_in
 

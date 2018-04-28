@@ -75,6 +75,9 @@ class DeepInterpreter(object):
 
 
     def __enter__(self):
+        # Magic method for managing context with the usage of 'with' statement ( context-guard ).
+        # This helps in managing an active keras/tensorflow session for resolving variable scope
+        # reference: http://effbot.org/zone/python-with-statement.htm
         # Override gradient of all ops created in context
         self.graph_context.__enter__()
         self.override_context.__enter__()
@@ -83,6 +86,7 @@ class DeepInterpreter(object):
 
 
     def __exit__(self, type, value, traceback):
+        # Exit a `with` block
         self.graph_context.__exit__(type, value, traceback)
         self.override_context.__exit__(type, value, traceback)
         self.context_on = False
