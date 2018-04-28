@@ -1,9 +1,6 @@
 from matplotlib.cm import get_cmap
 import matplotlib as mpl
 from matplotlib.patches import Patch
-from PIL import Image
-from wordcloud import (WordCloud, get_single_color_func)
-import numpy as np
 import pandas as pd
 import codecs
 
@@ -38,28 +35,16 @@ def static_var(varname, value):
 
 @static_var("plot_counter", 0)
 def build_visual_explainer(text, relevance_scores, font_size='12pt', file_name='rendered', title='',
-                           pos_clr_name='Reds', neg_clr_name='Blues', highlight_oov=False,
+                           pos_clr_name='Reds', neg_clr_name='Blues', alpha=0.7, highlight_oov=False,
                            enable_plot=False, **plot_kw):
     """
-    Build a visualizer explainer highlighting the positive(color code: Red(default)) and
-    negative(color code: Blue(default)) effect of the input features
+    Build a visual explainer highlighting the positive(color code: Red(default)) and
+    negative(color code: Blue(default)) relevance of the input features
 
     Parameters
     ----------
-        - text: the raw text in which the words should be highlighted
-        - relevance_scores: a dictionary with {word: score} or a list with tuples [(word, score)]
-        - file_name: the name (path) of the file
-        - metainf: an optional string which will be added at the top of the file (e.g. true class of the document)
-        - highlight_oov: if True, out-of-vocabulary words will be highlighted in yellow (default False)
-    Saves the visualization in 'file_name.html' (you probably want to make this a whole path to not clutter your main directory...)
-
-    References
-    ----------
-    * http://matplotlib.org/examples/color/colormaps_reference.html
-    * https://github.com/cod3licious/textcatvis
     """
     # TODO: Add support for better visualization and plotting frameworks- e.g bokeh, plotly
-
     # Process the raw text to a word list
     _words = generate_word_list(text, ' ')
     features_df = pd.DataFrame({'features': _words})
@@ -76,17 +61,29 @@ def build_visual_explainer(text, relevance_scores, font_size='12pt', file_name='
     f_name = plot_feature_relevance(words_scores_df, **plot_kw) if enable_plot else None
     logger.info("Relevance plot name: {}".format(f_name))
 
-    # color-maps
+    # build the html structure
+    h_str = _build_str(text, words_scores_dict, f_name, title, font_size, pos_clr_name,
+                       neg_clr_name, alpha, highlight_oov)
+    # build html
+    _build_html(htmlstr=h_str, file_name=file_name)
+
+
+def _build_str(text, words_scores_dict, plot_file_name, title, font_size,
+               pos_clr_name, neg_clr_name, alpha_value, highlight_oov=False):
+    """
+    References
+    ----------
+    ..  [1] https://github.com/cod3licious/textcatvis/blob/master/textcatvis/vis_utils.py
+    ..  [2] http://matplotlib.org/examples/color/colormaps_reference.html
+    """
+    # color-maps for the words
     cmap_pos = get_cmap(pos_clr_name)
     cmap_neg = get_cmap(neg_clr_name)
-    # color mapping for non-vocabulary words
-    rgbac = (0.1, 0.1, 1.0)
-    # adjust opacity for non-vocabulary words
-    alpha = 0.2 if highlight_oov else 0.
+    # Highlight with 'yellow' if the word is not present in the word dictionary
+    rgba = (1., 1., 0)
     norm = mpl.colors.Normalize(0., 1.)
 
-    # build the html structure
-    html_str = u'<body><h3>{}</h3>'\
+    html_str = u'<body><h3>{}</h3>' \
                u'<div class="row" style=background-color:#F5F5F5' \
                u'white-space: pre-wrap; ' \
                u'font-size: {}; ' \
@@ -95,97 +92,36 @@ def build_visual_explainer(text, relevance_scores, font_size='12pt', file_name='
     rest_text = text
     relevance_wts = relevance_wt_assigner(text, words_scores_dict)
     for word, wts in relevance_wts:
-        html_str += rest_text[:rest_text.find(word)]
+        html_str += rest_text[: rest_text.find(word)]
         # cut off the identified word
         rest_text = rest_text[rest_text.find(word) + len(word):]
+        # adjust opacity for non-vocabulary words
+        alpha = 0.5 if highlight_oov else 0.
         if wts is not None:
-            rgbac = cmap_neg(norm(-wts)) if wts < 0 else cmap_pos(norm(wts))
+            # override the RGB values for color coding
+            rgba = cmap_neg(norm(-wts)) if wts < 0 else cmap_pos(norm(wts))
             # adjusting opacity for in-dictionary words
-            alpha = 0.5
-        html_str += u'<span style="background-color: rgba(%i, %i, %i, %.1f)">%s</span>' \
-                    % (round(255 * rgbac[0]), round(255 * rgbac[1]), round(255 * rgbac[2]), alpha, word)
-    # after the last word, add the rest of the text
+            alpha = alpha_value
+        html_str += u'<span style="background-color: rgba({:d}, {:d}, {:d}, {:.1f})">{}</span>' \
+                    .format(round(255 * rgba[0]), round(255 * rgba[1]), round(255 * rgba[2]), alpha, word)
+    # rest of the text
     html_str += rest_text
     html_str += u'</div>'
 
     # Embed the feature relevance scores as a plot
     build_visual_explainer.plot_counter += 1
-    html_str += u'<div align="center"><img src="./{}?{}"</div>'.\
-        format(f_name, build_visual_explainer.plot_counter) if f_name is not None else ''
+    html_str += u'<div align="center"><img src="./{}?{}"</div>'. \
+        format(plot_file_name, build_visual_explainer.plot_counter) if plot_file_name is not None else ''
     html_str += u'</body>'
+    return html_str
+
+
+def _build_html(htmlstr, file_name):
     file_name_with_extension = '{}.html'.format(file_name)
     with codecs.open(file_name_with_extension, 'w', encoding='utf8') as f:
-        f.write(html_str)
+        f.write(htmlstr)
         logger.info("Visual Explainer built, "
                     "use show_in_notebook to render in Jupyter style Notebooks: {}".format(file_name_with_extension))
-
-
-class _GroupedColorFunc(object):
-    """Create a color function object which assigns DIFFERENT SHADES of
-       specified colors to certain words based on the color to words mapping.
-       Uses wordcloud.get_single_color_func
-
-       Parameters
-       ----------
-       color_to_words : dict(str -> list(str))
-         A dictionary that maps a color to the list of words.
-       default_color : str
-         Color that will be assigned to a word that's not a member
-         of any value from color_to_words.
-
-       References
-       ----------
-       https://github.com/amueller/word_cloud/blob/master/examples/colored_by_group.py
-
-    """
-
-    def __init__(self, color_to_words, default_color):
-        self.color_func_to_words = [
-            (get_single_color_func(color), set(words))
-            for (color, words) in color_to_words.items()]
-
-        self.default_color_func = get_single_color_func(default_color)
-
-
-    def get_color_func(self, word):
-        """Returns a single_color_func associated with the word"""
-        try:
-            color_func = next(color_func for (color_func, words) in self.color_func_to_words if word in words)
-        except StopIteration:
-            color_func = self.default_color_func
-        return color_func
-
-
-    def __call__(self, word, **plot_kw):
-        return self.get_color_func(word)(word, **plot_kw)
-
-
-def generate_word_cloud(relevant_feature_wts, pos_clr_name='blue',
-                        neg_clr_name='red', threshold=0.1, save_to_file=True, mask_filename=None):
-    # Prepare a color map to word aggregated on threshold
-    color_mapping = {pos_clr_name: [], neg_clr_name: []}
-    color_map_append = lambda key, value: color_mapping[key].append(value)
-
-    for word, wt in relevant_feature_wts.items():
-        color_map_append(neg_clr_name, word) if wt < threshold else color_map_append(pos_clr_name, word)
-        # this is a temporary fix as there seems to be a bug in the wordcloud implementation used.
-        # If there are continuous set of 0 as weights, then one get 'float division by zero' or
-        # 'cannot convert float NaN to integer'. Below mentioned code is a work around for now
-        # TODO: Figure out a better fix
-        if wt == 0:
-            relevant_feature_wts[word] = 0.000000001
-
-    default_color = 'yellow'
-    grouped_color_func = _GroupedColorFunc(color_mapping, default_color)
-
-    im = Image.open(mask_filename)
-    mask_file = np.array(im) if mask_filename is not None else mask_filename
-    # TODO extend better support for Word Cloud params
-    wc = WordCloud(background_color="white", random_state=0, max_words=len(relevant_feature_wts),
-                   mask=mask_file, color_func=grouped_color_func)
-    wc.generate_from_frequencies(relevant_feature_wts)
-    wc.to_file('word_cloud.png') if save_to_file else None
-    return wc
 
 
 def plot_feature_relevance(feature_relevance_scores, **plot_kw):
