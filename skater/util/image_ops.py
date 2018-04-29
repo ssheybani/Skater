@@ -145,6 +145,7 @@ def normalize(X):
 
 
 def show_image(X, cmap=None, bins=None, title='Original'):
+    # TODO: Add ability to handle a pre-defined axes for plotting
     import copy
     font = {'family': 'avenir',
             'color': 'black',
@@ -152,6 +153,7 @@ def show_image(X, cmap=None, bins=None, title='Original'):
             'size': 14,
             }
     _X = copy.deepcopy(X)
+
     try:
         import matplotlib.pyplot as plt
         fig, ax = plt.subplots(1, 2, figsize=(16, 8))

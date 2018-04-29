@@ -70,7 +70,7 @@ def build_visual_explainer(text, relevance_scores, font_size='12pt', file_name='
 
 
 def _build_str(text, words_scores_dict, plot_file_name, title, font_size,
-               pos_clr_name, neg_clr_name, alpha_value, highlight_oov=False):
+               pos_clr_name, neg_clr_name, alpha_value, highlight_oov):
     """
     References
     ----------
@@ -86,7 +86,7 @@ def _build_str(text, words_scores_dict, plot_file_name, title, font_size,
     norm = mpl.colors.Normalize(0., 1.)
 
     html_content = u'<body><h3>{}</h3>' \
-                   u'<div class="row" style=background-color:#F5F5F5' \
+                   u'<div class="row" style=background-color:#F5F5F5 ' \
                    u'white-space: pre-wrap; ' \
                    u'font-size: {}; ' \
                    u'font-family: Avenir Black>'.format(title, font_size)
@@ -104,8 +104,8 @@ def _build_str(text, words_scores_dict, plot_file_name, title, font_size,
             rgba = cmap_neg(norm(-wts)) if wts < 0 else cmap_pos(norm(wts))
             # adjusting opacity for in-dictionary words
             alpha = alpha_value
-        html_content += u'<span style="background-color: rgba({:d}, {:d}, {:d}, {:.1f})">{}</span>'\
-            .format(round(255 * rgba[0]), round(255 * rgba[1]), round(255 * rgba[2]), alpha, word)
+        html_content += u'<span style="background-color: rgba({:0f}, {:0f}, {:0f}, {:.1f})">{}</span>'\
+            .format(round(float(255) * rgba[0]), round(float(255) * rgba[1]), round(float(255) * rgba[2]), alpha, word)
     # rest of the text
     html_content += rest_text
     html_content += u'</div>'
@@ -120,11 +120,10 @@ def _build_str(text, words_scores_dict, plot_file_name, title, font_size,
 
 def _build_html_file(html_str, file_name):
     file_name_with_extension = '{}.html'.format(file_name)
-    f = open(file_name_with_extension, 'w', encoding='utf8')
-    f.write(html_str)
-    f.close()
-    logger.info("Visual Explainer built",
-                "use show_in_notebook to render in Jupyter style Notebooks: {}".format(file_name_with_extension))
+    with open(file_name_with_extension, 'w', encoding='utf8') as f:
+        f.write(html_str)
+        logger.info("Visual Explainer built, "
+                    "use show_in_notebook to render in Jupyter style Notebooks: {}".format(file_name_with_extension))
 
 
 def plot_feature_relevance(feature_relevance_scores, **plot_kw):
