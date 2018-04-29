@@ -77,6 +77,7 @@ def _build_str(text, words_scores_dict, plot_file_name, title, font_size,
     ..  [1] https://github.com/cod3licious/textcatvis/blob/master/textcatvis/vis_utils.py
     ..  [2] http://matplotlib.org/examples/color/colormaps_reference.html
     """
+    # TODO: Add a HTML validator to verify that HTML structure
     # color-maps for the words
     cmap_pos = get_cmap(pos_clr_name)
     cmap_neg = get_cmap(neg_clr_name)
@@ -104,7 +105,7 @@ def _build_str(text, words_scores_dict, plot_file_name, title, font_size,
             rgba = cmap_neg(norm(-wts)) if wts < 0 else cmap_pos(norm(wts))
             # adjusting opacity for in-dictionary words
             alpha = alpha_value
-        html_content += u'<span style="background-color: rgba({:0f}, {:0f}, {:0f}, {:.1f})">{}</span>'\
+        html_content += u'<span style="background-color: rgba({:.0f}, {:.0f}, {:.0f}, {:.1f})">{}</span>'\
             .format(round(float(255) * rgba[0]), round(float(255) * rgba[1]), round(float(255) * rgba[2]), alpha, word)
     # rest of the text
     html_content += rest_text
