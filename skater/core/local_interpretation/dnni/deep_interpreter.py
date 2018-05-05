@@ -38,19 +38,18 @@ class DeepInterpreter(object):
     is responsible for providing relevance scores w.r.t a target class to analyze most contributing features driving
     an estimator's decision for or against the respective class
 
+
     Parameters
-    __________
+    -----------
     graph
     session
     log_level
 
-    Reference
+    References
     ---------
-    .. [1] Marco Ancona, Enea Ceolini, Cengiz Öztireli, Markus Gross:
-           Towards better understanding of gradient-based attribution methods for Deep Neural Networks. ICLR, 2018.
-           http://arxiv.org/abs/1711.06104
-    .. [2] https://github.com/marcoancona/DeepExplain/blob/master/deepexplain/tensorflow/methods.py
-
+    .. [1] Ancona M, Ceolini E, Öztireli C, Gross M (ICLR, 2018).
+           Towards better understanding of gradient-based attribution methods for Deep Neural Networks.
+           https://arxiv.org/abs/1711.06104
     """
     __name__ = "DeepInterpreter"
 
@@ -110,24 +109,44 @@ class DeepInterpreter(object):
                 return self.__supported_relevance_type_dict[type_name]['method']
 
 
-    def explain(self, relevance_type, T, X, xs, use_case=None, **kwargs):
-        """ Helps in computing the relevance scores for DNNs
+    def explain(self, relevance_type, target_tensor, X, xs, use_case=None, **kwargs):
+        """ Helps in computing the relevance scores for DNNs to understand the input and output behavior of the network.
 
         Parameters
         ----------
         relevance_type: str
-         Currently, relevance score could be computed using e-LRP('elrp') for image only or Integrated Gradient('ig')
-         for image or text
-        T: tensorflow.python.framework.ops.Tensor
+         Currently, relevance score could be computed using e-LRP('elrp') or Integrated Gradient('ig').
+         - epsilon-LRP('eLRP'): Is recommended with Activation ops ('ReLU' and 'Tanh'). Current implementation of
+           LRP works only for images and makes use of epsilon(default: 0.0001) as a stabilizer.
+         - Integrated Gradient('ig'): Is recommended with Activation ops ('Relu', 'Elu', 'Softplus', 'Tanh', 'Sigmoid').
+           It works for images and text. Optional parameters include steps(default: 100) and baseline(default:
+           {'image': 'a black image'}; {'txt': zero input embedding vector})
+           Gradient is computed by varying the input from the baseline(x') to the provided input(x). x, x' are element of R with
+           n dimension ---> [0,1]
+        target_tensor: tensorflow.python.framework.ops.Tensor
+         Specify the output layer to start from
         X: tensorflow.python.framework.ops.Tensor
+         Specify the input layer to reach to
         xs: numpy.array
+         Input for which explanation is desired
         use_case: str 'image' or 'txt
         kwargs: optional
 
         Returns
         -------
         result: numpy.ndarray
-        Computed relevance score for the input
+         Computed relevance(contribution) score for the given input
+
+        References
+        ----------
+        .. [1] Bach S, Binder A, Montavon G, Klauschen F, Müller K-R, Samek W (2015)
+           On Pixel-Wise Explanations for Non-Linear Classifier Decisions by Layer-Wise Relevance Propagation.
+           PLoS ONE 10(7): e0130140. https://doi.org/10.1371/journal.pone.0130140
+        .. [2] Sundararajan, M, Taly, A, Yan, Q (ICML, 2017).
+           Axiomatic Attribution for Deep Networks. http://arxiv.org/abs/1703.01365
+        .. [3] Ancona M, Ceolini E, Öztireli C, Gross M (ICLR, 2018).
+           Towards better understanding of gradient-based attribution methods for Deep Neural Networks.
+           https://arxiv.org/abs/1711.06104
 
         Examples
         --------
@@ -200,7 +219,7 @@ class DeepInterpreter(object):
         Initializer.grad_override_checkflag = 0
         Initializer.enabled_method_class = relevance_type_class
 
-        method = Initializer.enabled_method_class(T, X, xs, self.session, **kwargs)
+        method = Initializer.enabled_method_class(target_tensor, X, xs, self.session, **kwargs)
         self.logger.info('DeepInterpreter: executing method {}'.format(method))
 
         result = method.run()

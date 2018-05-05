@@ -10,6 +10,7 @@ class Initializer(object):
     """
     """
     __name__ = "Initializer"
+    # Currently supported Activation ops
     activation_ops = ['Relu', 'Elu', 'Softplus', 'Tanh', 'Sigmoid']
     enabled_method_class = None
     grad_override_checkflag = 0
