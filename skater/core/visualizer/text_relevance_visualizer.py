@@ -44,6 +44,43 @@ def build_visual_explainer(text, relevance_scores, font_size='12pt', file_name='
 
     Parameters
     ----------
+    text: str
+        input text to be explained
+    relevance_scores: pandas.core.series.Series
+        contribution/attribution scores for the features corresponding to the given text.
+        The relevance scores are compute over the embedding vector, remember to aggregate the embedding dimension
+        by computing 'mean/sum' to get scalar coefficient for the features.
+    font_size: str (default: `12pt`)
+        font size for the text visualizer
+    file_name: str (default: 'rendered')
+        specify the file name for the html file to be generated
+    title: str
+        specify a title
+    pos_clr_name: str (default: 'Reds')
+        color name for highlight positive influence. Color names should be compatible with matplotlib supported color names
+        (https://matplotlib.org/gallery/color/named_colors.html)
+    neg_clr_name: str (default: 'Blues')
+        color name for highlight negative influence. Color names should be compatible with matplotlib supported color names
+        (https://matplotlib.org/gallery/color/named_colors.html)
+    alpha: int (default: 0.7)
+        adjust the transparency for display
+    highlight_oov: boolean (default: False)
+        highlighting words which are not part of the dictionary
+    enable_plot: boolean (default: False)
+        if True, generate feature relevance plots as well
+    plot_kw: optional
+        optional aesthetic features for plotting,
+        - plot_name: str (default: feature_relevance.png)
+        - top_k: int (default: 10)
+        - color_map: tuple of str('positive_color', 'negative_color') (default: ('Red', 'Blue'))
+        - fig_size: tuple of int(width, height) (default: (20, 10)
+        - font_name: str (default: 'Avenir Black')
+        - txt_font_size: str( default: '14')
+
+    Returns
+    -------
+     None
+
     """
     # TODO: Add support for better visualization and plotting frameworks- e.g bokeh, plotly
     # Process the raw text to a word list
@@ -132,11 +169,20 @@ def plot_feature_relevance(feature_relevance_scores, **plot_kw):
 
     Parameters
     ----------
-    feature_relevance_scores:
-    plot_kw:
+    feature_relevance_scores: pandas.core.frame.DataFrame
+    plot_kw: optional
+        optional aesthetic features for plotting,
+        - plot_name: str (default: feature_relevance.png)
+        - top_k: int (default: 10)
+        - color_map: tuple of str('positive_color', 'negative_color') (default: ('Red', 'Blue'))
+        - fig_size: tuple of int(width, height) (default: (20, 10)
+        - font_name: str (default: 'Avenir Black')
+        - txt_font_size: str( default: '14')
 
     Returns
     -------
+    f_name: str
+        returns the generate plot saved as *.png file. Other formats could be specified as well.
     """
     try:
         import matplotlib.pyplot as plt
@@ -178,7 +224,7 @@ def plot_feature_relevance(feature_relevance_scores, **plot_kw):
 
 
 def _render_html(file_name):
-    from IPython.core.display import display, HTML
+    from IPython.core.display import HTML
     return HTML(file_name)
 
 
@@ -192,12 +238,11 @@ def show_in_notebook(file_name_with_type='rendered.html'):
 
     Parameters
     -----------
-    file_name_with_type:
+    file_name_with_type: str
+        specify the name of the file to display
 
-
-    Return
-    ------
     """
+    from IPython.core.display import display
     file_type = file_name_with_type.split('/')[-1].split('.')[-1]
     choice_dict = {
         'html': _render_html,
@@ -206,4 +251,5 @@ def show_in_notebook(file_name_with_type='rendered.html'):
         'jpg': _render_image
     }
     select_type = lambda choice_type: choice_dict[choice_type]
-    return select_type(file_type)(file_name_with_type)
+    logger.info("File Name: {}".format(select_type.filename))
+    return display(select_type(file_type)(file_name_with_type))

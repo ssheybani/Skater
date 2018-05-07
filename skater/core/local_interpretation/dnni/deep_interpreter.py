@@ -115,27 +115,27 @@ class DeepInterpreter(object):
         Parameters
         ----------
         relevance_type: str
-         Currently, relevance score could be computed using e-LRP('elrp') or Integrated Gradient('ig').
-         - epsilon-LRP('eLRP'): Is recommended with Activation ops ('ReLU' and 'Tanh'). Current implementation of
-           LRP works only for images and makes use of epsilon(default: 0.0001) as a stabilizer.
-         - Integrated Gradient('ig'): Is recommended with Activation ops ('Relu', 'Elu', 'Softplus', 'Tanh', 'Sigmoid').
-           It works for images and text. Optional parameters include steps(default: 100) and baseline(default:
-           {'image': 'a black image'}; {'txt': zero input embedding vector})
-           Gradient is computed by varying the input from the baseline(x') to the provided input(x). x, x' are element of R with
-           n dimension ---> [0,1]
+            Currently, relevance score could be computed using e-LRP('elrp') or Integrated Gradient('ig').
+            - epsilon-LRP('eLRP'): Is recommended with Activation ops ('ReLU' and 'Tanh'). Current implementation of
+            LRP works only for images and makes use of epsilon(default: 0.0001) as a stabilizer.
+            - Integrated Gradient('ig'): Is recommended with Activation ops ('Relu', 'Elu', 'Softplus', 'Tanh', 'Sigmoid').
+            It works for images and text. Optional parameters include steps(default: 100) and baseline(default:
+            {'image': 'a black image'}; {'txt': zero input embedding vector})
+            Gradient is computed by varying the input from the baseline(x') to the provided input(x). x, x' are element of R with
+            n dimension ---> [0,1]
         target_tensor: tensorflow.python.framework.ops.Tensor
-         Specify the output layer to start from
+            Specify the output layer to start from
         X: tensorflow.python.framework.ops.Tensor
-         Specify the input layer to reach to
+            Specify the input layer to reach to
         xs: numpy.array
-         Input for which explanation is desired
+            Input for which explanation is desired
         use_case: str 'image' or 'txt
         kwargs: optional
 
         Returns
         -------
         result: numpy.ndarray
-         Computed relevance(contribution) score for the given input
+            Computed relevance(contribution) score for the given input
 
         References
         ----------
