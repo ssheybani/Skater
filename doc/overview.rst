@@ -28,7 +28,7 @@ preferably in a human interpretable way. Ideally, you should be able to query th
 its algorithmic decisions.
 
 Skater
-~~~~~~~~~~~~~~~~
+~~~~~~
 Skater is a unified framework to enable Model Interpretation for all forms of model to help one build an Interpretable
 machine learning system often needed for real world use-cases. It is an open source python library designed to
 demystify the learned structures of a black box model both globally(inference on the basis of a complete data set)
@@ -37,14 +37,18 @@ programming paradigms as deemed necessary to provide scalability and concurrency
 The project is still in beta phase and is under active development.
 
 Algorithms supported by Skater:
-+---------+---------+-----------+-----------+-----------+--------------+--------+
-| Scope of Interpretation         |            Algorithms                       |
-+=========+=========+===========+===========+===========+==============+========+
-| Global Interpretation           | Model agnostic Feature Importance           |
-+---------+---------+-----------+-----------+-----------+--------------+--------+
-| Global Interpretation           | Model agnostic Partial Dependence Plots     |
-+---------+---------+-----------+-----------+-----------+--------------+--------+
-| Local Interpretation            | Local Interpretable Model Explanation(LIME) |
-+---------+---------+-----------+-----------+-----------+--------------+--------+
-| Global and Local Interpretation | Scalable Bayesian Rule Lists                |
-+---------+---------+-----------+-----------+-----------+--------------+--------+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
++---------+---------+-----+-----------+-----------+--------------+--------------+
+| Scope of Interpretation |            Algorithms                               |
++=========+=========+=====+===========+===========+==============+==============+
+| Global Interpretation   | Model agnostic Feature Importance                   | 
++---------+---------+-----+-----------+-----------+--------------+--------------+
+| Global Interpretation   | Model agnostic Partial Dependence Plots             |
++---------+---------+-----+-----------+-----------+--------------+--------------+
+| Local Interpretation    | Local Interpretable Model Explanation(LIME)         |
++---------+---------+-----+-----------+-----------+--------------+--------------+
+| Global and Local        | Scalable Bayesian Rule Lists                        |
+| Interpretation          |                                                     |
++---------+---------+-----+-----------+-----------+--------------+--------------+
+
