@@ -80,7 +80,7 @@ the input space. Linear surrogates around a point correspond the LIME algorithm;
 surrogates around a point correspond to anchorLIME.
 
 Local Interpretable Model-Agnostic Explanations(LIME)
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer
    :members:
@@ -88,11 +88,13 @@ Local Interpretable Model-Agnostic Explanations(LIME)
 
 .. _interpretable-rule-based:
 
-Global And Local Interpretaions
+Global And Local Interpretations
 --------------------------------
 Bayesian Rule Lists(BRL)
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: skater.core.global_interpretation.interpretable_models.brlc import BRLC
    :members:
+   
 .. autoclass:: skater.core.global_interpretation.interpretable_models.bigdatabrlc import BigDataBRLC
    :members:
