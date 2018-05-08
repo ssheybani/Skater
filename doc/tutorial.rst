@@ -177,7 +177,10 @@ For Local Interpretation, one can access LIME as,
    LimeTabularExplainer(regressor_X, feature_names=regressor_data.feature_names,
    mode="regression").explain_instance(regressor_X[0], annotated_model)
    
-   
+
+B. Natively interpretable models(Transparent Design)
+#################################
+
 For Global and Local Interpretation(Transparent Models), Skater support Rule based models using Bayesian Rule Lists,
 
 .. code-block:: python
