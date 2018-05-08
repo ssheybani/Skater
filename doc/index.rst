@@ -12,12 +12,11 @@
 
 .. _contents:
 
-Model Agnostic Interpretation with Skater documentation!
+Model Interpretation with Skater!
 =======================================
+Skater is a open source unified framework to enable Model Interpretation for all forms of model to help one build an Interpretable machine learning system often needed for real world use-cases. Skater supports algorithms to demystify the learned structures of a black box model both globally(inference on the basis of a complete data set) and locally(inference about an individual prediction).
 
-Skater is a open source python package for model agnostic interpretation of predictive models. With Skater, you can unpack the internal mechanics of arbitrary models; as long as you can obtain inputs, and use a function to obtain outputs, you can use Skater to learn about the models internal decision criteria.
-
-The package was originally developed by Aaron Kramer and Pramit Choudhary at DataScience.com to help enable data scientists provide model insights to team members and 3rd parties.
+The package was originally developed by Aaron Kramer, Pramit Choudhary and rest of the DataScience.com team to help data scientists and data enthusiast gain better model insight. Skater enables this vision by providing the ability to infer and debug the model's decision policies as needed bringing "human in the loop". 
 
 
 .. only:: html
