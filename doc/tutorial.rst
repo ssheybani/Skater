@@ -30,9 +30,8 @@ models and classifiers.
 
 Local Models
 ~~~~~~~~~~~~~~~~~~~~~~~
-To create a skater model based on a local function or method, pass in the predict function to an InMemoryModel. A user can optionally pass data samples
-to the examples keyword argument. This is only used to infer output types and formats. Out of the box, skater allows models return numpy arrays and
-pandas dataframes. If you would like support for additional formats, please let us know: https://github.com/datascienceinc/model-interpretation/issues/117
+To create a skater model based on a local function or method, pass in the predict function to an InMemoryModel. A user can optionally pass data samples to the examples keyword argument. This is only used to infer output types and formats. 
+Out of the box, skater allows models return numpy arrays and pandas dataframes. If you would like support for additional formats, please let us know: https://github.com/datascienceinc/model-interpretation/issues/117
 
 .. code-block:: python
 
@@ -43,8 +42,7 @@ pandas dataframes. If you would like support for additional formats, please let 
    from skater.model import InMemoryModel
    model = InMemoryModel(gb.predict, examples = X[:10])
 
-If your model requires or returns different data structures, you can instead create a function that converts outputs to an appropriate
-data structure.
+If your model requires or returns different data structures, you can instead create a function that converts outputs to an appropriate data structure.
 
 .. code-block:: python
 
@@ -176,4 +174,4 @@ For details on the interpretation algorithms currently available, please see the
 
 - :ref:`interpretation-feature-importance`
 - :ref:`interpretation-partial-dependence`
-- :ref:`interpretation-overview-local`
+- :ref:`interpretation-local`
