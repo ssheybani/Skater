@@ -86,6 +86,8 @@ Local Interpretable Model-Agnostic Explanations(LIME)
    :members:
 
 
+.. _interpretable-rule-based:
+
 Global And Local Interpretaions
 --------------------------------
 Bayesian Rule Lists(BRL)
