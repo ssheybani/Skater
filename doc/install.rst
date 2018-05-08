@@ -13,7 +13,6 @@ Skater relies on
 - joblib==0.11,
 - dill>=0.2.6,
 - rpy2==2.9.1; python_version>"3.0",
-- Jinja2==2.10
 - numpy
 - Plotting functionality requires matplotlib>=2.1.0
 - with v1.1.0-b1 there are additional dependencies on R related binaries(setup.sh)
