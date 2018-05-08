@@ -94,5 +94,5 @@ Bayesian Rule Lists(BRL)
 
 .. autoclass:: skater.core.global_interpretation.interpretable_models.brlc import BRLC
    :members:
-.. autoclass:: from skater.core.global_interpretation.interpretable_models.bigdatabrlc import BigDataBRLC
+.. autoclass:: skater.core.global_interpretation.interpretable_models.bigdatabrlc import BigDataBRLC
    :members:
