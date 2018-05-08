@@ -79,8 +79,18 @@ how features impact predictions constrained to a particular point or small regio
 the input space. Linear surrogates around a point correspond the LIME algorithm; tree like
 surrogates around a point correspond to anchorLIME.
 
-LIME
+Local Interpretable Model-Agnostic Explanations(LIME)
 ~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer
+   :members:
+
+
+Global And Local Interpretaions
+--------------------------------
+Bayesian Rule Lists(BRL)
+
+.. autoclass:: skater.core.global_interpretation.interpretable_models.brlc import BRLC
+   :members:
+.. autoclass:: from skater.core.global_interpretation.interpretable_models.bigdatabrlc import BigDataBRLC
    :members:
