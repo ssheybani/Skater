@@ -70,7 +70,7 @@ in a regression model).
 .. autoclass:: skater.core.global_interpretation.partial_dependence.PartialDependence
    :members:
 
-.. _interpretation-overview-local:
+.. _interpretation-local:
 
 Local Interpretations
 ----------------------
