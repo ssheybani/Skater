@@ -12,8 +12,8 @@
 
 .. _contents:
 
-Model Interpretation with Skater!
-=======================================
+Model Interpretation with Skater
+================================
 Skater is a open source unified framework to enable Model Interpretation for all forms of model to help one build an
 Interpretable machine learning system often needed for real world use-cases. Skater supports algorithms to
 demystify the learned structures of a black box model both globally(inference on the basis of a complete data set)
@@ -37,6 +37,7 @@ ability to infer and debug the model's decision policies as needed bringing "hum
    overview
    install
    tutorial
+   examples
    api
 
 

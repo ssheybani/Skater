@@ -68,6 +68,7 @@ class FeatureImportance(BaseGlobalInterpretation):
         -------
         importances : Sorted Series
 
+
         References
         ----------
         Wei, Pengfei, Zhenzhou Lu, and Jingwen Song. "Variable Importance Analysis: A Comprehensive Review".
@@ -75,6 +76,7 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         Examples
         --------
+
             >>> from skater.model import InMemoryModel
             >>> from skater.core.explanations import Interpretation
             >>> from sklearn.ensemble import RandomForestClassier
@@ -84,6 +86,8 @@ class FeatureImportance(BaseGlobalInterpretation):
             >>> interpreter = Interpretation()
             >>> interpreter.load_data(X)
             >>> interpreter.feature_importance.feature_importance(model)
+
+
         """
 
         if filter_classes:
