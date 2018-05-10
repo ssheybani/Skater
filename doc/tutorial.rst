@@ -1,7 +1,7 @@
 
-*****
+*********
 Tutorial
-*****
+*********
 
 A. Post-hoc Model Interpretation
 #################################
@@ -82,7 +82,7 @@ If your api requires additional configuration like cookies, use request_kwargs:
 
 
 Model Input/Output Data Types
-----------------------------
+-------------------------------
 Skater natively supports models that accept numpy arrays and pandas dataframes as inputs.
 If your model requires a different input type, such as the case of a model API
 requiring JSON, or an H20 model requiring a H20Frame, then you'll need to include
@@ -178,8 +178,8 @@ For Local Interpretation, one can access LIME as,
    mode="regression").explain_instance(regressor_X[0], annotated_model)
    
 
-B. Natively interpretable models(Transparent Design)
-#################################
+B. Natively interpretable models(Rule Based Models/Transparent Design)
+####################################################
 
 For Global and Local Interpretation(Transparent Models), Skater support Rule based models using Bayesian Rule Lists,
 

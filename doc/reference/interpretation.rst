@@ -93,8 +93,8 @@ Global And Local Interpretations
 Bayesian Rule Lists(BRL)
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: skater.core.global_interpretation.interpretable_models.brlc import BRLC
+.. autoclass:: skater.core.global_interpretation.interpretable_models.brlc.BRLC
    :members:
    
-.. autoclass:: skater.core.global_interpretation.interpretable_models.bigdatabrlc import BigDataBRLC
+.. autoclass:: skater.core.global_interpretation.interpretable_models.bigdatabrlc.BigDataBRLC
    :members:
