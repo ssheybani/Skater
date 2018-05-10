@@ -1,6 +1,6 @@
 .. _contents:
 
-Jupyter Notebooks
+Notebook Gallery
 =================
 
 Model Abstraction

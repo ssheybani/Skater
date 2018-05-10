@@ -37,7 +37,7 @@ ability to infer and debug the model's decision policies as needed bringing "hum
    overview
    install
    tutorial
-   examples
+   gallery
    api
 
 
