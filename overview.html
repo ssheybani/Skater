@@ -27,6 +27,7 @@
   
     <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Install Skater" href="install.html" />
@@ -95,6 +96,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Install Skater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gallery.html">Notebook Gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 </ul>
 
@@ -185,16 +187,22 @@ its algorithmic decisions.</p>
 machine learning system often needed for real world use-cases. It is an open source python library designed to
 demystify the learned structures of a black box model both globally(inference on the basis of a complete data set)
 and locally(inference about an individual prediction).</p>
-<p>Note: The library has embraced object-oriented and functional programming paradigms as deemed necessary to provide scalability and concurrency while keeping code brevity in mind. The project is still in beta phase and is under active development.</p>
+<p>Note: The library has embraced object-oriented and functional programming paradigms as deemed necessary to provide
+scalability and concurrency while keeping code brevity in mind. The project is still in beta phase and is
+under active development.</p>
 </div>
 <div class="section" id="algorithms-supported-by-skater">
 <h2>Algorithms supported by Skater<a class="headerlink" href="#algorithms-supported-by-skater" title="Permalink to this headline">¶</a></h2>
 <p>Model Interpretation could be enabled in multiple different ways, but at a highlevel it could be broadly categorized as,</p>
-<ol class="arabic simple">
-<li>post hoc interpretation: Given a black box model trained to solve a supervised learning problem(X –&gt; Y, where X is the input and Y is the output), post-hoc interpretation can be thought of as a function(f) ‘g’ with input data(D) and a predictive model. The function ‘g’ returns a visual or textual representation which helps in understanding the inner working of the model or why a certain outcome is more favorable than the other. It could also be called inspecting the black box or reverse engineering.</li>
-<li>natively interpretable models: Given a supervised learning problem, the preditive model(explanator function) has a transparent design and is interpretable both globally and locally without any further explanations.</li>
-</ol>
-<p>Skater provides the ability to interpret the model in both ways(we are actively working on implementing other algorithms, <a class="reference external" href="https://github.com/datascienceinc/Skater/issues?utf8=%E2%9C%93&amp;q=is%3Aopen+">https://github.com/datascienceinc/Skater/issues?utf8=%E2%9C%93&amp;q=is%3Aopen+</a>)</p>
+<p>1. post hoc interpretation: Given a black box model trained to solve a supervised learning
+problem(X –&gt; Y, where X is the input and Y is the output), post-hoc interpretation can be thought of as a
+function(f) ‘g’ with input data(D) and a predictive model. The function ‘g’ returns a visual or textual
+representation which helps in understanding the inner working of the model or why a certain outcome is more
+favorable than the other. It could also be called inspecting the black box or reverse engineering.</p>
+<p>2. natively interpretable models: Given a supervised learning problem, the predictive model(explanator function)
+has a transparent design and is interpretable both globally and locally without any further explanations.</p>
+<p>Skater provides the ability to interpret the model in both ways(we are actively working on
+implementing other algorithms, <a class="reference external" href="https://github.com/datascienceinc/Skater/issues?utf8=%E2%9C%93&amp;q=is%3Aopen+">https://github.com/datascienceinc/Skater/issues?utf8=%E2%9C%93&amp;q=is%3Aopen+</a>)</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="12%" />

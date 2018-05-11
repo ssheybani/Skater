@@ -27,8 +27,11 @@
   
     <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api.html" />
+    <link rel="prev" title="Tutorial" href="tutorial.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -84,10 +87,24 @@
               
             
             
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Install Skater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Notebook Gallery</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#model-abstraction">Model Abstraction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#inmemory-model">InMemory Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deployed-model">Deployed Model</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#interpretation-examples">Interpretation Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#global-interpretation">Global Interpretation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#local-interpretation">Local Interpretation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#global-and-local-interpretation">Global And Local Interpretation</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 </ul>
 
@@ -154,7 +171,7 @@
            <div itemprop="articleBody">
             
   <div class="section" id="notebook-gallery">
-<span id="contents"></span><h1>Notebook Gallery<a class="headerlink" href="#notebook-gallery" title="Permalink to this headline">¶</a></h1>
+<h1>Notebook Gallery<a class="headerlink" href="#notebook-gallery" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="model-abstraction">
 <h2>Model Abstraction<a class="headerlink" href="#model-abstraction" title="Permalink to this headline">¶</a></h2>
 <img alt="_images/ml_workflow.png" src="_images/ml_workflow.png" />
@@ -169,8 +186,8 @@
 <div class="section" id="deployed-model">
 <h3>Deployed Model<a class="headerlink" href="#deployed-model" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
-<li>python deployed model: <a class="reference external" href="https://github.com/datascienceinc/Skater/tree/master/examples/python-deployed-model">https://github.com/datascienceinc/Skater/tree/master/examples/python-deployed-model</a></li>
-<li>r deployed model: <a class="reference external" href="https://github.com/datascienceinc/Skater/tree/master/examples/r/deployed_model">https://github.com/datascienceinc/Skater/tree/master/examples/r/deployed_model</a></li>
+<li><cite>python</cite> deployed model: <a class="reference external" href="https://github.com/datascienceinc/Skater/tree/master/examples/python-deployed-model">https://github.com/datascienceinc/Skater/tree/master/examples/python-deployed-model</a></li>
+<li><cite>r</cite> deployed model: <a class="reference external" href="https://github.com/datascienceinc/Skater/tree/master/examples/r/deployed_model">https://github.com/datascienceinc/Skater/tree/master/examples/r/deployed_model</a></li>
 <li>pre-trained/canned model: <a class="reference external" href="https://github.com/datascienceinc/Skater/tree/master/examples/third_party_model">https://github.com/datascienceinc/Skater/tree/master/examples/third_party_model</a></li>
 </ol>
 </div>
@@ -180,16 +197,15 @@
 <div class="section" id="global-interpretation">
 <h3>Global Interpretation<a class="headerlink" href="#global-interpretation" title="Permalink to this headline">¶</a></h3>
 <img alt="_images/pdp.png" src="_images/pdp.png" />
-<ol class="arabic simple">
-<li><dl class="first docutils">
-<dt>Model Agnostic Partial Dependence Plot(PDP)</dt>
-<dd><ul class="first last">
+<ol class="arabic">
+<li><p class="first">Model Agnostic Partial Dependence Plot(PDP)</p>
+<blockquote>
+<div><ul class="simple">
 <li><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/ensemble_model.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/ensemble_model.ipynb</a></li>
 <li><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/sklearn-classifiers.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/sklearn-classifiers.ipynb</a></li>
 <li><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/sklearn_regression_models.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/sklearn_regression_models.ipynb</a></li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 </li>
 </ol>
 <img alt="_images/feature_importance.png" src="_images/feature_importance.png" />
@@ -209,19 +225,23 @@
 <h3>Local Interpretation<a class="headerlink" href="#local-interpretation" title="Permalink to this headline">¶</a></h3>
 <img alt="_images/lime.png" src="_images/lime.png" />
 <ol class="arabic simple">
-<li>Local Interpretable Model Explanations(LIME)
-* <a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretation_example.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretation_example.ipynb</a>
-* <a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/NLP.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/NLP.ipynb</a>
-* <a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/third_party_model/algorithmia_indico.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/third_party_model/algorithmia_indico.ipynb</a></li>
+<li>Local Interpretable Model Explanations(LIME)<ul>
+<li><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretation_example.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretation_example.ipynb</a></li>
+<li><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/NLP.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/NLP.ipynb</a></li>
+<li><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/third_party_model/algorithmia_indico.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/third_party_model/algorithmia_indico.ipynb</a></li>
+</ul>
+</li>
 </ol>
 </div>
 <div class="section" id="global-and-local-interpretation">
 <h3>Global And Local Interpretation<a class="headerlink" href="#global-and-local-interpretation" title="Permalink to this headline">¶</a></h3>
 <img alt="_images/sbrl.png" src="_images/sbrl.png" />
 <ol class="arabic simple">
-<li>Rule Based Models(Transparent Design)
-* <a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/rule_list_notebooks/rule_lists_continuous_features.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/rule_list_notebooks/rule_lists_continuous_features.ipynb</a>
-* <a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/rule_list_notebooks/rule_lists_titanic_dataset.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/rule_list_notebooks/rule_lists_titanic_dataset.ipynb</a></li>
+<li>Rule Based Models(Transparent Design)<ul>
+<li><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/rule_list_notebooks/rule_lists_continuous_features.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/rule_list_notebooks/rule_lists_continuous_features.ipynb</a></li>
+<li><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/rule_list_notebooks/rule_lists_titanic_dataset.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/rule_list_notebooks/rule_lists_titanic_dataset.ipynb</a></li>
+</ul>
+</li>
 </ol>
 </div>
 </div>
@@ -232,6 +252,15 @@
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="tutorial.html" class="btn btn-neutral" title="Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
