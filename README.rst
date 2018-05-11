@@ -8,13 +8,12 @@
 
 Skater
 ===========
-Skater is a python package for model agnostic interpretation of predictive models.
-With Skater, you can unpack the internal mechanics of arbitrary models; as long
-as you can obtain inputs, and use a function to obtain outputs, you can use
-Skater to learn about the models internal decision policies.
+Skater is a unified framework to enable Model Interpretation for all forms of model to help one build an Interpretable
+machine learning system often needed for real world use-cases(** we are actively working towards to enabling faithful interpretability for all forms models). It is an open source python library designed to
+demystify the learned structures of a black box model both globally(inference on the basis of a complete data set)
+and locally(inference about an individual prediction). 
 
-
-The project was started as a research idea to find ways to enable better interpretability(preferably human interpretability) to predictive "black boxes" both for researchers and practioners.
+The project was started as a research idea to find ways to enable better interpretability(preferably human interpretability) to predictive "black boxes" both for researchers and practioners. The project is still in beta phase.
 
 .. image:: https://travis-ci.org/datascienceinc/Skater.svg?branch=master
     :target: https://travis-ci.com/datascienceinc/Skater
@@ -59,59 +58,31 @@ HighLevel Design
 .. _Gitter chat: https://gitter.im/datascienceinc-skater
 
 Install Skater
-================
-
-Dependencies
-~~~~~~~~~~~~~~~~
-Skater relies on numpy, pandas, scikit-learn, and the DataScience.com fork of
-the LIME package. Plotting functionality requires matplotlib, though it is not
-required to install the package.
+==============
+For detailed information on the dependencies and intallation instruction check out `installing skater
+<https://datascienceinc.github.io/Skater/install.html>`_.
 
 pip
-~~~~~~~~~~~~~~~~
-
-When using pip, to ensure your system is not modified by an installation, it
-is recommended that you use a virtual environment (virtualenv, conda environment).
-
+~~~
 ::
 
+    Option 1: without rule lists 
     pip install -U Skater
-
-conda
-~~~~~~~~~~~~~~~~
-
-Skater is available in the `conda-forge`_ channel with builds for Linux, OS X and
-Windows.
-
-::
-
-    conda install -c conda-forge Skater
-
-.. _conda-forge: http://conda-forge.github.io/
-
-
-For Bayesian Rule List
-~~~~~~~~~~~~~~~~~~~~~~~
-Follow the steps mentioned at the link mentioned below to install conda,
-https://conda.io/docs/user-guide/install/linux.html
-::
-    Quick summary to install conda and setup the python environment(recommended steps for using python3.x)
-
-    1. wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-    2. bash miniconda.sh -b -p $HOME/miniconda
-    3. export PATH="$HOME/miniconda/bin:$PATH"
-    4. conda config --set always_yes yes --set changeps1 no
-    5. conda info -a
-
-    Installation:
-    Option1:
-    1. conda install gxx_linux-64
-    2. git clone the repo
-    3. sudo python setup.py install --ostype=linux-ubuntu --rl=True
     
-    Option2:
+    Option 2: with rule lists
     1. conda install gxx_linux-64
-    2. sudo pip install -U --no-deps --force-reinstall --install-option="--rl=True" skater==1.1.0b1
+    2. sudo pip install -U --no-deps --force-reinstall --install-option="--rl=True" skater
+
+
+To get the latest changes try cloning the repo and use the below mentioned commands to get started,
+::
+    Option 1: without rule lists
+    1. git clone the repo
+    2. sudo python setup.py install
+    
+    Option 2: with rule lists
+    1. conda install gxx_linux-64
+    2. sudo pip install -U --no-deps --force-reinstall --install-option="--rl=True" skater==1.1.0
 
 
 Usage
