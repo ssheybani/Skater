@@ -1,8 +1,8 @@
 Model Objects
-=======================================
+=============
 
 Overview
----------------------------------------
+--------
 Skater contains an abstraction for predictive models. Models apis vary by implementation.
 The skater Model object manages variations in how models are called, the inputs they expect,
 and the outputs they generate, so that inputs, outputs, and calls are standardized to both the
@@ -13,13 +13,13 @@ InMemoryModel and DeployedModel class, though this API may change in later versi
    :linenos:
 
    from sklearn.datasets import load_breast_cancer
-   from sklearn.ensemble import GradientBoostedClassifier
+   from sklearn.ensemble import GradientBoostingClassifier
 
    breast_cancer = load_breast_cancer()
    X = breast_cancer.data
    y = breast_cancer.target
 
-   gb = GradientBoostedClassifier()
+   gb = GradientBoostingClassifier()
    gb.fit(X,y)
 
    from skater.model import InMemoryModel
@@ -27,7 +27,7 @@ InMemoryModel and DeployedModel class, though this API may change in later versi
 
 
 InMemoryModel
----------------------------------------
+-------------
 Models that are callable function are exposed via the InMemoryModel object.
 
 .. automethod:: skater.model.InMemoryModel.__init__
@@ -35,7 +35,7 @@ Models that are callable function are exposed via the InMemoryModel object.
 
 
 DeployedModel
----------------------------------------
+-------------
 Models that are deployed, and therefore callable via http posts are exposed via the
 DeployedModel object.
 

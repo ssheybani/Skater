@@ -1,7 +1,7 @@
 .. _contents:
 
 API Reference
-===========
+=============
 
 .. automodule:: skater
    :members:

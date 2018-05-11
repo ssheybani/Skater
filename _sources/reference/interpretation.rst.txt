@@ -55,6 +55,12 @@ measuring the entropy in the change of predictions, given a perturbation of a gi
 The intuition is that the more a model's decision criteria depend on a feature, the
 more we'll see predictions change as a function of perturbing a feature.
 
+Jupyter Notebooks
+
+    1. https://github.com/datascienceinc/Skater/blob/master/examples/ensemble_model.ipynb
+    2. https://github.com/datascienceinc/Skater/blob/master/examples/sklearn-classifiers.ipynb
+    3. https://github.com/datascienceinc/Skater/blob/master/examples/sklearn_regression_models.ipynb
+
 .. autoclass:: skater.core.global_interpretation.feature_importance.FeatureImportance
    :members:
 
@@ -67,10 +73,16 @@ Partial Dependence describes the marginal impact of a feature on model predictio
 other features in the model constant. The derivative of partial dependence describes the impact of a feature (analogous to a feature coefficient
 in a regression model).
 
+Jupyter Notebooks
+
+    1. https://github.com/datascienceinc/Skater/blob/master/examples/ensemble_model.ipynb
+    2. https://github.com/datascienceinc/Skater/blob/master/examples/sklearn-classifiers.ipynb
+    3. https://github.com/datascienceinc/Skater/blob/master/examples/sklearn_regression_models.ipynb
+
 .. autoclass:: skater.core.global_interpretation.partial_dependence.PartialDependence
    :members:
 
-.. _interpretation-overview-local:
+.. _interpretation-local:
 
 Local Interpretations
 ----------------------
@@ -79,8 +91,22 @@ how features impact predictions constrained to a particular point or small regio
 the input space. Linear surrogates around a point correspond the LIME algorithm; tree like
 surrogates around a point correspond to anchorLIME.
 
-LIME
-~~~~~~~~~~~~~~~~~~
+Local Interpretable Model-Agnostic Explanations(LIME)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer
+   :members:
+
+
+.. _interpretable-rule-based:
+
+Global And Local Interpretations
+--------------------------------
+Bayesian Rule Lists(BRL)
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: skater.core.global_interpretation.interpretable_models.brlc.BRLC
+   :members:
+   
+.. autoclass:: skater.core.global_interpretation.interpretable_models.bigdatabrlc.BigDataBRLC
    :members:

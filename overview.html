@@ -30,7 +30,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Install Skater" href="install.html" />
-    <link rel="prev" title="Model Agnostic Interpretation with Skater documentation!" href="index.html" /> 
+    <link rel="prev" title="Model Interpretation with Skater" href="index.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -52,6 +52,9 @@
             <a href="index.html" class="icon icon-home"> skater
           
 
+          
+            
+            <img src="_static/skater-logo.svg" class="logo" alt="Logo"/>
           
           </a>
 
@@ -85,7 +88,9 @@
             
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-model-interpretation">What is Model Interpretation?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#skater">Skater</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#algorithms-supported-by-skater">Algorithms supported by Skater</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Install Skater</a></li>
@@ -112,7 +117,7 @@
 
       <div class="wy-nav-content">
         
-        <div class="rst-content">
+        <div class="rst-content style-external-links">
         
           
 
@@ -163,28 +168,64 @@
 <br>
 <br><div class="section" id="overview">
 <h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
-<hr class="docutils" />
+<div class="section" id="what-is-model-interpretation">
+<h2>What is Model Interpretation?<a class="headerlink" href="#what-is-model-interpretation" title="Permalink to this headline">¶</a></h2>
+<p>The concept of model interpretability in the field of machine learning is still new, largely subjective, and, at times,
+controversial. Model interpretation is the ability to explain and validate the decisions of a predictive model to
+enable fairness, accountability, and transparency in the algorithmic decision-making
+(for a more detailed explanation on the definition of transparency in machine learning, see “Challenges of Transparency” by Adrian Weller).
+Or, to state it formally, model interpretation can be defined as the ability to better understand the decision policies
+of a machine-learned response function to explain the relationship between independent (input) and dependent (target) variables,
+preferably in a human interpretable way. Ideally, you should be able to query the model to understand the “what, why, and how” of
+its algorithmic decisions.</p>
+</div>
 <div class="section" id="skater">
 <h2>Skater<a class="headerlink" href="#skater" title="Permalink to this headline">¶</a></h2>
-<p>Skater is a python package for model agnostic interpretation of predictive models. With Skater, one can understand the internal
-mechanics of arbitrary models based on the interaction of independent variable(input data) and dependent variable(target response).
-One can use Skater to query the model to understand more about the learned decision policies of a “black box”.</p>
-<p>So that models produced by different learning algorithms, implementations, and environments can be compared, the Skater philosophy
-is that all models should be evaluated as black boxes; decision criteria are inferred based on input perturbations and observing
-corresponding outputs.</p>
-<p>Interpretation algorithms for all but the most trivial models must make some simplifications
-when representing a model’s decision criteria. These simplifications can be with respect to:</p>
+<p>Skater is a unified framework to enable Model Interpretation for all forms of model to help one build an Interpretable
+machine learning system often needed for real world use-cases. It is an open source python library designed to
+demystify the learned structures of a black box model both globally(inference on the basis of a complete data set)
+and locally(inference about an individual prediction).</p>
+<p>Note: The library has embraced object-oriented and functional programming paradigms as deemed necessary to provide scalability and concurrency while keeping code brevity in mind. The project is still in beta phase and is under active development.</p>
+</div>
+<div class="section" id="algorithms-supported-by-skater">
+<h2>Algorithms supported by Skater<a class="headerlink" href="#algorithms-supported-by-skater" title="Permalink to this headline">¶</a></h2>
+<p>Model Interpretation could be enabled in multiple different ways, but at a highlevel it could be broadly categorized as,</p>
 <ol class="arabic simple">
-<li><cite>feature scope</cite>: the number of features for which we explain model behavior at a time.</li>
-<li><cite>domain</cite>: the region of the input space for which explain model behavior</li>
-<li><cite>detail/fidelity</cite>: the level of aggregation performed (across features or the domain)</li>
+<li>post hoc interpretation: Given a black box model trained to solve a supervised learning problem(X –&gt; Y, where X is the input and Y is the output), post-hoc interpretation can be thought of as a function(f) ‘g’ with input data(D) and a predictive model. The function ‘g’ returns a visual or textual representation which helps in understanding the inner working of the model or why a certain outcome is more favorable than the other. It could also be called inspecting the black box or reverse engineering.</li>
+<li>natively interpretable models: Given a supervised learning problem, the preditive model(explanator function) has a transparent design and is interpretable both globally and locally without any further explanations.</li>
 </ol>
-<p>Partial dependence, marginal plots, and similar explanations generally simplify on feature scope;
-they provide faithful approximations on small feature subsets.</p>
-<p>LIME and anchor LIME simplify on domain and fidelity, as they provide regressions or trees
-respectively, on small regions of the domain.</p>
-<p>Feature importance simplifies on detail, as it provides scalars for all features
-across the entire domain.</p>
+<p>Skater provides the ability to interpret the model in both ways(we are actively working on implementing other algorithms, <a class="reference external" href="https://github.com/datascienceinc/Skater/issues?utf8=%E2%9C%93&amp;q=is%3Aopen+">https://github.com/datascienceinc/Skater/issues?utf8=%E2%9C%93&amp;q=is%3Aopen+</a>)</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="12%" />
+<col width="7%" />
+<col width="15%" />
+<col width="15%" />
+<col width="19%" />
+<col width="19%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head" colspan="3">Scope of Interpretation</th>
+<th class="head" colspan="4">Algorithms</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td colspan="3">Global Interpretation</td>
+<td colspan="4">Model agnostic Feature Importance</td>
+</tr>
+<tr class="row-odd"><td colspan="3">Global Interpretation</td>
+<td colspan="4">Model agnostic Partial Dependence Plots</td>
+</tr>
+<tr class="row-even"><td colspan="3">Local Interpretation</td>
+<td colspan="4">Local Interpretable Model Explanation(LIME)</td>
+</tr>
+<tr class="row-odd"><td colspan="3">Global and Local
+Interpretation</td>
+<td colspan="4">Scalable Bayesian Rule Lists</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 
@@ -199,7 +240,7 @@ across the entire domain.</p>
         <a href="install.html" class="btn btn-neutral float-right" title="Install Skater" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="Model Agnostic Interpretation with Skater documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral" title="Model Interpretation with Skater" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -208,7 +249,7 @@ across the entire domain.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Author.
+        &copy; Copyright 2017, skater developers and contributors (MIT License).
 
     </p>
   </div>
