@@ -23,55 +23,75 @@ class BigDataBRLC(BRLC):
 
     Parameters
     ----------
-    sub_sample_percentage: float (default=0.1)
+    sub_sample_percentage : float (default=0.1)
         specify the fraction of the training sample to be retained for training BRL.
-    iterations: int (default=30000)
+
+    iterations : int (default=30000)
         number of iterations for each MCMC chain.
-    pos_sign: int (default=1)
+
+    pos_sign : int (default=1)
         sign for the positive labels in the "label" column.
-    neg_sign: int (default=0)
+
+    neg_sign : int (default=0)
         sign for the negative labels in the "label" column.
-    min_rule_len: int (default=1)
+
+    min_rule_len : int (default=1)
         minimum number of cardinality for rules to be mined from the data-frame.
-    max_rule_len: int (default=8)
+
+    max_rule_len : int (default=8)
         maximum number of cardinality for rules to be mined from the data-frame.
-    min_support_pos: float (default=0.1)
+
+    min_support_pos : float (default=0.1)
         a number between 0 and 1, for the minimum percentage support for the positive observations.
-    min_support_neg: float (default 0.1)
+
+    min_support_neg : float (default 0.1)
         a number between 0 and 1, for the minimum percentage support for the negative observations.
-    eta: int (default=1)
+
+    eta : int (default=1)
+
     n_chains: int (default=10)
-    alpha: int (default=1)
+
+    alpha : int (default=1)
         a prior pseudo-count for the positive(alpha1) and negative(alpha0) classes. Default values (1, 1)
-    lambda_: int (default=8)
+
+    lambda_ : int (default=8)
         a hyper-parameter for the expected length of the rule list.
-    discretize: bool (default=True)
+
+    discretize : bool (default=True)
         apply discretizer to handle continuous features.
-    drop_features: bool (default=False)
+
+    drop_features : bool (default=False)
         once continuous features are discretized, use this flag to either retain or drop them from the dataframe
-    threshold: float (default=0.5)
-        specify the threshold for the decision boundary. This is the probability level to compute
-        distance of the predictions(for input examples) from the decision boundary. Input examples closest to the
+
+    threshold : float (default=0.5)
+        specify the threshold for the decision boundary. This is the probability level to compute \
+        distance of the predictions(for input examples) from the decision boundary. Input examples closest to the \
         decision boundary are sub-sampled. Size of sub-sampled data is controlled using 'sub_sample_percentage'.
-    penalty_param_svm: float (default=0.01)
-        Regularization parameter('C') for Linear Support Vector Classifier. Lower regularization value forces the
+
+    penalty_param_svm : float (default=0.01)
+        Regularization parameter('C') for Linear Support Vector Classifier. Lower regularization value forces the \
         optimizer to maximize the hyperplane.
-        References
-        -----------
-        .. https://stats.stackexchange.com/questions/31066/what-is-the-influence-of-c-in-svms-with-linear-kernel
-    calibration_type: string (default='sigmoid')
+
+        References: https://stats.stackexchange.com/questions/31066/what-is-the-influence-of-c-in-svms-with-linear-kernel
+
+    calibration_type : string (default='sigmoid')
         Calibrate the base estimator's prediction(currently, all the base estimators are calibrated, that might
         change in future with more experimentation). Calibration could be performed in 2 ways
         1. parametric approach using Platt Scaling ('sigmoid')
         2. non-parametric approach using isotonic regression('isotonic).
-        Avoid using isotonic regression for input examples<<1k because it tends to overfit.
-        References
-        -----------
-        .. [1] A. Niculescu-Mizil & R. Caruana(ICML2005), Predicting Good Probabilities With Supervised Learning
-        .. [2] https://www.cs.cornell.edu/~alexn/papers/calibration.icml05.crc.rev3.pdf
-        .. [3] http://fastml.com/classifier-calibration-with-platts-scaling-and-isotonic-regression/
-    cv_calibration: int (default=3)
+        Avoid using isotonic regression for input examples<<1k because it tends to over-fit.
+
+        References:
+
+        [1] A. Niculescu-Mizil & R. Caruana(ICML2005), Predicting Good Probabilities With Supervised Learning
+
+        [2] https://www.cs.cornell.edu/~alexn/papers/calibration.icml05.crc.rev3.pdf
+
+        [3] http://fastml.com/classifier-calibration-with-platts-scaling-and-isotonic-regression/
+
+    cv_calibration : int (default=3)
         specify number of folds for cross-validation splitting strategy
+
     random_state: int (default=0)
     surrogate_estimator: string (default='SVM', 'RF': RandomForest)
         Surrogate model to build the initial model for handling large datasets. Currently, SVM and RandomForest
@@ -87,7 +107,7 @@ class BigDataBRLC(BRLC):
     (http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0156574)
 
     Examples
-    ---------
+    --------
     >>> from skater.core.global_interpretation.interpretable_models.brlc import BRLC
     >>> from skater.core.global_interpretation.interpretable_models.bigdatabrlc import BigDataBRLC
     >>> import pandas as pd
@@ -128,16 +148,16 @@ class BigDataBRLC(BRLC):
 
         Parameters
         -----------
-        X: pandas.DataFrame
+        X : pandas.DataFrame
             input examples representing the training set
-        y: pandas.DataFrame
+        y : pandas.DataFrame
             target labels associated with the training set
-        pos_label: int
-        neg_label: int
+        pos_label : int
+        neg_label : int
 
         Returns
         --------
-        X_, y_: pandas.dataframe
+        X_, y_ : pandas.dataframe
         sub-sampled input examples
         """
         if not isinstance(X, pd.DataFrame) or not isinstance(y, pd.Series):

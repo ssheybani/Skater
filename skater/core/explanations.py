@@ -11,28 +11,13 @@ class Interpretation(object):
     Interpretation class. Before calling interpretation subclasses like partial
     dependence, one must call Interpretation.load_data().
 
-    Attributes:
-    ----------
-    data_set: skater.data.DataSet
-        skater's data abstraction layer. All interactions with data goes through
-         this object.
 
-    local_interpreter: skater.core.local_interpreter.LocalInterpreter
-        Contains methods for interpreting single prediction. Currently exposes the lime
-        library.
-
-    global_interpreter: skater.core.global_interpreter.GlobalInterpreter
-        Contains methods for evaluating a model over entire regions of the domain. Currently
-        exposes partial dependency
-
-
-    Examples:
-    ----------
-
-    from skater.core.explanations import Interpretation
-    interpreter = Interpretation()
-    interpreter.load_data(X, feature_ids = ['a','b'])
-    interpreter.partial_dependence([feature_id1, feature_id2], regressor.predict)
+    Examples
+    --------
+        >>> from skater.core.explanations import Interpretation
+        >>> interpreter = Interpretation()
+        >>> interpreter.load_data(X, feature_ids = ['a','b'])
+        >>> interpreter.partial_dependence([feature_id1, feature_id2], regressor.predict)
     """
 
     def __init__(self, training_data=None, training_labels=None, feature_names=None, index=None,
@@ -41,7 +26,7 @@ class Interpretation(object):
         Attaches local and global interpretations
         to Interpretation object.
 
-        Parameters:
+        Parameters
         -----------
         log_level: int
             Logger Verbosity, see https://docs.python.org/2/library/logging.html
@@ -77,7 +62,7 @@ class Interpretation(object):
 
 
         Returns
-        ---------
+        --------
             None
         """
 

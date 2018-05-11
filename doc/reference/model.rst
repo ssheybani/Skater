@@ -1,8 +1,8 @@
 Model Objects
-=======================================
+=============
 
 Overview
----------------------------------------
+--------
 Skater contains an abstraction for predictive models. Models apis vary by implementation.
 The skater Model object manages variations in how models are called, the inputs they expect,
 and the outputs they generate, so that inputs, outputs, and calls are standardized to both the
@@ -27,7 +27,7 @@ InMemoryModel and DeployedModel class, though this API may change in later versi
 
 
 InMemoryModel
----------------------------------------
+-------------
 Models that are callable function are exposed via the InMemoryModel object.
 
 .. automethod:: skater.model.InMemoryModel.__init__
@@ -35,7 +35,7 @@ Models that are callable function are exposed via the InMemoryModel object.
 
 
 DeployedModel
----------------------------------------
+-------------
 Models that are deployed, and therefore callable via http posts are exposed via the
 DeployedModel object.
 
