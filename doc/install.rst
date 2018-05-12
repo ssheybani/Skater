@@ -31,13 +31,14 @@ https://conda.io/docs/user-guide/install/linux.html
     4. conda config --set always_yes yes --set changeps1 no
     5. conda info -a
 
+Managing conda virtual environment. For details, check `here <https://conda.io/docs/user-guide/tasks/manage-environments.html#activating-an-environment>`_
 ::
-    Managing conda virtual environment. For details, check
-    `here<https://conda.io/docs/user-guide/tasks/manage-environments.html#activating-an-environment>_`
+
     1. create: conda create -n skater-test python=3.6
     2. activate: source activate skater-test
     3. deactivate: source deactivate
 
+Install
 ::
 
     Option 1: without rule lists
@@ -49,11 +50,11 @@ https://conda.io/docs/user-guide/install/linux.html
 
 conda
 ~~~~~~
-Skater is available in the conda-forge channel with builds for Linux and OS X.
+Skater is available in the conda-forge channel with builds for Linux and OS X. 
+The latest version of the library is not updated on conda, `#223 <https://github.com/datascienceinc/Skater/issues/223>`_)
 ::
 
-    conda install -c conda-forge Skater(the latest version of the library is not updated on conda,
-    `#223<https://github.com/datascienceinc/Skater/issues/223`_)
+    conda install -c conda-forge Skater
 
 
 testing
