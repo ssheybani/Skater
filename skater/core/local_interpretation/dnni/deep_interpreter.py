@@ -50,6 +50,7 @@ class DeepInterpreter(object):
     .. [1] Ancona M, Ceolini E, Öztireli C, Gross M (ICLR, 2018).
            Towards better understanding of gradient-based attribution methods for Deep Neural Networks.
            https://arxiv.org/abs/1711.06104
+           (https://github.com/marcoancona/DeepExplain/blob/master/deepexplain/tensorflow/methods.py)
     """
     __name__ = "DeepInterpreter"
 
