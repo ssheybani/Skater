@@ -121,8 +121,8 @@ class DeepInterpreter(object):
             - Integrated Gradient('ig'): Is recommended with Activation ops ('Relu', 'Elu', 'Softplus', 'Tanh', 'Sigmoid').
             It works for images and text. Optional parameters include steps(default: 100) and baseline(default:
             {'image': 'a black image'}; {'txt': zero input embedding vector})
-            Gradient is computed by varying the input from the baseline(x') to the provided input(x). x, x' are element of R with
-            n dimension ---> [0,1]
+            Gradient is computed by varying the input from the baseline(x') to the provided input(x). x, x'
+            are element of R with n dimension ---> [0,1]
         target_tensor: tensorflow.python.framework.ops.Tensor
             Specify the output layer to start from
         X: tensorflow.python.framework.ops.Tensor
