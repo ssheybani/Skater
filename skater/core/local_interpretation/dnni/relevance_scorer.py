@@ -94,6 +94,7 @@ class IntegratedGradients(BaseGradient):
     .. Axiomatic Attribution for Deep Networks (http://arxiv.org/abs/1703.01365)
     .. [2] Ancona M, Ceolini E, Öztireli C, Gross M:
     .. Towards better understanding of gradient-based attribution methods for Deep Neural Networks. ICLR, 2018
+    .. [3] Taly, Ankur(2017) http://theory.stanford.edu/~ataly/Talks/sri_attribution_talk_jun_2017.pdf
     """
 
     __name__ = "IntegratedGradients"
