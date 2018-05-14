@@ -190,6 +190,7 @@ For Global and Local Interpretation(Transparent Models), Skater support Rule bas
 
 For details on the interpretation algorithms currently available, please see the documentation for:
 
+- :ref:`global-interpretation`
 - :ref:`interpretation-feature-importance`
 - :ref:`interpretation-partial-dependence`
 - :ref:`interpretation-local`

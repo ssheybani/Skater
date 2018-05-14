@@ -1,5 +1,5 @@
-Notebook Gallery
-=================
+Gallery
+=======
 
 Model Abstraction
 #################

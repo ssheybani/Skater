@@ -61,13 +61,13 @@ implementing other algorithms, `issues <https://github.com/datascienceinc/Skater
 | Global Interpretation   | Model agnostic Partial Dependence Plots             |
 +---------+---------+-----+-----------+-----------+--------------+--------------+
 | Local Interpretation    | Local Interpretable Model Explanation(LIME)         |
-+---------+---------+-----+-----------+-----------+--------------+--------------+
-| Local Interpretation    | DNNs:     | 1. Layer-wise Relevance Propagation     |
-+---------+---------+-----+           | (e-LRP):Currently only for image        |
++---------+---------+-----+-----------+-----------------------------------------+
+| Local Interpretation    | DNNs      | - Layer-wise Relevance Propagation      |
+|                         |           |   (e-LRP): image                        |
 |                         |           |                                         |
-+---------+---------+-----+           | 2. Integrated Gradient: image and text
+|                         |           | - Integrated Gradient: image and text   |
 |                         |           |                                         |
-+---------+---------+-----+-----------+-----------+--------------+--------------+
++---------+---------+-----+-----------+-----------------------------------------+
 | Global and Local        | Scalable Bayesian Rule Lists                        |
 | Interpretation          |                                                     |
 +---------+---------+-----+-----------+-----------+--------------+--------------+

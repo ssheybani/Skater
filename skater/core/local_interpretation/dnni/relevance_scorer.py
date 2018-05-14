@@ -40,7 +40,7 @@ class BaseGradient(Initializer):
 
 
 class LRP(BaseGradient):
-    """ LRP Implementation computed using backpropagation by applying change rule on a modified gradient function.
+    """ LRP Implementation is computed using backpropagation by applying change rule on a modified gradient function.
     LRP could be implemented in different ways. This version implements the epsilon-LRP(Eq (58) as stated in [1]
     or Eq (2) in [2]. Epsilon acts as a numerical stabilizer.
 
