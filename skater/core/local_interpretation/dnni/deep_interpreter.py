@@ -110,7 +110,7 @@ class DeepInterpreter(object):
                 return self.__supported_relevance_type_dict[type_name]['method']
 
 
-    def explain(self, relevance_type, target_tensor, X, xs, use_case=None, **kwargs):
+    def explain(self, relevance_type, output_tensor, input_tensor, samples, use_case=None, **kwargs):
         """ Helps in computing the relevance scores for DNNs to understand the input and output behavior of the network.
 
         Parameters
@@ -124,12 +124,12 @@ class DeepInterpreter(object):
             {'image': 'a black image'}; {'txt': zero input embedding vector})
             Gradient is computed by varying the input from the baseline(x') to the provided input(x). x, x'
             are element of R with n dimension ---> [0,1]
-        target_tensor: tensorflow.python.framework.ops.Tensor
+        output_tensor: tensorflow.python.framework.ops.Tensor
             Specify the output layer to start from
-        X: tensorflow.python.framework.ops.Tensor
+        input_tensor: tensorflow.python.framework.ops.Tensor
             Specify the input layer to reach to
-        xs: numpy.array
-            Input for which explanation is desired
+        samples: numpy.array
+            Input/Inputs for which explanation is/are desired
         use_case: str 'image' or 'txt
         kwargs: optional
 
@@ -202,7 +202,8 @@ class DeepInterpreter(object):
         >>>    print("Y shape: {}".format(ys.shape))
         >>>    # Original Predictions
         >>>    print(loaded_model.predict_classes(xs))
-        >>>    relevance_scores = di.explain('elrp', target_tensor * ys, input_tensor, xs, use_case='image')
+        >>>    relevance_scores = di.explain('elrp', output_tensor=target_tensor * ys, input_tensor=input_tensor,
+        >>>                                                                                samples=xs, use_case='image')
         """
         if not self.context_on:
             raise RuntimeError('explain can be invoked only within a DeepInterpreter context.')
@@ -220,7 +221,7 @@ class DeepInterpreter(object):
         Initializer.grad_override_checkflag = 0
         Initializer.enabled_method_class = relevance_type_class
 
-        method = Initializer.enabled_method_class(target_tensor, X, xs, self.session, **kwargs)
+        method = Initializer.enabled_method_class(output_tensor, input_tensor, samples, self.session, **kwargs)
         self.logger.info('DeepInterpreter: executing method {}'.format(method))
 
         result = method.run()
