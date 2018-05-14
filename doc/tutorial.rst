@@ -1,10 +1,14 @@
 
+*********
 Tutorial
-===========
+*********
+
+A. Post-hoc Model Interpretation
+#################################
 
 
 Creating an interpretation object
-------------------
+---------------------------------
 
 The general workflow within the skater package is to create an interpretation, create a model, and run interpretation algorithms.
 
@@ -22,17 +26,11 @@ Internally, the Interpretation will generate a DataManager to handle data reques
 
 To begin using the Interpretation to explain models, we need to create a skater Model.
 
-Creating a Model
-------------------
-To ensure formatting consistency, and common functionality among various model types and interfaces,
-we require that models passed to Interpretations to be wrapped in a skater Model object. Currently we support regression type
-models and classifiers.
 
-Local Models
-~~~~~~~~~~~~~~~~~~~~~~~
-To create a skater model based on a local function or method, pass in the predict function to an InMemoryModel. A user can optionally pass data samples
-to the examples keyword argument. This is only used to infer output types and formats. Out of the box, skater allows models return numpy arrays and
-pandas dataframes. If you would like support for additional formats, please let us know: https://github.com/datascienceinc/model-interpretation/issues/117
+Local Models(InMemoryModel)
+---------------------------
+To create a skater model based on a local function or method, pass in the predict function to an InMemoryModel. A user can optionally pass data samples to the examples keyword argument. This is only used to infer output types and formats. 
+Out of the box, skater allows models return numpy arrays and pandas dataframes. If you would like support for additional formats, please let us know: https://github.com/datascienceinc/model-interpretation/issues/117
 
 .. code-block:: python
 
@@ -43,8 +41,7 @@ pandas dataframes. If you would like support for additional formats, please let 
    from skater.model import InMemoryModel
    model = InMemoryModel(gb.predict, examples = X[:10])
 
-If your model requires or returns different data structures, you can instead create a function that converts outputs to an appropriate
-data structure.
+If your model requires or returns different data structures, you can instead create a function that converts outputs to an appropriate data structure.
 
 .. code-block:: python
 
@@ -54,8 +51,8 @@ data structure.
    from skater.model import InMemoryModel
    model = InMemoryModel(predict_as_dataframe, examples = X[:10])
 
-Models behind an API
-~~~~~~~~~~~~~~~~~~~~
+Operationalized Model(DeployedModel)
+------------------------------------
 If your model is accessible through an api, use a DeployedModel, which wraps the requests library. DeployedModels require two functions,
 an input formatter and an output formatter, which speak to the requests library for posting and parsing.
 
@@ -85,7 +82,7 @@ If your api requires additional configuration like cookies, use request_kwargs:
 
 
 Model Input/Output Data Types
-~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------
 Skater natively supports models that accept numpy arrays and pandas dataframes as inputs.
 If your model requires a different input type, such as the case of a model API
 requiring JSON, or an H20 model requiring a H20Frame, then you'll need to include
@@ -105,11 +102,10 @@ If your model returns another data structure, you'll need to define an output_fo
 that takes your model's return type, and returns a numpy array or pandas dataframe.
 
 Model Types
-~~~~~~~~~~~~~~~~~~~~~~~
-Skater supports regressions, classifiers without probability scores, and classifiers
-with probability scores.
+--------------
+Skater supports regressions, classifiers with or without probability scores.
 
-Skater expects that regression models run on n examples will return numerical arrays
+Skater expects that regression models run on 'n' examples will return numerical arrays
 of shape (n, ) or (n, 1), such as the following regression output run on 3 examples:
 
 ::
@@ -164,16 +160,38 @@ or
     skater_model = InMemoryModel(classifier.predict, unique_classes=unique_classes)
 
 
-With an Interpretation and a Model, one can run all skater interpretation algorithms.
+With an Interpretation and a Model, one can access golabl interpretation algorithms.
 
 .. code-block:: python
 
    interpreter.feature_importance.feature_importance(skater_model)
 
    interpreter.partial_dependence.plot_partial_dependence([features[0], features[1]], skater_model)
+   
+   
+For Local Interpretation, one can access LIME as,
+
+.. code-block:: python
+
+   from skater.core.local_interpretation.lime.lime_tabular import LimeTabularExplainer
+   LimeTabularExplainer(regressor_X, feature_names=regressor_data.feature_names,
+   mode="regression").explain_instance(regressor_X[0], annotated_model)
+   
+
+B. Natively interpretable models(Rule Based Models/Transparent Design)
+####################################################
+
+For Global and Local Interpretation(Transparent Models), Skater support Rule based models using Bayesian Rule Lists,
+
+.. code-block:: python
+
+   from skater.core.global_interpretation.interpretable_models.brlc import BRLC
+   sbrl_model = BRLC(min_rule_len=1, max_rule_len=10, iterations=10000, n_chains=20, drop_features=True)
+
 
 For details on the interpretation algorithms currently available, please see the documentation for:
 
 - :ref:`interpretation-feature-importance`
 - :ref:`interpretation-partial-dependence`
-- :ref:`interpretation-overview-local`
+- :ref:`interpretation-local`
+- :ref:`interpretable-rule-based`

@@ -29,10 +29,6 @@ class FeatureImportance(BaseGlobalInterpretation):
         Computes feature importance of all features related to a model instance.
         Supports classification, multi-class classification, and regression.
 
-        Wei, Pengfei, Zhenzhou Lu, and Jingwen Song.
-        "Variable Importance Analysis: A Comprehensive Review".
-        Reliability Engineering & System Safety 142 (2015): 399-432.
-
 
         Parameters
         ----------
@@ -68,22 +64,31 @@ class FeatureImportance(BaseGlobalInterpretation):
             Whether to weight the importance values by the strength of the perturbations.
             Generally doesn't effect results unless n_samples is very small.
 
+
         Returns
         -------
         importances : Sorted Series
 
 
+        References
+        ----------
+        Wei, Pengfei, Zhenzhou Lu, and Jingwen Song. "Variable Importance Analysis: A Comprehensive Review".
+        Reliability Engineering & System Safety 142 (2015): 399-432.
+
         Examples
         --------
+
             >>> from skater.model import InMemoryModel
             >>> from skater.core.explanations import Interpretation
-            >>> from sklearn.ensemble import RandomForestClassier
-            >>> rf = RandomForestClassier()
+            >>> from sklearn.ensemble import RandomForestClassifier
+            >>> rf = RandomForestClassifier()
             >>> rf.fit(X,y)
             >>> model = InMemoryModel(rf.predict_proba, examples = X)
             >>> interpreter = Interpretation()
             >>> interpreter.load_data(X)
             >>> interpreter.feature_importance.feature_importance(model)
+
+
         """
 
         if filter_classes:
@@ -230,8 +235,8 @@ class FeatureImportance(BaseGlobalInterpretation):
         --------
             >>> from skater.model import InMemoryModel
             >>> from skater.core.explanations import Interpretation
-            >>> from sklearn.ensemble import RandomForestClassier
-            >>> rf = RandomForestClassier()
+            >>> from sklearn.ensemble import RandomForestClassifier
+            >>> rf = RandomForestClassifier()
             >>> rf.fit(X,y)
             >>> model = InMemoryModel(rf.predict_proba, examples = X)
             >>> interpreter = Interpretation()

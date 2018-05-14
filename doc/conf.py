@@ -16,13 +16,13 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-#import os
-#import sys
-# s_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'skater')
-# sys.path.appent(s_path)
+import os
+import sys
+# cd in the doc directory, before using `make html`
+s_path = sys.path.insert(0, os.path.abspath('../'))
+sys.path.append(s_path)
+
 from skater import about
-
-
 
 
 # -- General configuration ------------------------------------------------
@@ -35,12 +35,23 @@ from skater import about
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 
-extensions = ['sphinx.ext.autodoc',
-    'sphinx.ext.todo',
-    'sphinx.ext.viewcode','sphinx.ext.autosummary']
+extensions = [
+    'sphinx.ext.autodoc', 'sphinx.ext.autosummary',
+    'numpydoc', 'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx'
+]
+
+# this is needed for some reason...
+# see https://github.com/numpy/numpydoc/issues/69
+numpydoc_class_members_toctree = False
+
+autodoc_default_flags = ['members', 'inherited-members']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
+
+# generate autosummary even if no references
+autosummary_generate = True
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -53,7 +64,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'skater'
-copyright = u'2017, Author'
+copyright = u'2017, skater developers and contributors (MIT License)'
 author = u'Author'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -91,6 +102,23 @@ todo_include_todos = True
 #
 import sphinx_rtd_theme
 html_theme = "sphinx_rtd_theme"
+
+html_theme_options = {
+    'canonical_url': '',
+    'analytics_id': '',
+    'logo_only': False,
+    'display_version': True,
+    'prev_next_buttons_location': 'bottom',
+    'style_external_links': True,
+    'vcs_pageview_mode': '',
+    # Toc options
+    'collapse_navigation': True,
+    'sticky_navigation': True,
+    'navigation_depth': 4,
+    'includehidden': True,
+    'titles_only': False
+}
+
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -103,12 +131,17 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+html_context = {
+    'css_files': [
+        '_static/theme_overrides.css',  # override wide tables in RTD theme
+    ],
+}
 
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'skaterdoc'
-
+html_logo = 'logos/skater-logo.svg'
 
 # -- Options for LaTeX output ---------------------------------------------
 

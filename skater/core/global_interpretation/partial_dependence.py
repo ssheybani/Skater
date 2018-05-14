@@ -229,7 +229,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
         return_metadata: boolean
 
-        :Example:
+        :Examples:
         >>> from skater.model import InMemoryModel
         >>> from skater.core.explanations import Interpretation
         >>> from sklearn.ensemble import RandomForestClassier
@@ -481,7 +481,7 @@ class PartialDependence(BaseGlobalInterpretation):
             estimate: the variance of the partial dependence estimates
             prediction: the variances of the predictions at the given point
 
-        Example
+        Examples
         --------
         >>> from sklearn.ensemble import GradientBoostingRegressor
         >>> from sklearn.datasets.california_housing import fetch_california_housing

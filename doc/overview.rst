@@ -10,36 +10,59 @@
 
 
 
-**********
+********
 Overview
-**********
+********
 
-'''''''''''''''''''''''''''''
 
+What is Model Interpretation?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The concept of model interpretability in the field of machine learning is still new, largely subjective, and, at times,
+controversial. Model interpretation is the ability to explain and validate the decisions of a predictive model to
+enable fairness, accountability, and transparency in the algorithmic decision-making
+(for a more detailed explanation on the definition of transparency in machine learning, see “Challenges of Transparency” by Adrian Weller).
+Or, to state it formally, model interpretation can be defined as the ability to better understand the decision policies
+of a machine-learned response function to explain the relationship between independent (input) and dependent (target) variables,
+preferably in a human interpretable way. Ideally, you should be able to query the model to understand the "what, why, and how" of
+its algorithmic decisions.
 
 Skater
-~~~~~~~~~~~~~~~~
+~~~~~~
+Skater is a unified framework to enable Model Interpretation for all forms of model to help one build an Interpretable
+machine learning system often needed for real world use-cases. It is an open source python library designed to
+demystify the learned structures of a black box model both globally(inference on the basis of a complete data set)
+and locally(inference about an individual prediction). 
 
-Skater is a python package for model agnostic interpretation of predictive models. With Skater, one can understand the internal
-mechanics of arbitrary models based on the interaction of independent variable(input data) and dependent variable(target response).
-One can use Skater to query the model to understand more about the learned decision policies of a "black box".
+Note: The library has embraced object-oriented and functional programming paradigms as deemed necessary to provide
+scalability and concurrency while keeping code brevity in mind. The project is still in beta phase and is
+under active development.
 
-So that models produced by different learning algorithms, implementations, and environments can be compared, the Skater philosophy
-is that all models should be evaluated as black boxes; decision criteria are inferred based on input perturbations and observing
-corresponding outputs.
+Algorithms supported by Skater
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Model Interpretation could be enabled in multiple different ways, but at a highlevel it could be broadly categorized as,
 
-Interpretation algorithms for all but the most trivial models must make some simplifications
-when representing a model's decision criteria. These simplifications can be with respect to:
+1. post hoc interpretation: Given a black box model trained to solve a supervised learning
+problem(X --> Y, where X is the input and Y is the output), post-hoc interpretation can be thought of as a
+function(f) 'g' with input data(D) and a predictive model. The function 'g' returns a visual or textual
+representation which helps in understanding the inner working of the model or why a certain outcome is more
+favorable than the other. It could also be called inspecting the black box or reverse engineering.
 
-1. `feature scope`: the number of features for which we explain model behavior at a time.
-2. `domain`: the region of the input space for which explain model behavior
-3. `detail/fidelity`: the level of aggregation performed (across features or the domain)
+2. natively interpretable models: Given a supervised learning problem, the predictive model(explanator function)
+has a transparent design and is interpretable both globally and locally without any further explanations.
 
-Partial dependence, marginal plots, and similar explanations generally simplify on feature scope;
-they provide faithful approximations on small feature subsets.
+Skater provides the ability to interpret the model in both ways(we are actively working on
+implementing other algorithms, https://github.com/datascienceinc/Skater/issues?utf8=%E2%9C%93&q=is%3Aopen+)
 
-LIME and anchor LIME simplify on domain and fidelity, as they provide regressions or trees
-respectively, on small regions of the domain.
++---------+---------+-----+-----------+-----------+--------------+--------------+
+| Scope of Interpretation |            Algorithms                               |
++=========+=========+=====+===========+===========+==============+==============+
+| Global Interpretation   | Model agnostic Feature Importance                   | 
++---------+---------+-----+-----------+-----------+--------------+--------------+
+| Global Interpretation   | Model agnostic Partial Dependence Plots             |
++---------+---------+-----+-----------+-----------+--------------+--------------+
+| Local Interpretation    | Local Interpretable Model Explanation(LIME)         |
++---------+---------+-----+-----------+-----------+--------------+--------------+
+| Global and Local        | Scalable Bayesian Rule Lists                        |
+| Interpretation          |                                                     |
++---------+---------+-----+-----------+-----------+--------------+--------------+
 
-Feature importance simplifies on detail, as it provides scalars for all features
-across the entire domain.

@@ -1,4 +1,3 @@
-"""DataSet object"""
 from __future__ import division
 import numpy as np
 import pandas as pd
@@ -357,26 +356,27 @@ class DataManager(object):
 
     def generate_sample(self, sample=True, include_y=False, strategy='random-choice', n_samples=1000,
                         replace=True, bin_count=50):
-        """
-        Method for generating data from the dataset.
+        """ Method for generating data from the dataset.
 
-        Parameters:
+        Parameters
         -----------
-            sample(Bool):
+            sample : boolean
                 If False, we'll take the full dataset, otherwise we'll sample.
 
-            n_samples_from_dataset(int):
-                Specifies the number of samples to return. Only implemented
-                if strategy is "random-choice".
+            include_y: boolean (default=False)
 
-            replace(Bool):
+            strategy: string (default='random-choice')
+                Supported strategy types 'random-choice', 'uniform-from-percentile', 'uniform-over-similarity-ranks'
+
+            n_samples : int (default=1000)
+                Specifies the number of samples to return. Only implemented if strategy is "random-choice".
+
+            replace : boolean (default=True)
                 Bool for sampling with or without replacement
 
-            samples_per_bin(int):
-                If strategy is uniform-over-similarity-ranks, then this is the number
+            bin_count : int
+                If strategy is "uniform-over-similarity-ranks", then this is the number
                 of samples to take from each discrete rank.
-
-
         """
 
         __strategy_types__ = ['random-choice', 'uniform-from-percentile', 'uniform-over-similarity-ranks']
@@ -435,17 +435,9 @@ class DataManager(object):
 
         Parameters
         ----------
-
         feature_id: hashable
             name of the feature to sample. If no feature names were passed, then
             the features are accessible via their column index.
-
-        n_samples: int
-            the number of samples to generate
-
-        method: str
-            the sampling method. Currently only random-choice is implemented.
-
 
         """
         dm = DataManager(self[feature_id],
@@ -461,10 +453,7 @@ class DataManager(object):
 
 
     def _labels_by_index(self, data_index):
-        """
-        Method for grabbing labels associated with given indices.
-        :param data_index:
-        :return:
+        """ Method for grabbing labels associated with given indices.
         """
         # we coerce self.index to a list, so this is fine:
         numeric_index = [self.index.index(i) for i in data_index]
