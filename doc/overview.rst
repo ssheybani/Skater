@@ -20,11 +20,11 @@ What is Model Interpretation?
 The concept of model interpretability in the field of machine learning is still new, largely subjective, and, at times,
 controversial. Model interpretation is the ability to explain and validate the decisions of a predictive model to
 enable fairness, accountability, and transparency in the algorithmic decision-making
-(for a more detailed explanation on the definition of transparency in machine learning, see “Challenges of Transparency” by Adrian Weller).
-Or, to state it formally, model interpretation can be defined as the ability to better understand the decision policies
-of a machine-learned response function to explain the relationship between independent (input) and dependent (target) variables,
-preferably in a human interpretable way. Ideally, you should be able to query the model to understand the "what, why, and how" of
-its algorithmic decisions.
+(for a more detailed explanation on the definition of transparency in machine learning,
+see “Challenges of Transparency” by Adrian Weller).Or, to state it formally, model interpretation can be defined as
+the ability to better understand the decision policies of a machine-learned response function to explain the
+relationship between independent (input) and dependent (target) variables, preferably in a human interpretable way.
+Ideally, you should be able to query the model to understand the "what, why, and how" of it's algorithmic decisions.
 
 Skater
 ~~~~~~
@@ -51,7 +51,7 @@ favorable than the other. It could also be called inspecting the black box or re
 has a transparent design and is interpretable both globally and locally without any further explanations.
 
 Skater provides the ability to interpret the model in both ways(we are actively working on
-implementing other algorithms, https://github.com/datascienceinc/Skater/issues?utf8=%E2%9C%93&q=is%3Aopen+)
+implementing other algorithms, `issues <https://github.com/datascienceinc/Skater/issues?utf8=%E2%9C%93&q=is%3Aopen+>`_)
 
 +---------+---------+-----+-----------+-----------+--------------+--------------+
 | Scope of Interpretation |            Algorithms                               |
@@ -61,6 +61,12 @@ implementing other algorithms, https://github.com/datascienceinc/Skater/issues?u
 | Global Interpretation   | Model agnostic Partial Dependence Plots             |
 +---------+---------+-----+-----------+-----------+--------------+--------------+
 | Local Interpretation    | Local Interpretable Model Explanation(LIME)         |
++---------+---------+-----+-----------+-----------+--------------+--------------+
+| Local Interpretation    | DNNs:     | 1. Layer-wise Relevance Propagation     |
++---------+---------+-----+           | (e-LRP):Currently only for image        |
+|                         |           |                                         |
++---------+---------+-----+           | 2. Integrated Gradient: image and text
+|                         |           |                                         |
 +---------+---------+-----+-----------+-----------+--------------+--------------+
 | Global and Local        | Scalable Bayesian Rule Lists                        |
 | Interpretation          |                                                     |
