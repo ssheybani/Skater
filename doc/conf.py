@@ -37,13 +37,23 @@ from skater import about
 
 extensions = [
     'sphinx.ext.autodoc', 'sphinx.ext.autosummary',
-    'numpydoc', 'sphinx.ext.doctest',
+    'numpydoc', 'sphinx.ext.doctest', 'sphinx.ext.mathjax',
     'sphinx.ext.intersphinx'
 ]
 
 # this is needed for some reason...
 # see https://github.com/numpy/numpydoc/issues/69
 numpydoc_class_members_toctree = False
+
+# For maths, use mathjax by default and svg if NO_MATHJAX env variable is set
+# (useful for viewing the doc offline)
+if os.environ.get('NO_MATHJAX'):
+    extensions.append('sphinx.ext.imgmath')
+    imgmath_image_format = 'svg'
+else:
+    extensions.append('sphinx.ext.mathjax')
+    mathjax_path = ('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/'
+                    'MathJax.js?config=TeX-AMS_SVG')
 
 autodoc_default_flags = ['members', 'inherited-members']
 

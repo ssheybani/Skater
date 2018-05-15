@@ -108,7 +108,18 @@ behavior.
 
 DNNs: DeepInterpreter
 ~~~~~~~~~~~~~~~~~~~~~
-Helps in interpreting Deep Neural Network Models using the base estimator.
+Helps in interpreting Deep Neural Network Models by computing the relevance/attribution of the output prediction of a
+deep network to its input features. The intention is to understand the input-output behavior of the complex network based
+on relevant contributing features.
+
+*Define Relevance:* Also known as Attribution or Contribution. Lets define an input
+X = :math:`[x1, x2, ... xn] \in R^{n}` to a deep neural network(F) trained for binary
+classification (:math:`F(x) \mapsto [0, 1]`). The goal of the relevance/attribution method is to compute
+the contribution scores of each input feature :math:`x_{i}` to the output prediction. For e.g. for an image
+classification network, if the input :math:`x_{i}` is represented as each pixel of the image, the attribution scores
+:math:`(a1, ..., an) \in R^{n}` could inform us which pixels of the image contributed in the selection of the
+particular class label.
+
 
 .. autoclass:: skater.core.local_interpretation.dnni.deep_interpreter.DeepInterpreter
    :members: explain

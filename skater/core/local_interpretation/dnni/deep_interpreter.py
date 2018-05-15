@@ -32,8 +32,7 @@ def deep_interpreter_grad(op, grad):
 
 
 class DeepInterpreter(object):
-    """
-    :: Experimental :: The implementation is currently experimental and might change in future
+    """ :: Experimental :: The implementation is currently experimental and might change in future
     Interpreter for inferring Deep Learning Models. Given a trained NN model and an input vector X, DeepInterpreter
     is responsible for providing relevance scores w.r.t a target class to analyze most contributing features driving
     an estimator's decision for or against the respective class
