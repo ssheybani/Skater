@@ -38,15 +38,17 @@ class DeepInterpreter(object):
     is responsible for providing relevance scores w.r.t a target class to analyze most contributing features driving
     an estimator's decision for or against the respective class
 
+    Framework supported: Tensorflow(>=1.4.0) and Keras(>=2.0.8)
 
     Parameters
-    -----------
-    graph
-    session
-    log_level
+    ----------
+    graph : tensorflow.Graph instance
+    session : tensorflow.Session to execute the graph(default session: tf.get_default_session())
+    log_level : int (default: _WARNING)
+        The log_level could be adjusted to other values as well. Check here `./skater/util/logger.py`
 
     References
-    ---------
+    ----------
     .. [1] Ancona M, Ceolini E, Öztireli C, Gross M (ICLR, 2018).
            Towards better understanding of gradient-based attribution methods for Deep Neural Networks.
            https://arxiv.org/abs/1711.06104
@@ -65,6 +67,7 @@ class DeepInterpreter(object):
         else:
             self.logger.info("Current session: {}".format(session.__dict__))
         self.graph = session.graph if graph is None else graph
+        # request for the default graph
         self.graph_context = self.graph.as_default()
         self.override_context = self.graph.gradient_override_map(self._get_gradient_override_map())
         self.context_on = False
@@ -116,21 +119,30 @@ class DeepInterpreter(object):
         Parameters
         ----------
         relevance_type: str
-            Currently, relevance score could be computed using e-LRP('elrp') or Integrated Gradient('ig').
-            - epsilon-LRP('eLRP'): Is recommended with Activation ops ('ReLU' and 'Tanh'). Current implementation of
-            LRP works only for images and makes use of epsilon(default: 0.0001) as a stabilizer.
-            - Integrated Gradient('ig'): Is recommended with Activation ops ('Relu', 'Elu', 'Softplus', 'Tanh', 'Sigmoid').
-            It works for images and text. Optional parameters include steps(default: 100) and baseline(default:
-            {'image': 'a black image'}; {'txt': zero input embedding vector})
-            Gradient is computed by varying the input from the baseline(x') to the provided input(x). x, x'
-            are element of R with n dimension ---> [0,1]
+            Currently, relevance score could be computed using e-LRP('elrp') or Integrated Gradient('ig'). Other
+            algorithms are under development.
+
+             - epsilon-LRP('eLRP'):
+               Is recommended with Activation ops ('ReLU' and 'Tanh'). Current implementation of
+               LRP works only for images and makes use of epsilon(default: 0.0001) as a stabilizer.
+
+             - Integrated Gradient('ig'):
+               Is recommended with Activation ops ('Relu', 'Elu', 'Softplus', 'Tanh', 'Sigmoid').
+               It works for images and text. Optional parameters include steps(default: 100) and
+               baseline(default: {'image': 'a black image'}; {'txt': zero input embedding vector})
+               Gradient is computed by varying the input from the baseline(x') to the provided input(x). x, x'
+               are element of R with n dimension ---> [0,1]
         output_tensor: tensorflow.python.framework.ops.Tensor
             Specify the output layer to start from
         input_tensor: tensorflow.python.framework.ops.Tensor
             Specify the input layer to reach to
         samples: numpy.array
-            Input/Inputs for which explanation is/are desired
-        use_case: str 'image' or 'txt
+            Batch of input for which explanations are desired.
+            Note: The first dimension of the array specifies the batch size. For e.g.,
+                  - for an image input of batch size 2: (2, 150, 150, 3) <batch_size, image_width, image_height, no_of_channels>
+                  - for a text input of batch size 1: (1, 80) <batch_size, embedding_dimensions>
+        use_case: str
+            Options: 'image' or 'txt
         kwargs: optional
 
         Returns
@@ -219,17 +231,17 @@ class DeepInterpreter(object):
         self.logger.info('DeepInterpreter: executing relevance type class {}'.format(relevance_type_class))
 
         Initializer.grad_override_checkflag = 0
-        Initializer.enabled_method_class = relevance_type_class
+        Initializer._enabled_method_class = relevance_type_class
 
-        method = Initializer.enabled_method_class(output_tensor, input_tensor, samples, self.session, **kwargs)
+        method = Initializer._enabled_method_class(output_tensor, input_tensor, samples, self.session, **kwargs)
         self.logger.info('DeepInterpreter: executing method {}'.format(method))
 
         result = method.run()
-        if issubclass(Initializer.enabled_method_class, BaseGradient) and Initializer.grad_override_checkflag == 0:
+        if issubclass(Initializer._enabled_method_class, BaseGradient) and Initializer.grad_override_checkflag == 0:
             warnings.warn('Results may not reliable: As default gradient seems to have been used. '
                           'or you might have forgotten to create the graph within the DeepInterpreter context. '
                           'Be careful...')
 
-        Initializer.enabled_method_class = None
+        Initializer._enabled_method_class = None
         Initializer.grad_override_checkflag = 0
         return result

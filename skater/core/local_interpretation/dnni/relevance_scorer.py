@@ -40,9 +40,11 @@ class BaseGradient(Initializer):
 
 
 class LRP(BaseGradient):
-    """ LRP Implementation is computed using backpropagation by applying change rule on a modified gradient function.
-    LRP could be implemented in different ways. This version implements the epsilon-LRP(Eq (58) as stated in [1]
-    or Eq (2) in [2]. Epsilon acts as a numerical stabilizer.
+    """ LRP is technique to decompose the prediction(output) of a deep neural networks(DNNs) by computing relevance at
+    each layer in a backward pass. Current implementation is computed using backpropagation by applying change rule on
+    a modified gradient function. LRP could be implemented in different ways.
+    This version implements the epsilon-LRP(Eq (58) as stated in [1] or Eq (2) in [2].
+    Epsilon acts as a numerical stabilizer.
 
     References
     ----------
@@ -53,7 +55,7 @@ class LRP(BaseGradient):
            Towards better understanding of gradient-based attribution methods for Deep Neural Networks. ICLR, 2018
     """
     __name__ = "LRP"
-    eps = None
+    _eps = None
     logger = build_logger(_INFO, __name__)
 
     def __init__(self, feature_wts, X, xs, session, epsilon=1e-4):
@@ -81,12 +83,12 @@ class LRP(BaseGradient):
 
 class IntegratedGradients(BaseGradient):
     """ Integrated Gradient is a relevance scoring algorithm for Deep network based on final predictions to its input
-        features. The algorithm statisfies two fundamental axioms related to relevance/attribution
-        computation,
-        1.Sensitivity : For every input and baseline, if the change in one feature causes the prediction to change,
-                        then the that feature should have non-zero relevance score
-        2.Implementation Invariance : Compute relevance(attribution) should be identical for functionally equivalent
-                                      networks.
+    features. The algorithm statisfies two fundamental axioms related to relevance/attribution computation,
+     1.Sensitivity : For every input and baseline, if the change in one feature causes the prediction to change,
+     then the that feature should have non-zero relevance score
+
+     2.Implementation Invariance : Compute relevance(attribution) should be identical for functionally equivalent
+     networks.
 
     References
     ----------
@@ -96,7 +98,6 @@ class IntegratedGradients(BaseGradient):
     .. Towards better understanding of gradient-based attribution methods for Deep Neural Networks. ICLR, 2018
     .. [3] Taly, Ankur(2017) http://theory.stanford.edu/~ataly/Talks/sri_attribution_talk_jun_2017.pdf
     """
-
     __name__ = "IntegratedGradients"
     logger = build_logger(_INFO, __name__)
 

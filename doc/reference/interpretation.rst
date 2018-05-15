@@ -84,6 +84,7 @@ Jupyter Notebooks
 
 .. _interpretation-local:
 
+
 Local Interpretations
 ---------------------
 Local Interpretation could be possibly be achieved in two ways. Firstly, one could possibly approximate the
@@ -105,29 +106,26 @@ behavior.
 .. autoclass:: skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer
    :members:
 
-
 DNNs: DeepInterpreter
 ~~~~~~~~~~~~~~~~~~~~~
 Helps in interpreting Deep Neural Network Models using the base estimator.
 
 .. autoclass:: skater.core.local_interpretation.dnni.deep_interpreter.DeepInterpreter
-   :members:
+   :members: explain
 
 
 DNNs: Layerwise Relevance Propagation(e-LRP)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-LRP is technique to decompose the prediction(output) of a deep neural networks(DNNs) by computing relevance at
-each layer in a backward pass. This helps in computing pixel-wise relevance score :math:`R_{p}`.
-The current support is only for image.
-
-
 .. autoclass:: skater.core.local_interpretation.dnni.relevance_scorer.LRP
-   :members:
+   :no-members:
+   :no-inherited-members:
+
 
 DNNs: Integrated Gradient
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
+.. autoclass:: skater.core.local_interpretation.dnni.relevance_scorer.IntegratedGradients
+   :no-members:
+   :no-inherited-members:
 
 
 .. _interpretable-rule-based:
