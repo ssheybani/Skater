@@ -49,6 +49,12 @@ Local Interpretation
    * https://github.com/datascienceinc/Skater/blob/master/examples/third_party_model/algorithmia_indico.ipynb
 
 
+2. DeepInterpreter for interpreting DNNs
+   - epsilon-Layer-wise Relevance Propagation(e-LRP)
+   - Integrated Gradient(IG)
+
+
+
 Global And Local Interpretation
 *******************************
 .. image:: images/sbrl.png

@@ -101,8 +101,8 @@ class IntegratedGradients(BaseGradient):
     __name__ = "IntegratedGradients"
     logger = build_logger(_INFO, __name__)
 
-    def __init__(self, output_tensor, input_tensor, session, steps=100, baseline=None):
-        super(IntegratedGradients, self).__init__(output_tensor, input_tensor, session)
+    def __init__(self, output_tensor, input_tensor, samples, session, steps=100, baseline=None):
+        super(IntegratedGradients, self).__init__(output_tensor, input_tensor, samples, session)
         self.steps = steps
         # Using black image or zero embedding vector for text as a default baseline, as suggested in the paper
         # Mukund Sundararajan, Ankir Taly, Qibi Yan. Axiomatic Attribution for Deep Networks(ICML2017)

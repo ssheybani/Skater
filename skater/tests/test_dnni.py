@@ -93,8 +93,10 @@ class TestDNNI(unittest.TestCase):
             xs = self.x_test[0:2]
             ys = self.y_test[0:2]
 
-            relevance_scores = di.explain('elrp', target_tensor * ys, input_tensor, xs, use_case='image')
-        self.assertEquals(relevance_scores.shape, (2, 28, 28, 1))
+            relevance_scores_elrp = di.explain('elrp', target_tensor * ys, input_tensor, xs, use_case='image')
+            relevance_scores_ig = di.explain('ig', target_tensor * ys, input_tensor, xs, use_case='image')
+        self.assertEquals(relevance_scores_elrp.shape, (2, 28, 28, 1))
+        self.assertEquals(relevance_scores_ig.shape, (2, 28, 28, 1))
 
 
 if __name__ == '__main__':
