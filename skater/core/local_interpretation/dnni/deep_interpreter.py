@@ -20,15 +20,15 @@ logger = build_logger(_INFO, __name__)
 @ops.RegisterGradient("DeepInterpretGrad")
 def deep_interpreter_grad(op, grad):
     logger.debug("Computing gradient using DeepInterpretGrad")
-    Initializer.grad_override_checkflag = 1
-    if Initializer.enabled_method_class is not None \
-            and issubclass(Initializer.enabled_method_class, BaseGradient):
+    Initializer._grad_override_checkflag = 1
+    if Initializer._enabled_method_class is not None \
+            and issubclass(Initializer._enabled_method_class, BaseGradient):
         logger.debug("Computing gradient using DeepInterpretGrad: {}".
-                     format(Initializer.enabled_method_class.non_linear_grad))
-        return Initializer.enabled_method_class.non_linear_grad(op, grad)
+                     format(Initializer._enabled_method_class._non_linear_grad))
+        return Initializer._enabled_method_class._non_linear_grad(op, grad)
     else:
-        logger.debug("Computing gradient using DeepInterpretGrad: {}".format(Initializer.original_grad))
-        return Initializer.original_grad(op, grad)
+        logger.debug("Computing gradient using DeepInterpretGrad: {}".format(Initializer._original_grad))
+        return Initializer._original_grad(op, grad)
 
 
 class DeepInterpreter(object):
@@ -229,18 +229,18 @@ class DeepInterpreter(object):
             raise RuntimeError('Method type not found in {}'.format(list(self.__supported_relevance_type_dict.keys())))
         self.logger.info('DeepInterpreter: executing relevance type class {}'.format(relevance_type_class))
 
-        Initializer.grad_override_checkflag = 0
+        Initializer._grad_override_checkflag = 0
         Initializer._enabled_method_class = relevance_type_class
 
         method = Initializer._enabled_method_class(output_tensor, input_tensor, samples, self.session, **kwargs)
         self.logger.info('DeepInterpreter: executing method {}'.format(method))
 
-        result = method.run()
-        if issubclass(Initializer._enabled_method_class, BaseGradient) and Initializer.grad_override_checkflag == 0:
+        result = method._run()
+        if issubclass(Initializer._enabled_method_class, BaseGradient) and Initializer._grad_override_checkflag == 0:
             warnings.warn('Results may not reliable: As default gradient seems to have been used. '
                           'or you might have forgotten to create the graph within the DeepInterpreter context. '
                           'Be careful...')
 
         Initializer._enabled_method_class = None
-        Initializer.grad_override_checkflag = 0
+        Initializer._grad_override_checkflag = 0
         return result

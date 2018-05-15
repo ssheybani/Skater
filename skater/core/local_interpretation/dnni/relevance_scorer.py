@@ -21,22 +21,22 @@ class BaseGradient(Initializer):
     __name__ = "BaseGradient"
     logger = build_logger(_INFO, __name__)
 
-    def default_relevance_score(self):
+    def _default_relevance_score(self):
         BaseGradient.logger.debug("Computing default relevance score...")
-        return tf.gradients(self.feature_wts, self.X)
+        return tf.gradients(self.output_tensor, self.input_tensor)
 
 
-    def run(self):
+    def _run(self):
         BaseGradient.logger.info("Executing operations ...")
-        relevance_scores = self.default_relevance_score()
-        results = self.session_run(relevance_scores, self.xs)
+        relevance_scores = self._default_relevance_score()
+        results = self._session_run(relevance_scores, self.samples)
         return results[0]
 
 
     @classmethod
-    def non_linear_grad(cls, op, grad):
+    def _non_linear_grad(cls, op, grad):
         BaseGradient.logger.debug("Computing gradient with activation type {}".format(op.type))
-        return cls.original_grad(op, grad)
+        return cls._original_grad(op, grad)
 
 
 class LRP(BaseGradient):
@@ -58,25 +58,25 @@ class LRP(BaseGradient):
     _eps = None
     logger = build_logger(_INFO, __name__)
 
-    def __init__(self, feature_wts, X, xs, session, epsilon=1e-4):
-        super(LRP, self).__init__(feature_wts, X, xs, session)
+    def __init__(self, output_tensor, input_tensor, samples, session, epsilon=1e-4):
+        super(LRP, self).__init__(output_tensor, input_tensor, samples, session)
         assert epsilon > 0.0, 'LRP epsilon must be > 0'
-        LRP.eps = epsilon
-        LRP.logger.info("Epsilon value: {}".format(LRP.eps))
+        LRP._eps = epsilon
+        LRP.logger.info("Epsilon value: {}".format(LRP._eps))
 
 
-    def default_relevance_score(self):
+    def _default_relevance_score(self):
         # computing dot product of the feature wts of the input data and the gradients of the prediction label
-        return [g * x for g, x in zip(
-                tf.gradients(self.feature_wts, self.X), [self.X])]
+        return [g * x for g, x in
+                zip(tf.gradients(self.output_tensor, self.input_tensor), [self.input_tensor])]
 
 
     @classmethod
-    def non_linear_grad(cls, op, grad):
+    def _non_linear_grad(cls, op, grad):
         LRP.logger.debug("Computing non-linear gradient with activation type {}".format(op.type))
         op_out = op.outputs[0]
         op_in = op.inputs[0]
-        stabilizer_epsilon = cls.eps * tf.sign(op_in)
+        stabilizer_epsilon = cls._eps * tf.sign(op_in)
         op_in += stabilizer_epsilon
         return grad * op_out / op_in
 
@@ -101,24 +101,24 @@ class IntegratedGradients(BaseGradient):
     __name__ = "IntegratedGradients"
     logger = build_logger(_INFO, __name__)
 
-    def __init__(self, T, X, xs, session, steps=100, baseline=None):
-        super(IntegratedGradients, self).__init__(T, X, xs, session)
+    def __init__(self, output_tensor, input_tensor, session, steps=100, baseline=None):
+        super(IntegratedGradients, self).__init__(output_tensor, input_tensor, session)
         self.steps = steps
         # Using black image or zero embedding vector for text as a default baseline, as suggested in the paper
         # Mukund Sundararajan, Ankir Taly, Qibi Yan. Axiomatic Attribution for Deep Networks(ICML2017)
-        self.baseline = np.zeros((1,) + self.xs.shape[1:]) if baseline is None else baseline
+        self.baseline = np.zeros((1,) + self.samples.shape[1:]) if baseline is None else baseline
 
 
-    def run(self):
+    def _run(self):
         IntegratedGradients.logger.info("Executing operations to compute relevance using Integrated Gradient")
-        t_grad = self.default_relevance_score()
+        t_grad = self._default_relevance_score()
         gradient = None
         alpha_list = list(np.linspace(start=1. / self.steps, stop=1.0, num=self.steps))
         for alpha in alpha_list:
-            xs_scaled = (self.xs - self.baseline) * alpha
+            xs_scaled = (self.samples - self.baseline) * alpha
             # compute the gradient for each alpha value
             _scores = self.session_run(t_grad, xs_scaled)
             gradient = _scores if gradient is None else [g + a for g, a in zip(gradient, _scores)]
 
-        results = [(x - b) * (g / self.steps) for g, x, b in zip(gradient, [self.xs], [self.baseline])]
+        results = [(x - b) * (g / self.steps) for g, x, b in zip(gradient, [self.samples], [self.baseline])]
         return results[0]
