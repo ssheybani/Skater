@@ -117,7 +117,7 @@ class IntegratedGradients(BaseGradient):
         for alpha in alpha_list:
             xs_scaled = (self.samples - self.baseline) * alpha
             # compute the gradient for each alpha value
-            _scores = self.session_run(t_grad, xs_scaled)
+            _scores = self._session_run(t_grad, xs_scaled)
             gradient = _scores if gradient is None else [g + a for g, a in zip(gradient, _scores)]
 
         results = [(x - b) * (g / self.steps) for g, x, b in zip(gradient, [self.samples], [self.baseline])]
