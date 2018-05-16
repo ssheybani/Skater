@@ -26,7 +26,6 @@ pip
 ~~~~
 We recommended that you use a virtual environment to ensure your system is not modified by an installation (virtualenv, conda environment).
 Detailed instruction could be found at `install conda <https://conda.io/docs/user-guide/install/linux.html>`_
-
 ::
     Quick summary to install conda and setup the python environment(recommended steps for using python3.x)
 
