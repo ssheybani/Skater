@@ -58,7 +58,7 @@ Install
     2. Ubuntu: pip3 install --upgrade tensorflow (follow instructions https://www.tensorflow.org/install/ for 
        details and best practices)
     3. sudo pip install keras
-    4. sudo pip install -U --no-deps --force-reinstall --install-option="--rl=True" skater
+    4. sudo pip install -U --no-deps --force-reinstall --install-option="--rl=True" skater==1.1.1b1
     
 
 conda
