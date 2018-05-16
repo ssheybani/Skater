@@ -61,4 +61,3 @@ is recommended that you use a virtual environment (virtualenv, conda environment
     #For enabling Rule based interpretation
     follow the steps mentioned on the repo
 
-

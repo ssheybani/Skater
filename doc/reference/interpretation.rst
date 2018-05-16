@@ -27,9 +27,9 @@ Currently load_data requires a numpy ndarray or pandas DataFrame, though we may 
 For more details on what the DataManager does, please see the relevant documentation [PROVIDE LINK].
 
 .. currentmodule:: skater
-
-
 .. automethod:: skater.core.explanations.Interpretation.load_data
+
+.. _global-interpretation:
 
 Global Interpretations
 ----------------------
@@ -70,8 +70,8 @@ Jupyter Notebooks
 Partial Dependence
 ~~~~~~~~~~~~~~~~~~
 Partial Dependence describes the marginal impact of a feature on model prediction, holding
-other features in the model constant. The derivative of partial dependence describes the impact of a feature (analogous to a feature coefficient
-in a regression model).
+other features in the model constant. The derivative of partial dependence describes the impact of a
+feature (analogous to a feature coefficient in a regression model).
 
 Jupyter Notebooks
 
@@ -84,18 +84,59 @@ Jupyter Notebooks
 
 .. _interpretation-local:
 
+
 Local Interpretations
-----------------------
-Local interpretations are based on using interpretable surrogate models to illustrate
-how features impact predictions constrained to a particular point or small region in
-the input space. Linear surrogates around a point correspond the LIME algorithm; tree like
-surrogates around a point correspond to anchorLIME.
+---------------------
+Local Interpretation could be possibly be achieved in two ways. Firstly, one could possibly approximate the
+behavior of a complex predictive model in the vicinity of a single input using a simple interpretable auxiliary or
+surrogate model (e.g. Linear Regressor). Secondly, one could use the base estimator to understand the behavior of a
+single prediction using intuitive approximate functions based on inputs and outputs.
 
 Local Interpretable Model-Agnostic Explanations(LIME)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+LIME is a novel algorithm designed by Riberio Marco, Singh Sameer, Guestrin Carlos to access the behavior of the `any`
+base estimator(model) using interpretable surrogate models (e.g. linear classifier/regressor). Such form of
+comprehensive evaluation helps in generating explanations which are locally faithful but may not align with the global
+behavior.
+
+:Reference:
+   Riberio M, Singh S, Guestrin C(2016). Why Should {I} Trust You?": Explaining the Predictions of Any Classifier
+   (arXiv:1602.04938v3)
 
 .. autoclass:: skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer
    :members:
+
+DNNs: DeepInterpreter
+~~~~~~~~~~~~~~~~~~~~~
+Helps in interpreting Deep Neural Network Models by computing the relevance/attribution of the output prediction of a
+deep network to its input features. The intention is to understand the input-output behavior of the complex network based
+on relevant contributing features.
+
+*Define Relevance:* Also known as Attribution or Contribution. Lets define an input
+X = :math:`[x1, x2, ... xn] \in R^{n}` to a deep neural network(F) trained for binary
+classification (:math:`F(x) \mapsto [0, 1]`). The goal of the relevance/attribution method is to compute
+the contribution scores of each input feature :math:`x_{i}` to the output prediction. For e.g. for an image
+classification network, if the input :math:`x_{i}` is represented as each pixel of the image, the attribution scores
+:math:`(a1, ..., an) \in R^{n}` could inform us which pixels of the image contributed in the selection of the
+particular class label.
+
+
+.. autoclass:: skater.core.local_interpretation.dnni.deep_interpreter.DeepInterpreter
+   :members: explain
+
+
+DNNs: Layerwise Relevance Propagation(e-LRP)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: skater.core.local_interpretation.dnni.relevance_scorer.LRP
+   :no-members:
+   :no-inherited-members:
+
+
+DNNs: Integrated Gradient
+~~~~~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: skater.core.local_interpretation.dnni.relevance_scorer.IntegratedGradients
+   :no-members:
+   :no-inherited-members:
 
 
 .. _interpretable-rule-based:

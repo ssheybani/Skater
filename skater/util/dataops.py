@@ -129,3 +129,23 @@ def divide_zerosafe(a, b):
         c = np.true_divide(a, b)
         c[~np.isfinite(c)] = 0  # -inf inf NaN
     return c
+
+
+# Lamda for converting data-frame to a dictionary
+convert_dataframe_to_dict = lambda key_column_name, value_column_name, df: \
+    df.set_index(key_column_name).to_dict()[value_column_name]
+
+
+
+
+
+def json_validator(json_object):
+    """ json validator
+    """
+    # Reference: https://stackoverflow.com/questions/5508509/how-do-i-check-if-a-string-is-valid-json-in-python
+    import json
+    try:
+        json.loads(json_object)
+    except ValueError:
+        return False
+    return True

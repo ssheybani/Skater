@@ -66,7 +66,6 @@ def setup_package():
 
     setup(
         name=about['__title__'],
-        zip_safe=False,
         packages=find_packages(),
         description=about['__summary__'],
         long_description=readme,
@@ -76,18 +75,23 @@ def setup_package():
         url=about['__uri__'],
         license=about['__license__'],
         cmdclass={'install': InvokingShScript},
+        include_package_data=True,
         install_requires=[
             'scikit-learn>=0.18',
             'pandas>=0.19',
             'ds-lime>=0.1.1.21',
             'requests',
             'multiprocess',
-            'joblib==0.11',
             'dill>=0.2.6',
+            'wordcloud==1.3.1',
+            'joblib==0.11',
             'rpy2==2.9.1; python_version>"3.0"',
-            'Jinja2==2.10'],
-        extras_require ={'all':'matplotlib'},
-        )
+            'Jinja2==2.10',
+            'bs4'],
+        extras_require={
+            'all':'matplotlib'
+            },
+        zip_safe=False)
 
 if __name__ == '__main__':
     setup_package()

@@ -1,4 +1,5 @@
-"""Feature Importance class"""
+# -*- coding: UTF-8 -*-
+
 from itertools import cycle
 import numpy as np
 import pandas as pd
