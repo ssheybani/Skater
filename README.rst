@@ -103,24 +103,24 @@ Since the project is under active development, the best way to understand usage 
  
 Algorithms
 ~~~~~~~~~~
-+---------+---------+-----+-----------+-----------+--------------+--------------+
-| Scope of Interpretation |            Algorithms                               |
-+=========+=========+=====+===========+===========+==============+==============+
-| Global Interpretation   | Model agnostic Feature Importance                   | 
-+---------+---------+-----+-----------+-----------+--------------+--------------+
-| Global Interpretation   | Model agnostic Partial Dependence Plots             |
-+---------+---------+-----+-----------+-----------+--------------+--------------+
-| Local Interpretation    | Local Interpretable Model Explanation(LIME)         |
-+---------+---------+-----+-----------+-----------------------------------------+
-| Local Interpretation    | DNNs      | - Layer-wise Relevance Propagation      |
-|                         |           |   (e-LRP): image                        |
-|                         |           |                                         |
-|                         |           | - Integrated Gradient: image and text   |
-|                         |           |                                         |
-+---------+---------+-----+-----------+-----------------------------------------+
-| Global and Local        | Scalable Bayesian Rule Lists                        |
-| Interpretation          |                                                     |
-+---------+---------+-----+-----------+-----------+--------------+--------------+
++---------+---------+-----+-----------+-----------+--------------+--------------+--------------------+------------------+
+| Scope of Interpretation |            Algorithms                                                                       |
++=========+=========+=====+===========+===========+==============+==============+=======================================+
+| Global Interpretation   | `Model agnostic Feature Importance <https://tinyurl.com/feature-importance>`_               | 
++---------+---------+-----+-----------+-----------+--------------+--------------+--------------------+------------------+
+| Global Interpretation   | `Model agnostic Partial Dependence Plots <https://tinyurl.com/partial-dependence>`_         |     
++---------+---------+-----+-----------+-----------+--------------+--------------+--------------------+------------------+
+| Local Interpretation    | `Local Interpretable Model Explanation(LIME) <https://tinyurl.com/lime-explanation>`_       |
++---------+---------+-----+-----------+-----------------------------------------+--------------------+------------------+
+| Local Interpretation    | DNNs      | - `Layer-wise Relevance Propagation <https://tinyurl.com/e-layerwise>`_         |
+|                         |           |   (e-LRP): image                                                                |
+|                         |           |                                                                                 |
+|                         |           | - `Integrated Gradient <https://tinyurl.com/integrated-gradient>`_              |
+|                         |           |   image and text                                                                |
++---------+---------+-----+-----------+-----------------------------------------+--------------------+------------------+
+| Global and Local        | `Scalable Bayesian Rule Lists <https://tinyurl.com/rule-list-sbr>`_                         |
+| Interpretation          |                                                                                             |
++---------+---------+-----+-----------+-----------+--------------+--------------+--------------------+------------------+
  
 
 
@@ -148,7 +148,8 @@ R Client
 Refer to https://github.com/christophM/iml 
 
    
-Books
-=====
-1. Christoph Molnar, Interpretable Machine Learning: https://christophm.github.io/interpretable-ml-book/ 
-2. Dipanjan Sarkar et al., Practical Machine Learning with Python: https://github.com/dipanjanS/practical-machine-learning-with-python
+Books and blogs
+===============
+1. `Interpreting predictive models with Skater: Unboxing model opacity <https://www.oreilly.com/ideas/interpreting-predictive-models-with-skater-unboxing-model-opacity>`_
+2. Molnar Christoph, `Interpretable Machine Learning <https://christophm.github.io/interpretable-ml-book/>`_
+3. Sarkar Dipanjan et al., `Practical Machine Learning with Python <https://github.com/dipanjanS/practical-machine-learning-with-python>`_
