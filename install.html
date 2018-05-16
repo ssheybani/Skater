@@ -178,15 +178,19 @@
 <li>dill&gt;=0.2.6,</li>
 <li>rpy2==2.9.1; python_version&gt;”3.0”,</li>
 <li>numpy</li>
+<li>with v1.1.0 there are additional dependencies on R related binaries(setup.sh)</li>
+</ul>
+<p>External/Optional dependencies</p>
+<ul class="simple">
 <li>Plotting functionality requires matplotlib&gt;=2.1.0</li>
-<li>with v1.1.0-b1 there are additional dependencies on R related binaries(setup.sh)</li>
+<li>tensorflow&gt;=1.4.0</li>
+<li>keras&gt;=2.0.8</li>
 </ul>
 </div>
 <div class="section" id="pip">
 <h2>pip<a class="headerlink" href="#pip" title="Permalink to this headline">¶</a></h2>
 <p>We recommended that you use a virtual environment to ensure your system is not modified by an installation (virtualenv, conda environment).
-Follow the steps mentioned at the link mentioned below to install conda,
-<a class="reference external" href="https://conda.io/docs/user-guide/install/linux.html">https://conda.io/docs/user-guide/install/linux.html</a></p>
+Detailed instruction could be found at <a class="reference external" href="https://conda.io/docs/user-guide/install/linux.html">install conda</a></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Quick summary to install conda and setup the python environment(recommended steps for using python3.x)
 
 1. wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
@@ -203,12 +207,20 @@ Follow the steps mentioned at the link mentioned below to install conda,
 </pre></div>
 </div>
 <p>Install</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Option</span> <span class="mi">1</span><span class="p">:</span> <span class="n">without</span> <span class="n">rule</span> <span class="n">lists</span>
-<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">Skater</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Option</span> <span class="mi">1</span><span class="p">:</span> <span class="n">without</span> <span class="n">rule</span> <span class="n">lists</span> <span class="ow">and</span> <span class="n">without</span> <span class="n">deepinterpreter</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">skater</span>
 
-<span class="n">Option</span> <span class="mi">2</span><span class="p">:</span> <span class="k">with</span> <span class="n">rule</span> <span class="n">lists</span>
+<span class="n">Option</span> <span class="mi">2</span><span class="p">:</span> <span class="n">without</span> <span class="n">rule</span> <span class="n">lists</span> <span class="ow">and</span> <span class="k">with</span> <span class="n">deepinterpreter</span><span class="p">:</span>
+<span class="mf">1.</span> <span class="n">Ubuntu</span><span class="p">:</span> <span class="n">pip3</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">tensorflow</span> <span class="p">(</span><span class="n">follow</span> <span class="n">instructions</span> <span class="n">at</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">tensorflow</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">install</span><span class="o">/</span> <span class="k">for</span> <span class="n">details</span> <span class="ow">and</span>          <span class="n">best</span> <span class="n">practices</span><span class="p">)</span>
+<span class="mf">2.</span> <span class="n">sudo</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">keras</span>
+<span class="mf">3.</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">skater</span>
+
+<span class="n">Option</span> <span class="mi">3</span><span class="p">:</span> <span class="n">For</span> <span class="n">everything</span> <span class="n">included</span>
 <span class="mf">1.</span> <span class="n">conda</span> <span class="n">install</span> <span class="n">gxx_linux</span><span class="o">-</span><span class="mi">64</span>
-<span class="mf">2.</span> <span class="n">sudo</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">deps</span> <span class="o">--</span><span class="n">force</span><span class="o">-</span><span class="n">reinstall</span> <span class="o">--</span><span class="n">install</span><span class="o">-</span><span class="n">option</span><span class="o">=</span><span class="s2">&quot;--rl=True&quot;</span> <span class="n">skater</span>
+<span class="mf">2.</span> <span class="n">Ubuntu</span><span class="p">:</span> <span class="n">pip3</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">tensorflow</span> <span class="p">(</span><span class="n">follow</span> <span class="n">instructions</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">tensorflow</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">install</span><span class="o">/</span> <span class="k">for</span>
+   <span class="n">details</span> <span class="ow">and</span> <span class="n">best</span> <span class="n">practices</span><span class="p">)</span>
+<span class="mf">3.</span> <span class="n">sudo</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">keras</span>
+<span class="mf">4.</span> <span class="n">sudo</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">deps</span> <span class="o">--</span><span class="n">force</span><span class="o">-</span><span class="n">reinstall</span> <span class="o">--</span><span class="n">install</span><span class="o">-</span><span class="n">option</span><span class="o">=</span><span class="s2">&quot;--rl=True&quot;</span> <span class="n">skater</span>
 </pre></div>
 </div>
 </div>
