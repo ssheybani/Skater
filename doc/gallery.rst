@@ -26,6 +26,7 @@ Interpretation Examples
 Global Interpretation
 *********************
 .. image:: images/pdp.png
+   :width: 500
 1. Model Agnostic Partial Dependence Plot(PDP)
 
     * https://github.com/datascienceinc/Skater/blob/master/examples/ensemble_model.ipynb
@@ -33,6 +34,7 @@ Global Interpretation
     * https://github.com/datascienceinc/Skater/blob/master/examples/sklearn_regression_models.ipynb
 
 .. image:: images/feature_importance.png
+   :width: 500
 2. Model Agnostic Feature Importance
 
     * https://github.com/datascienceinc/Skater/blob/master/examples/ensemble_model.ipynb
@@ -42,16 +44,32 @@ Global Interpretation
 Local Interpretation
 ********************
 .. image:: images/lime.png
+   :width: 800
 1. Local Interpretable Model Explanations(LIME)
 
    * https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretation_example.ipynb
    * https://github.com/datascienceinc/Skater/blob/master/examples/NLP.ipynb
    * https://github.com/datascienceinc/Skater/blob/master/examples/third_party_model/algorithmia_indico.ipynb
-
+|
 
 2. DeepInterpreter for interpreting DNNs
-   - epsilon-Layer-wise Relevance Propagation(e-LRP)
-   - Integrated Gradient(IG)
+ - epsilon-Layer-wise Relevance Propagation(e-LRP): only for image currently
+ - Integrated Gradient(IG): image and text
+
+*Image Interpretability*
+
+.. image:: images/example_lrp_ig.png
+       :width: 49%
+       :alt: Interpreting pre-trained Inception-V3 model
+.. image:: images/interpreting_inverted_panda_ig_elrp.png
+       :width: 49%
+       :alt: some more examples on image interpretability
+
+*Text Interpretability using Integrated Gradient*
+
+.. image:: images/text_ig.png
+       :width: 500
+
 
 
 

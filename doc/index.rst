@@ -32,13 +32,14 @@ ability to infer and debug the model's decision policies as needed bringing "hum
 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    overview
    install
    tutorial
-   gallery
    api
+   gallery
+
 
 
 Indices and tables
