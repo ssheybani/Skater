@@ -14,14 +14,19 @@ Skater relies on
 - dill>=0.2.6,
 - rpy2==2.9.1; python_version>"3.0",
 - numpy
+- with v1.1.0 there are additional dependencies on R related binaries(setup.sh)
+
+External/Optional dependencies
+
 - Plotting functionality requires matplotlib>=2.1.0
-- with v1.1.0-b1 there are additional dependencies on R related binaries(setup.sh)
+- tensorflow>=1.4.0
+- keras>=2.0.8
 
 pip
 ~~~~
 We recommended that you use a virtual environment to ensure your system is not modified by an installation (virtualenv, conda environment).
-Follow the steps mentioned at the link mentioned below to install conda,
-https://conda.io/docs/user-guide/install/linux.html
+Detailed instruction could be found at `install conda <https://conda.io/docs/user-guide/install/linux.html>`_
+
 ::
     Quick summary to install conda and setup the python environment(recommended steps for using python3.x)
 
@@ -41,12 +46,21 @@ Managing conda virtual environment. For details, check `here <https://conda.io/d
 Install
 ::
 
-    Option 1: without rule lists
-    pip install -U Skater
+    Option 1: without rule lists and without deepinterpreter
+    pip install -U skater
 
-    Option 2: with rule lists
+    Option 2: without rule lists and with deepinterpreter:
+    1. Ubuntu: pip3 install --upgrade tensorflow (follow instructions at https://www.tensorflow.org/install/ for details and          best practices)
+    2. sudo pip install keras
+    3. pip install -U skater
+    
+    Option 3: For everything included
     1. conda install gxx_linux-64
-    2. sudo pip install -U --no-deps --force-reinstall --install-option="--rl=True" skater
+    2. Ubuntu: pip3 install --upgrade tensorflow (follow instructions https://www.tensorflow.org/install/ for 
+       details and best practices)
+    3. sudo pip install keras
+    4. sudo pip install -U --no-deps --force-reinstall --install-option="--rl=True" skater
+    
 
 conda
 ~~~~~~
