@@ -27,7 +27,7 @@ before_install:
   - conda install gxx_linux-64
 
 install:
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib pandas h5py flake8 coverage
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy cython scipy matplotlib h5py flake8 coverage
   - source activate test-environment
   - pip install codecov # not on conda
   - pip install coveralls
