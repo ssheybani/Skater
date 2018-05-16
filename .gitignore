@@ -8,4 +8,5 @@
 *.swo
 .DS_Store
 .idea
+.buildinfo
 build
