@@ -68,16 +68,6 @@ pip
 ~~~
 ::
 
-    Option 1: without rule lists 
-    pip install -U Skater
-    
-    Option 2: with rule lists
-    1. conda install gxx_linux-64
-    2. sudo pip install -U --no-deps --force-reinstall --install-option="--rl=True" skater
-
-
-To get the latest changes try cloning the repo and use the below mentioned commands to get started,
-::
     Option 1: without rule lists and without deepinterpreter
     pip install -U skater
 
@@ -92,6 +82,17 @@ To get the latest changes try cloning the repo and use the below mentioned comma
        details and best practices)
     3. sudo pip install keras
     4. sudo pip install -U --no-deps --force-reinstall --install-option="--rl=True" skater==1.1.1b1
+
+
+To get the latest changes try cloning the repo and use the below mentioned commands to get started,
+::
+    
+    1. conda install gxx_linux-64
+    2. Ubuntu: pip3 install --upgrade tensorflow (follow instructions https://www.tensorflow.org/install/ for
+       details and best practices)
+    3. sudo pip install keras
+    4. git clone the repo
+    5. sudo python setup.py install --ostype=linux-ubuntu --rl=True
 
 Testing
 ~~~~~~~
