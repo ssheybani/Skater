@@ -1,5 +1,5 @@
-build
-=====
+html
+====
 
 .. toctree::
    :maxdepth: 4

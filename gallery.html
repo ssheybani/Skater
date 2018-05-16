@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Notebook Gallery &mdash; skater 0 documentation</title>
+  <title>Gallery &mdash; skater 0 documentation</title>
   
 
   
@@ -30,8 +30,7 @@
   <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="API Reference" href="api.html" />
-    <link rel="prev" title="Tutorial" href="tutorial.html" /> 
+    <link rel="prev" title="DataManagers" href="reference/data.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -63,7 +62,7 @@
             
             
               <div class="version">
-                1.1.0-b1
+                1.1.1-b1
               </div>
             
           
@@ -91,7 +90,8 @@
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Install Skater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Notebook Gallery</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Gallery</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#model-abstraction">Model Abstraction</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#inmemory-model">InMemory Model</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#deployed-model">Deployed Model</a></li>
@@ -105,7 +105,6 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 </ul>
 
             
@@ -151,7 +150,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Notebook Gallery</li>
+      <li>Gallery</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -170,8 +169,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="notebook-gallery">
-<h1>Notebook Gallery<a class="headerlink" href="#notebook-gallery" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="gallery">
+<h1>Gallery<a class="headerlink" href="#gallery" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="model-abstraction">
 <h2>Model Abstraction<a class="headerlink" href="#model-abstraction" title="Permalink to this headline">¶</a></h2>
 <img alt="_images/ml_workflow.png" src="_images/ml_workflow.png" />
@@ -196,7 +195,7 @@
 <h2>Interpretation Examples<a class="headerlink" href="#interpretation-examples" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="global-interpretation">
 <h3>Global Interpretation<a class="headerlink" href="#global-interpretation" title="Permalink to this headline">¶</a></h3>
-<img alt="_images/pdp.png" src="_images/pdp.png" />
+<a class="reference internal image-reference" href="_images/pdp.png"><img alt="_images/pdp.png" src="_images/pdp.png" style="width: 500px;" /></a>
 <ol class="arabic">
 <li><p class="first">Model Agnostic Partial Dependence Plot(PDP)</p>
 <blockquote>
@@ -208,7 +207,7 @@
 </div></blockquote>
 </li>
 </ol>
-<img alt="_images/feature_importance.png" src="_images/feature_importance.png" />
+<a class="reference internal image-reference" href="_images/feature_importance.png"><img alt="_images/feature_importance.png" src="_images/feature_importance.png" style="width: 500px;" /></a>
 <ol class="arabic" start="2">
 <li><p class="first">Model Agnostic Feature Importance</p>
 <blockquote>
@@ -220,10 +219,13 @@
 </div></blockquote>
 </li>
 </ol>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
 </div>
 <div class="section" id="local-interpretation">
 <h3>Local Interpretation<a class="headerlink" href="#local-interpretation" title="Permalink to this headline">¶</a></h3>
-<img alt="_images/lime.png" src="_images/lime.png" />
+<a class="reference internal image-reference" href="_images/lime.png"><img alt="_images/lime.png" src="_images/lime.png" style="width: 800px;" /></a>
 <ol class="arabic simple">
 <li>Local Interpretable Model Explanations(LIME)<ul>
 <li><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretation_example.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretation_example.ipynb</a></li>
@@ -232,10 +234,60 @@
 </ul>
 </li>
 </ol>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="2">
+<li>DeepInterpreter for interpreting DNNs</li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li>epsilon-Layer-wise Relevance Propagation(e-LRP): only for image currently</li>
+<li>Integrated Gradient(IG): image and text</li>
+</ul>
+</div></blockquote>
+<a class="reference internal image-reference" href="_images/example_lrp_ig.png"><img alt="Interpreting pre-trained Inception-V3 model" src="_images/example_lrp_ig.png" style="width: 49%;" /></a>
+<a class="reference internal image-reference" href="_images/interpreting_inverted_panda_ig_elrp.png"><img alt="some more examples on image interpretability" src="_images/interpreting_inverted_panda_ig_elrp.png" style="width: 49%;" /></a>
+<dl class="docutils">
+<dt>Image Interpretability</dt>
+<dd><ul class="first last simple">
+<li><dl class="first docutils">
+<dt>Image Classification:</dt>
+<dd><ul class="first last">
+<li><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretability/image_interpretation_example_cats_dogs.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretability/image_interpretation_example_cats_dogs.ipynb</a></li>
+<li><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretability/imagenet_adv_inceptionv3_tensorflow.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretability/imagenet_adv_inceptionv3_tensorflow.ipynb</a></li>
+<li><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretability/mnist_cnn_keras.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretability/mnist_cnn_keras.ipynb</a></li>
+<li><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretability/mnist_mlp_tensorflow.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretability/mnist_mlp_tensorflow.ipynb</a></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<a class="reference internal image-reference" href="_images/text_ig.png"><img alt="_images/text_ig.png" src="_images/text_ig.png" style="width: 500px;" /></a>
+<dl class="docutils">
+<dt>Text Interpretability with Integrated Gradient</dt>
+<dd><ul class="first last simple">
+<li><dl class="first docutils">
+<dt>Sentiment Analysis:</dt>
+<dd><ul class="first last">
+<li><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/text_interpretability/LSTM_sentiment_imdb.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/text_interpretability/LSTM_sentiment_imdb.ipynb</a></li>
+<li><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/text_interpretability/cnn_sentiment_imdb.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/text_interpretability/cnn_sentiment_imdb.ipynb</a></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
 </div>
 <div class="section" id="global-and-local-interpretation">
 <h3>Global And Local Interpretation<a class="headerlink" href="#global-and-local-interpretation" title="Permalink to this headline">¶</a></h3>
-<img alt="_images/sbrl.png" src="_images/sbrl.png" />
+<a class="reference internal image-reference" href="_images/sbrl.png"><img alt="_images/sbrl.png" src="_images/sbrl.png" style="width: 600px;" /></a>
 <ol class="arabic simple">
 <li>Rule Based Models(Transparent Design)<ul>
 <li><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/rule_list_notebooks/rule_lists_continuous_features.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/rule_list_notebooks/rule_lists_continuous_features.ipynb</a></li>
@@ -255,10 +307,8 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-      
-        <a href="tutorial.html" class="btn btn-neutral" title="Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="reference/data.html" class="btn btn-neutral" title="DataManagers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -300,6 +350,7 @@
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_SVG"></script>
 
   
 
