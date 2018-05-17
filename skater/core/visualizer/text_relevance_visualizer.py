@@ -250,6 +250,6 @@ def show_in_notebook(file_name_with_type='rendered.html'):
         'jpeg': _render_image,
         'jpg': _render_image
     }
-    select_type = lambda choice_type: choice_dict[choice_type]
-    logger.info("File Name: {}".format(select_type.filename))
+    select_type = lambda choice_type: choice_dict[file_type]
+    logger.info("File Name: {}".format(file_name_with_type))
     return display(select_type(file_type)(file_name_with_type))
