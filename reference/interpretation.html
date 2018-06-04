@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.1.1-b1
+                1.1.1b3
               </div>
             
           
@@ -105,6 +105,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#dnns-deepinterpreter">DNNs: DeepInterpreter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dnns-layerwise-relevance-propagation-e-lrp">DNNs: Layerwise Relevance Propagation(e-LRP)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dnns-integrated-gradient">DNNs: Integrated Gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dnns-occlusion">DNNs: Occlusion</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#global-and-local-interpretations">Global And Local Interpretations</a><ul>
@@ -727,7 +728,7 @@ this parameter.</div></blockquote>
 num_samples: size of the neighborhood to learn the linear model
 distance_metric: the distance metric to use for weights.
 model_regressor: sklearn regressor to use in explanation. Defaults
-to Ridge regression in LimeBase. Must have <a href="#id17"><span class="problematic" id="id18">model_regressor.coef_</span></a>
+to Ridge regression in LimeBase. Must have <a href="#id20"><span class="problematic" id="id21">model_regressor.coef_</span></a>
 and ‘sample_weight’ as a parameter to model_regressor.fit()</p>
 </dd>
 <dt>Returns:</dt>
@@ -777,7 +778,7 @@ an estimator’s decision for or against the respective class</p>
 <table class="docutils citation" frame="void" id="r1" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[R1]</a></td><td>Ancona M, Ceolini E, Öztireli C, Gross M (ICLR, 2018).
+<tr><td class="label"><a class="fn-backref" href="#id1">[R1]</a></td><td>Ancona M, Ceolini E, Oztireli C, Gross M (ICLR, 2018).
 Towards better understanding of gradient-based attribution methods for Deep Neural Networks.
 <a class="reference external" href="https://arxiv.org/abs/1711.06104">https://arxiv.org/abs/1711.06104</a>
 (<a class="reference external" href="https://github.com/marcoancona/DeepExplain/blob/master/deepexplain/tensorflow/methods.py">https://github.com/marcoancona/DeepExplain/blob/master/deepexplain/tensorflow/methods.py</a>)</td></tr>
@@ -944,8 +945,8 @@ Towards better understanding of gradient-based attribution methods for Deep Neur
 <div class="section" id="dnns-layerwise-relevance-propagation-e-lrp">
 <h3>DNNs: Layerwise Relevance Propagation(e-LRP)<a class="headerlink" href="#dnns-layerwise-relevance-propagation-e-lrp" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
-<dt id="skater.core.local_interpretation.dnni.relevance_scorer.LRP">
-<em class="property">class </em><code class="descclassname">skater.core.local_interpretation.dnni.relevance_scorer.</code><code class="descname">LRP</code><span class="sig-paren">(</span><em>output_tensor</em>, <em>input_tensor</em>, <em>samples</em>, <em>session</em>, <em>epsilon=0.0001</em><span class="sig-paren">)</span><a class="headerlink" href="#skater.core.local_interpretation.dnni.relevance_scorer.LRP" title="Permalink to this definition">¶</a></dt>
+<dt id="skater.core.local_interpretation.dnni.gradient_relevance_scorer.LRP">
+<em class="property">class </em><code class="descclassname">skater.core.local_interpretation.dnni.gradient_relevance_scorer.</code><code class="descname">LRP</code><span class="sig-paren">(</span><em>output_tensor</em>, <em>input_tensor</em>, <em>samples</em>, <em>session</em>, <em>epsilon=0.0001</em><span class="sig-paren">)</span><a class="headerlink" href="#skater.core.local_interpretation.dnni.gradient_relevance_scorer.LRP" title="Permalink to this definition">¶</a></dt>
 <dd><p>LRP is technique to decompose the prediction(output) of a deep neural networks(DNNs) by computing relevance at
 each layer in a backward pass. Current implementation is computed using backpropagation by applying change rule on
 a modified gradient function. LRP could be implemented in different ways.
@@ -973,8 +974,8 @@ Towards better understanding of gradient-based attribution methods for Deep Neur
 <div class="section" id="dnns-integrated-gradient">
 <h3>DNNs: Integrated Gradient<a class="headerlink" href="#dnns-integrated-gradient" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
-<dt id="skater.core.local_interpretation.dnni.relevance_scorer.IntegratedGradients">
-<em class="property">class </em><code class="descclassname">skater.core.local_interpretation.dnni.relevance_scorer.</code><code class="descname">IntegratedGradients</code><span class="sig-paren">(</span><em>output_tensor</em>, <em>input_tensor</em>, <em>samples</em>, <em>session</em>, <em>steps=100</em>, <em>baseline=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skater.core.local_interpretation.dnni.relevance_scorer.IntegratedGradients" title="Permalink to this definition">¶</a></dt>
+<dt id="skater.core.local_interpretation.dnni.gradient_relevance_scorer.IntegratedGradients">
+<em class="property">class </em><code class="descclassname">skater.core.local_interpretation.dnni.gradient_relevance_scorer.</code><code class="descname">IntegratedGradients</code><span class="sig-paren">(</span><em>output_tensor</em>, <em>input_tensor</em>, <em>samples</em>, <em>session</em>, <em>steps=100</em>, <em>baseline=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skater.core.local_interpretation.dnni.gradient_relevance_scorer.IntegratedGradients" title="Permalink to this definition">¶</a></dt>
 <dd><p>Integrated Gradient is a relevance scoring algorithm for Deep network based on final predictions to its input
 features. The algorithm statisfies two fundamental axioms related to relevance/attribution computation,</p>
 <blockquote>
@@ -993,13 +994,48 @@ networks.</p>
 <table class="docutils citation" frame="void" id="r11" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id8">[R11]</a></td><td>Ancona M, Ceolini E, Öztireli C, Gross M:</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id8">[R11]</a></td><td>Ancona M, Ceolini E, Öztireli C, Gross M (ICLR, 2018).</td></tr>
 </tbody>
 </table>
 <table class="docutils citation" frame="void" id="r12" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id9">[R12]</a></td><td>Taly, Ankur(2017) <a class="reference external" href="http://theory.stanford.edu/~ataly/Talks/sri_attribution_talk_jun_2017.pdf">http://theory.stanford.edu/~ataly/Talks/sri_attribution_talk_jun_2017.pdf</a></td></tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="dnns-occlusion">
+<h3>DNNs: Occlusion<a class="headerlink" href="#dnns-occlusion" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="skater.core.local_interpretation.dnni.perturbation_relevance_scorer.Occlusion">
+<em class="property">class </em><code class="descclassname">skater.core.local_interpretation.dnni.perturbation_relevance_scorer.</code><code class="descname">Occlusion</code><span class="sig-paren">(</span><em>output_tensor</em>, <em>input_tensor</em>, <em>samples</em>, <em>current_session</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#skater.core.local_interpretation.dnni.perturbation_relevance_scorer.Occlusion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occlusion is a perturbation based inference algorithm. Such forms of algorithm direcly computes the
+relevance/attribution of the input features <span class="math notranslate nohighlight">\((X_{i})\)</span> by systematically occluding different
+portions of the image (by removing, masking or altering them), then running a forward pass on the new input to
+produce a new output, and then measuring and monitoring the difference between the original output and new output.
+Perturbation based interpretation helps one to compute direct estimation of the marginal effect of a feature but
+the inference might be computationally expensive depending on the cardinatlity of the feature space.
+The choice of the baseline value while perturbing through the feature space could be set to 0,
+as explained in detail by Zeiler &amp; Fergus, 2014[2].</p>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r13" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id10">[R13]</a></td><td>Ancona M, Ceolini E, Oztireli C, Gross M (ICLR, 2018).</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r14" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id11">[R14]</a></td><td>Zeiler, M and Fergus, R (Springer, 2014). Visualizing and understanding convolutional networks.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r15" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id12">[R15]</a></td><td><a class="reference external" href="https://github.com/marcoancona/DeepExplain/blob/master/deepexplain/tensorflow/methods.py">https://github.com/marcoancona/DeepExplain/blob/master/deepexplain/tensorflow/methods.py</a></td></tr>
 </tbody>
 </table>
 </dd></dl>
@@ -1079,23 +1115,23 @@ Benjamin Letham, Hongyu Yang, Margo Seltzer and others. For more information che
 </tbody>
 </table>
 <p class="rubric">References</p>
-<table class="docutils citation" frame="void" id="r13" rules="none">
+<table class="docutils citation" frame="void" id="r16" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id10">[R13]</a></td><td>Letham et.al(2015) Interpretable classifiers using rules and Bayesian analysis:
+<tr><td class="label"><a class="fn-backref" href="#id13">[R16]</a></td><td>Letham et.al(2015) Interpretable classifiers using rules and Bayesian analysis:
 Building a better stroke prediction model (<a class="reference external" href="https://arxiv.org/abs/1511.01644">https://arxiv.org/abs/1511.01644</a>)</td></tr>
 </tbody>
 </table>
-<table class="docutils citation" frame="void" id="r14" rules="none">
+<table class="docutils citation" frame="void" id="r17" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id11">[R14]</a></td><td>Yang et.al(2016) Scalable Bayesian Rule Lists (<a class="reference external" href="https://arxiv.org/abs/1602.08610">https://arxiv.org/abs/1602.08610</a>)</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id14">[R17]</a></td><td>Yang et.al(2016) Scalable Bayesian Rule Lists (<a class="reference external" href="https://arxiv.org/abs/1602.08610">https://arxiv.org/abs/1602.08610</a>)</td></tr>
 </tbody>
 </table>
-<table class="docutils citation" frame="void" id="r15" rules="none">
+<table class="docutils citation" frame="void" id="r18" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id12">[R15]</a></td><td><a class="reference external" href="https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py">https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id15">[R18]</a></td><td><a class="reference external" href="https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py">https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py</a></td></tr>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
@@ -1435,28 +1471,28 @@ is supported.</p>
 </tbody>
 </table>
 <p class="rubric">References</p>
-<table class="docutils citation" frame="void" id="r16" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id13">[R16]</a></td><td>Dr. Tamas Madl, <a class="reference external" href="https://github.com/tmadl/sklearn-expertsys/blob/master/BigDataRuleListClassifier.py">https://github.com/tmadl/sklearn-expertsys/blob/master/BigDataRuleListClassifier.py</a></td></tr>
-</tbody>
-</table>
-<table class="docutils citation" frame="void" id="r17" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id14">[R17]</a></td><td><a class="reference external" href="https://pdfs.semanticscholar.org/e44c/9dcf90d5a9a7e74a1d74c9900ff69142c67f.pdf">https://pdfs.semanticscholar.org/e44c/9dcf90d5a9a7e74a1d74c9900ff69142c67f.pdf</a></td></tr>
-</tbody>
-</table>
-<table class="docutils citation" frame="void" id="r18" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id15">[R18]</a></td><td>Surrogate model: <a class="reference external" href="https://en.wikipedia.org/wiki/Surrogate_model">https://en.wikipedia.org/wiki/Surrogate_model</a></td></tr>
-</tbody>
-</table>
 <table class="docutils citation" frame="void" id="r19" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id16">[R19]</a></td><td><ol class="first last upperalpha simple" start="23">
+<tr><td class="label"><a class="fn-backref" href="#id16">[R19]</a></td><td>Dr. Tamas Madl, <a class="reference external" href="https://github.com/tmadl/sklearn-expertsys/blob/master/BigDataRuleListClassifier.py">https://github.com/tmadl/sklearn-expertsys/blob/master/BigDataRuleListClassifier.py</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r20" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id17">[R20]</a></td><td><a class="reference external" href="https://pdfs.semanticscholar.org/e44c/9dcf90d5a9a7e74a1d74c9900ff69142c67f.pdf">https://pdfs.semanticscholar.org/e44c/9dcf90d5a9a7e74a1d74c9900ff69142c67f.pdf</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r21" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id18">[R21]</a></td><td>Surrogate model: <a class="reference external" href="https://en.wikipedia.org/wiki/Surrogate_model">https://en.wikipedia.org/wiki/Surrogate_model</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r22" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id19">[R22]</a></td><td><ol class="first last upperalpha simple" start="23">
 <li>Andrew Pruett , Robert L. Hester(2016),</li>
 </ol>
 </td></tr>

@@ -10,3 +10,4 @@
 .idea
 .buildinfo
 build
+.mypy_cache
