@@ -123,7 +123,7 @@ Algorithms
 | Local Interpretation    | DNNs      | - `Layer-wise Relevance Propagation <https://tinyurl.com/e-layerwise>`_         |
 |                         |           |   (e-LRP): image                                                                |
 |                         |           |                                                                                 |
-|                         |           | - `Occlusion <https://tinyurl.com/dnn-occlusion`_ : image                       |
+|                         |           | - `Occlusion  <https://tinyurl.com/dnn-occlusion>`_ : image                     |
 |                         |           |                                                                                 |
 |                         |           | - `Integrated Gradient <https://tinyurl.com/integrated-gradient>`_              |
 |                         |           |   image and text                                                                |
