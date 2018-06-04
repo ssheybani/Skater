@@ -27,6 +27,7 @@ before_install:
   - conda install gxx_linux-64
 
 install:
+  # https://github.com/tensorflow/tensorflow/issues/6968 (reason for including libtcmalloc-minimal4)
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy cython scipy matplotlib h5py flake8 coverage
   - source activate test-environment
   - pip install codecov # not on conda
@@ -40,6 +41,8 @@ install:
       python -m pip install --upgrade --force-reinstall tensorflow==1.4.0;
       python -W ignore -c "import tensorflow as tf";
     else
+      sudo apt-get install libtcmalloc-minimal4;
+      export LD_PRELOAD="/usr/lib/libtcmalloc_minimal.so.4";
       python -m pip install --upgrade --force-reinstall tensorflow==1.4.0;
       python -W ignore -c "import tensorflow as tf";
     fi
@@ -65,7 +68,7 @@ after_success:
 branches:
   only:
     - master
-    - compute_relevance_dev
+    - compute_relevance_dev2
 notifications:
   #slack:
   #secure:
