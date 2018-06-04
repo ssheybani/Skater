@@ -2,13 +2,20 @@
 
 from skimage.filters import roberts, sobel
 import numpy as np
-import matplotlib.pyplot as plt
+from skater.util.exceptions import MatplotlibUnavailableError
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
 
 from skater.util.image_ops import normalize
 
+# helper function to enable or disable matplotlib access
+_enable_axis = lambda ax, flag: ax.axis("off") if flag is True else ax.axis("on")
+
 
 def visualize(relevance_score, original_input_img=None, edge_detector_type='sobel', cmap='bwr', axis=plt,
-              percentile=100, alpha_edges=0.8, alpha_bgcolor=1):
+              percentile=100, alpha_edges=0.8, alpha_bgcolor=1, disable_axis=True):
 
     dx, dy = 0.01, 0.01
     xx = np.arange(0.0, relevance_score.shape[1], dx)
@@ -32,7 +39,7 @@ def visualize(relevance_score, original_input_img=None, edge_detector_type='sobe
     # Plot the image with relevance scores
     axis.imshow(relevance_score, extent=extent, interpolation='nearest', cmap=cmap,
                 vmin=-abs_min, vmax=abs_max, alpha=alpha_bgcolor)
-    axis.axis('off')
+    _enable_axis(axis, disable_axis)
     return axis
 
 
