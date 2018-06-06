@@ -89,7 +89,7 @@ Image Interpretability
       + https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretability/mnist_cnn_keras.ipynb
       + https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretability/mnist_mlp_tensorflow.ipynb
       + Toy Example on self driving car:
-         http://172.31.3.87:8888/notebooks/pramit/Skater/examples/image_interpretability/self_driving_toy_example/toy_self_driving_example.ipynb#
+         https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretability/self_driving_toy_example/toy_self_driving_example.ipynb
 
 
 .. image:: images/text_ig.png
