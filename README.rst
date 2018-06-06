@@ -21,6 +21,9 @@ The project was started as a research idea to find ways to enable better interpr
 
 .. image:: https://coveralls.io/repos/github/datascienceinc/Skater/badge.svg?branch=master
     :target: https://coveralls.io/github/datascienceinc/Skater?branch=master
+  
+.. image:: https://img.shields.io/badge/License-MIT-yellow.svg
+    :target: https://github.com/datascienceinc/Skater/blob/master/LICENSE
     
     
 HighLevel Design 
