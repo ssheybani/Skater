@@ -47,6 +47,7 @@ __pycache__
 *.predict
 *.pkl
 .DS_Store
-.buildinfo
+.idea
 .mypy_cache
+.buildinfo
 *.gz

@@ -9,6 +9,7 @@ from skimage.transform import rotate
 from skimage import exposure
 
 from .exceptions import MatplotlibUnavailableError
+from .exceptions import DataSetError
 from skater.util.logger import build_logger
 from skater.util.logger import _INFO
 
@@ -19,12 +20,14 @@ __all__ = ['add_noise', 'image_transformation', 'flip_pixels', 'normalize', 'sho
 logger = build_logger(_INFO, __name__)
 
 
-def load_image(path, img_height, img_width, crop_from_center=True, mode='constant',
-               preserve_range=False, anti_aliasing=None, anti_aliasing_sigma=None):
+def load_image(path, img_height=None, img_width=None, crop_from_center=True, rgb2bgr=False, mode='constant',
+               preserve_range=True, anti_aliasing=None, anti_aliasing_sigma=None):
+    if not img_height or img_width is None:
+        raise AssertionError("Dimensions for the image size is not specified as reqiured. Either image height or "
+                             "image weight is missing ")
+
     # load image
     img = skimage.io.imread(path)
-    img = img / 255.0
-    assert (0 <= img).all() and (img <= 1.0).all()
 
     # Crop image from the center
     short_edge = np.min(img.shape[:2])
@@ -34,9 +37,12 @@ def load_image(path, img_height, img_width, crop_from_center=True, mode='constan
 
     in_img = crop_img if crop_from_center is True else img
 
+    # If RGB --> BGR flag is enabled
+    in_img = in_img[:, :, ::-1] if rgb2bgr else in_img
     # Re-size the image to required dimension
     resized_img = skimage.transform.resize(in_img, (img_height, img_width), mode=mode,
-                                           preserve_range=False, anti_aliasing=None, anti_aliasing_sigma=None)
+                                           preserve_range=preserve_range, anti_aliasing=anti_aliasing,
+                                           anti_aliasing_sigma=anti_aliasing_sigma)
     return resized_img
 
 
@@ -143,9 +149,22 @@ def flip_pixels(X, num_of_pixel, filtered_pixel=None, replace_with=0, random_sta
 
 
 def normalize(X):
-    """ Normalize image of the shape (H, W, D) in the range of 0 and 1
+    """ Normalize image of the shape (H, W, D) in the range of 0 and 1 (Min-Max scaling)
     """
+    if not isinstance(X, np.ndarray):
+        err_msg = "Input array should be numpy.ndarray"
+        raise(DataSetError(err_msg))
+
     return np.array((X - np.min(X)) / (np.max(X) - np.min(X)))
+
+
+def standard_scaler(X):
+    if not isinstance(X, np.ndarray):
+        err_msg = "Input array should be numpy.ndarray"
+        raise(DataSetError(err_msg))
+
+    X = (X - X.mean()) / X.std()
+    return X
 
 
 def show_image(X, cmap=None, bins=None, title='Original'):
