@@ -24,8 +24,14 @@ The project was started as a research idea to find ways to enable better interpr
   
 .. image:: https://img.shields.io/badge/License-MIT-yellow.svg
     :target: https://github.com/datascienceinc/Skater/blob/master/LICENSE
-    
-    
+
+.. image:: https://img.shields.io/badge/python-2.7-blue.svg
+    :target: https://www.python.org/download/releases/2.7/
+.. image:: https://img.shields.io/badge/python-3.5-blue.svg
+    :target: https://www.python.org/downloads/release/python-350/   
+.. image:: https://img.shields.io/badge/python-3.6-blue.svg
+    :target: https://www.python.org/downloads/release/python-360/
+ 
 HighLevel Design 
 ================
 .. image:: https://github.com/datascienceinc/Skater/blob/master/presentations/designs/interpretable_mls.png
