@@ -30,6 +30,10 @@ HighLevel Design
 ================
 .. image:: https://github.com/datascienceinc/Skater/blob/master/presentations/designs/interpretable_mls.png
 
+Skater in action on an example image classification problem
+
+.. image:: https://github.com/datascienceinc/Skater/blob/master/presentations/designs/example_inference.png
+    :target: https://youtu.be/dmXF7WxT63E
 
 📖 Documentation
 ================
