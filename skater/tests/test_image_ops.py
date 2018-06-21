@@ -44,10 +44,10 @@ class TestImageOps(unittest.TestCase):
 
 
     def test_image_ops(self):
-        # This is not an extensive test, but a at-least a start
-        A = np.arange(8).reshape((2, 2, 2))
-        original_value = A[0, 0, 0]
-        post_horizontal_flip = flip_orientation(A)
+        # This is not an extensive test, but at-least a start
+        X = np.arange(8).reshape((2, 2, 2))
+        original_value = X[0, 0, 0]
+        post_horizontal_flip = flip_orientation(X)
         self.assertEquals(original_value != post_horizontal_flip[0, 0, 0], True)
 
 

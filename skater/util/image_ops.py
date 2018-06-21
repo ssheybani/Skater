@@ -151,7 +151,7 @@ def flip_pixels(X, num_of_pixel, filtered_pixel=None, replace_with=0, random_sta
 def flip_orientation(X, axis=0):
     if not isinstance(X, np.ndarray):
         err_msg = "Input array should be numpy.ndarray"
-    raise(DataSetError(err_msg))
+        raise(DataSetError(err_msg))
 
     return np.flip(X, axis)
 
