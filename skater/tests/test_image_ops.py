@@ -6,6 +6,7 @@ from skater.util.image_ops import view_windows
 from skater.util.image_ops import load_image
 from skater.util.image_ops import standard_scaler
 from skater.util.image_ops import normalize
+from skater.util.image_ops import flip_orientation
 
 
 class TestImageOps(unittest.TestCase):
@@ -40,6 +41,14 @@ class TestImageOps(unittest.TestCase):
         x = np.asarray([1, 4, 5, 6, 6, 2, 3])
         x_new = normalize(x)
         self.assertEquals((np.min(x_new), np.max(x_new)), (0, 1))
+
+
+    def test_image_ops(self):
+        # This is not an extensive test, but a at-least a start
+        A = np.arange(8).reshape((2, 2, 2))
+        original_value = A[0, 0, 0]
+        post_horizontal_flip = flip_orientation(A)
+        self.assertEquals(original_value != post_horizontal_flip[0, 0, 0], True)
 
 
 if __name__ == '__main__':
