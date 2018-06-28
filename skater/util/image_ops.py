@@ -148,6 +148,14 @@ def flip_pixels(X, num_of_pixel, filtered_pixel=None, replace_with=0, random_sta
     return X_modified
 
 
+def flip_orientation(X, axis=0):
+    if not isinstance(X, np.ndarray):
+        err_msg = "Input array should be numpy.ndarray"
+        raise(DataSetError(err_msg))
+
+    return np.flip(X, axis)
+
+
 def normalize(X):
     """ Normalize image of the shape (H, W, D) in the range of 0 and 1 (Min-Max scaling)
     """
