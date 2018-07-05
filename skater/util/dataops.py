@@ -117,7 +117,7 @@ def _render_html(file_name):
 
 def _render_image(file_name):
     from IPython.display import Image
-    return Image(file_name)
+    return Image(file_name, retina=True)
 
 
 def show_in_notebook(file_name_with_type='rendered.html'):
