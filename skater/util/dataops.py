@@ -120,6 +120,11 @@ def _render_image(file_name):
     return Image(file_name, retina=True)
 
 
+def _render_pdf(file_name):
+    from IPython.display import IFrame
+    IFrame(file_name, width=600, height=300)
+
+
 def show_in_notebook(file_name_with_type='rendered.html'):
     """ Display generated artifacts(e.g. .png, .html, .jpeg/.jpg) in interactive Jupyter style Notebook
 
@@ -135,7 +140,9 @@ def show_in_notebook(file_name_with_type='rendered.html'):
         'html': _render_html,
         'png': _render_image,
         'jpeg': _render_image,
-        'jpg': _render_image
+        'jpg': _render_image,
+        'svg': _render_image,
+        'pdf': _render_pdf
     }
     select_type = lambda choice_type: choice_dict[file_type]
     logger.info("File Name: {}".format(file_name_with_type))
