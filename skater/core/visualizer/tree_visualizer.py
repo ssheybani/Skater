@@ -35,7 +35,8 @@ def _get_colors(num_classes, random_state=1):
 # https://stackoverflow.com/questions/48085315/interpreting-graphviz-output-for-decision-tree-regression
 # https://stackoverflow.com/questions/42891148/changing-colors-for-decision-tree-plot-created-using-export-graphviz
 # Color scheme info: http://wingraphviz.sourceforge.net/wingraphviz/language/colorname.htm
-def visualize(estimator, feature_names=None, class_names=None, color_list=None, enable_node_id=True, seed=2):
+# Currently, supported only for sklearn models
+def plot_tree(estimator, feature_names=None, class_names=None, color_list=None, enable_node_id=True, seed=2):
     dot_data = StringIO()
     export_graphviz(estimator, out_file=dot_data, filled=True, rounded=True,
                     special_characters=True, feature_names=feature_names,
@@ -63,3 +64,45 @@ def visualize(estimator, feature_names=None, class_names=None, color_list=None, 
     for ed in edges:
         ed.set_color('steelblue')
     return graph
+
+
+return_value = lambda estimator_type, v: 'Predicted Label: {}'.format(str(np.argmax(v))) if 'classifier' \
+    else 'Output: {}'.format(str(v))
+
+
+# Current implementation is specific to sklearn models.
+# Reference: https://stackoverflow.com/questions/20224526/how-to-extract-the-decision-rules-from-scikit-learn-decision-tree
+# TODO: Figure out ways to make it generic for other frameworks
+def tree_to_text(tree, feature_names, estimator_type='classifier'):
+    label_value_color = "\033[1;34;49m"
+    split_criteria_color = "\033[0;32;49m"
+    if_else_quotes_color = "\033[0;30;49m"
+
+    left_node = tree.tree_.children_left
+    right_node = tree.tree_.children_right
+    split_criterias = tree.tree_.threshold
+    features_names = [feature_names[i] for i in tree.tree_.feature]
+    value = tree.tree_.value
+
+    # Reference: https://github.com/scikit-learn/scikit-learn/blob/a24c8b464d094d2c468a16ea9f8bf8d42d949f84/sklearn/tree/_tree.pyx
+    TREE_LEAF = -1
+    TREE_UNDEFINED = -2
+
+    str_pattern1 = lambda indent, split_criteria_color, features_names, node, if_else_quotes_color: \
+        indent + "if ({}{}".format(split_criteria_color, features_names[node]) + \
+        " <= {}".format(str(split_criterias[node])) + if_else_quotes_color + " ) {"
+
+
+    def recurse(left_node, right_node, split_criterias, features_names, node, depth=0):
+        indent = "  " * depth
+        if split_criterias[node] != TREE_UNDEFINED:
+            print(str_pattern1(indent, split_criteria_color, features_names, node, if_else_quotes_color))
+            if left_node[node] != TREE_LEAF:
+                recurse(left_node, right_node, split_criterias, features_names, left_node[node], depth + 1)
+                print(indent, if_else_quotes_color, "} else {")
+                if right_node[node] != TREE_LEAF:
+                    recurse(left_node, right_node, split_criterias, features_names, right_node[node], depth + 1)
+                print(indent, if_else_quotes_color, "}")
+        else:
+            print(indent, label_value_color, return_value(estimator_type, value[node]))
+    recurse(left_node, right_node, split_criterias, features_names, 0)
