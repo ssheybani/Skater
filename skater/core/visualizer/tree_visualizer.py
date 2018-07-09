@@ -74,13 +74,14 @@ return_value = lambda estimator_type, v: 'Predicted Label: {}'.format(str(np.arg
 # Reference: https://stackoverflow.com/questions/20224526/how-to-extract-the-decision-rules-from-scikit-learn-decision-tree
 # TODO: Figure out ways to make it generic for other frameworks
 def tree_to_text(tree, feature_names, estimator_type='classifier'):
-    label_value_color = "\033[1;34;49m"
-    split_criteria_color = "\033[0;32;49m"
-    if_else_quotes_color = "\033[0;30;49m"
+    # definining colors
+    label_value_color = "\033[1;34;49m"  # blue
+    split_criteria_color = "\033[0;32;49m"  # green
+    if_else_quotes_color = "\033[0;30;49m"  # if and else quotes
 
     left_node = tree.tree_.children_left
     right_node = tree.tree_.children_right
-    split_criterias = tree.tree_.threshold
+    split_criteria = tree.tree_.threshold
     features_names = [feature_names[i] for i in tree.tree_.feature]
     value = tree.tree_.value
 
@@ -88,21 +89,23 @@ def tree_to_text(tree, feature_names, estimator_type='classifier'):
     TREE_LEAF = -1
     TREE_UNDEFINED = -2
 
-    str_pattern1 = lambda indent, split_criteria_color, features_names, node, if_else_quotes_color: \
-        indent + "if ({}{}".format(split_criteria_color, features_names[node]) + \
-        " <= {}".format(str(split_criterias[node])) + if_else_quotes_color + " ) {"
+    # define if and else string patterns for extracting the decision rules
+    if_str_pattern = lambda offset, s_c, f_n, node, ie_c: offset + "if {}{}".format(s_c, f_n[node]) + " <= {}"\
+        .format(str(s_c[node])) + ie_c + " {"
 
+    other_str_pattern = lambda offset, color_val, str_type: offset + color_val + str_type
 
-    def recurse(left_node, right_node, split_criterias, features_names, node, depth=0):
-        indent = "  " * depth
-        if split_criterias[node] != TREE_UNDEFINED:
-            print(str_pattern1(indent, split_criteria_color, features_names, node, if_else_quotes_color))
+    def recurse_tree(left_node, right_node, split_criterias, features_names, node, depth=0):
+        offset = "  " * depth
+        if split_criteria[node] != TREE_UNDEFINED:
+            print(if_str_pattern(offset, split_criteria_color, features_names, node, if_else_quotes_color))
             if left_node[node] != TREE_LEAF:
-                recurse(left_node, right_node, split_criterias, features_names, left_node[node], depth + 1)
-                print(indent, if_else_quotes_color, "} else {")
+                recurse_tree(left_node, right_node, split_criteria, features_names, left_node[node], depth + 1)
+                print(other_str_pattern(offset, if_else_quotes_color, "} else {"))
                 if right_node[node] != TREE_LEAF:
-                    recurse(left_node, right_node, split_criterias, features_names, right_node[node], depth + 1)
-                print(indent, if_else_quotes_color, "}")
+                    recurse_tree(left_node, right_node, split_criteria, features_names, right_node[node], depth + 1)
+                print(other_str_pattern(offset, if_else_quotes_color, "}"))
         else:
-            print(indent, label_value_color, return_value(estimator_type, value[node]))
-    recurse(left_node, right_node, split_criterias, features_names, 0)
+            print(offset, label_value_color, return_value(estimator_type, value[node]))
+
+    recurse_tree(left_node, right_node, split_criteria, features_names, 0)
