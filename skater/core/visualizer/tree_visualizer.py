@@ -81,7 +81,7 @@ def tree_to_text(tree, feature_names, estimator_type='classifier'):
 
     left_node = tree.tree_.children_left
     right_node = tree.tree_.children_right
-    split_criteria = tree.tree_.threshold
+    threshold = tree.tree_.threshold
     features_names = [feature_names[i] for i in tree.tree_.feature]
     value = tree.tree_.value
 
@@ -97,15 +97,15 @@ def tree_to_text(tree, feature_names, estimator_type='classifier'):
 
     def recurse_tree(left_node, right_node, split_criterias, features_names, node, depth=0):
         offset = "  " * depth
-        if split_criteria[node] != TREE_UNDEFINED:
+        if threshold[node] != TREE_UNDEFINED:
             print(if_str_pattern(offset, split_criteria_color, features_names, node, if_else_quotes_color))
             if left_node[node] != TREE_LEAF:
-                recurse_tree(left_node, right_node, split_criteria, features_names, left_node[node], depth + 1)
+                recurse_tree(left_node, right_node, threshold, features_names, left_node[node], depth + 1)
                 print(other_str_pattern(offset, if_else_quotes_color, "} else {"))
                 if right_node[node] != TREE_LEAF:
-                    recurse_tree(left_node, right_node, split_criteria, features_names, right_node[node], depth + 1)
+                    recurse_tree(left_node, right_node, threshold, features_names, right_node[node], depth + 1)
                 print(other_str_pattern(offset, if_else_quotes_color, "}"))
         else:
             print(offset, label_value_color, return_value(estimator_type, value[node]))
 
-    recurse_tree(left_node, right_node, split_criteria, features_names, 0)
+    recurse_tree(left_node, right_node, threshold, features_names, 0)

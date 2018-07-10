@@ -242,14 +242,14 @@ class PartialDependence(BaseGlobalInterpretation):
         >>> features = boston.feature_names
 
         >>> rf = RandomForestClassier()
-        >>> rf.fit(X,y)
+        >>> rf.fit(X, y)
 
 
         >>> model = InMemoryModel(rf.predict_proba, examples = X)
         >>> interpreter = Interpretation()
         >>> interpreter.load_data(X)
         >>> feature_ids = ['ZN','CRIM']
-        >>> interpreter.partial_dependence.partial_dependence(features,model)
+        >>> interpreter.partial_dependence.partial_dependence(features, model)
         """
 
         if self.data_set is None:

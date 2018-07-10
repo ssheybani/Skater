@@ -1,5 +1,4 @@
 from sklearn.metrics import log_loss, mean_absolute_error, mean_squared_error, r2_score, f1_score
-from sklearn.utils.multiclass import type_of_target
 from abc import ABCMeta, abstractmethod
 
 from ..util.static_types import StaticTypes
@@ -30,6 +29,7 @@ class Scorer(object):
         assert all([i in StaticTypes.model_types._valid_ for i in cls.model_types])
         assert all([i in StaticTypes.output_types._valid_ for i in cls.prediction_types])
         assert all([i in StaticTypes.output_types._valid_ for i in cls.label_types])
+
 
     @classmethod
     def check_model(cls, model):
