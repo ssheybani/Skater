@@ -2,6 +2,7 @@
 
 from .global_interpretation.partial_dependence import PartialDependence
 from .global_interpretation.feature_importance import FeatureImportance
+from .global_interpretation.tree_surrogate import TreeSurrogate
 from ..data import DataManager
 from ..util.logger import build_logger
 
@@ -37,6 +38,7 @@ class Interpretation(object):
         self.logger = build_logger(log_level, __name__)
         self.partial_dependence = PartialDependence(self)
         self.feature_importance = FeatureImportance(self)
+        self.tree_surrogate = TreeSurrogate(self)
         self.data_set = None
         self.load_data(training_data,
                        training_labels=training_labels,
