@@ -1,8 +1,11 @@
 from .base import BaseGlobalInterpretation
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
-from sklearn.metrics import precision_recall_fscore_support as score
 from sklearn.model_selection import RandomizedSearchCV
 import numpy as np
+
+from skater.model.base import ModelType
+from skater.core.visualizer.tree_visualizer import plot_tree
+
 
 
 class TreeSurrogate(BaseGlobalInterpretation):
@@ -11,6 +14,7 @@ class TreeSurrogate(BaseGlobalInterpretation):
         super(TreeSurrogate, self).__init__()
         self.__model = None
         self.feature_names = None
+        self.class_names = None
         self.impurity_threshold = 0.01
         self.criterion_types = {'classification': {'criterion': ['gini', 'entropy']},
                                 'regression': {'criterion': ['mse', 'friedman_mse', 'mae']}
@@ -20,7 +24,7 @@ class TreeSurrogate(BaseGlobalInterpretation):
 
     def apply(self, estimator_type='classification', criterion='gini', splitter='best', max_depth=None, min_samples_split=2,
               min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=None, seed=None, max_leaf_nodes=None,
-              min_impurity_decrease=0.0, min_impurity_split=None, class_weight=None,
+              min_impurity_decrease=0.0, min_impurity_split=None, class_weight=None, class_names=None,
               presort=False, feature_name=None, impurity_threshold=0.01):
 
         # TODO validate the parameters based on estimator type
@@ -46,6 +50,7 @@ class TreeSurrogate(BaseGlobalInterpretation):
 
             self.feature_names = feature_name
             self.impurity_threshold = impurity_threshold
+            self.class_names = class_names
 
 
     def learn(self, X, Y, original_y, cv=True, n_iter_search=10, param_grid=None):
@@ -73,13 +78,16 @@ class TreeSurrogate(BaseGlobalInterpretation):
             random_search_estimator.fit(X, Y)
             self.__model = random_search_estimator.best_estimator_
         y_hat_surrogate = self.predict(X)
+
+        model_inst = ModelType(model_type='classifier')
+        scorer = model_inst.scorers.get_scorer_function(scorer_type='f1')
         # TODO This should be abstracted by the model scorer factory
-        base_precision, base_recall, base_fscore, base_support = score(original_y, Y)
-        surrogate_precision, surrogate_recall, surrogate_fscore, surrogate_support = score(Y, y_hat_surrogate)
+        metric_score = scorer(original_y, Y)
+        surrogate_metric_score = scorer(Y, y_hat_surrogate)
         # Check on the length of any of the metric to determine the number of classes
         # if all is selected then compare against all metrics
-        avg_score = np.sqrt(np.sum((base_fscore - surrogate_fscore)**2))
-        return avg_score
+        fidelity_score = np.sqrt(np.sum((metric_score - surrogate_metric_score)**2))
+        return fidelity_score
 
 
     @property
@@ -97,8 +105,17 @@ class TreeSurrogate(BaseGlobalInterpretation):
         pass
 
 
-    def plot_global_decisions(self):
-        pass
+    def plot_global_decisions(self, model, colors=None, enable_node_id=True, random_state=5,
+                              persist=True, file_name="interpretable_tree.png"):
+        g = plot_tree(model, feature_names=self.feature_names, color_list=colors, class_names=self.class_name,
+                      enable_node_id=enable_node_id, seed=random_state)
+        f_name = "interpretable_tree.png" if file_name is None else file_name
+
+        if persist is True:
+            g.write_png(f_name)
+            return 0
+        else:
+            return g
 
 
     def plot_local_decisions(self):

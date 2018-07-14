@@ -7,9 +7,7 @@ from ..util.static_types import StaticTypes
 class Scorer(object):
     """
     Base Class for all skater scoring functions.
-
     Any Scoring function must consume a model.
-
     Any scorer must determine the types of models that are compatible.
 
     """
@@ -151,7 +149,7 @@ class F1(ClassifierScorer):
     type = StaticTypes.scorer_types.increasing
 
     @staticmethod
-    def _score(y_true, y_predicted, sample_weight=None):
+    def _score(y_true, y_predicted, sample_weight=None, average='weighted'):
         """
 
         :param X: Dense X of probabilities, or binary indicator
@@ -182,7 +180,8 @@ class ScorerFactory(object):
         elif model.model_type == StaticTypes.model_types.classifier:
             self.cross_entropy = CrossEntropy(model)
             self.f1 = F1(model)
-            if model.probability:
+            if model.probability is not None and not 'unknown':
+                #
                 self.default = self.cross_entropy
             else:
                 self.default = self.f1
