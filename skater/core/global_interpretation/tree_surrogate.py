@@ -6,30 +6,36 @@ import numpy as np
 from skater.model.base import ModelType
 from skater.core.visualizer.tree_visualizer import plot_tree
 
+from skater.util.logger import build_logger
+from skater.util.logger import _WARNING
+from skater.util.logger import _INFO
+
+logger = build_logger(_INFO, __name__)
 
 
-class TreeSurrogate(BaseGlobalInterpretation):
+class TreeSurrogate(object):
+    __name__ = "TreeSurrogate"
+
     # Reference: http://ftp.cs.wisc.edu/machine-learning/shavlik-group/craven.thesis.pdf
-    def __init__(self):
-        super(TreeSurrogate, self).__init__()
+    def __init__(self, estimator_type='classification', criterion='gini', splitter='best', max_depth=None, min_samples_split=2,
+                 min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=None, seed=None, max_leaf_nodes=None,
+                 min_impurity_decrease=0.0, min_impurity_split=None, class_weight=None, class_names=None,
+                 presort=False, feature_names=None, impurity_threshold=0.01, log_level=_WARNING):
+        self.logger = build_logger(log_level, __name__)
         self.__model = None
-        self.feature_names = None
-        self.class_names = None
-        self.impurity_threshold = 0.01
+
+        self.feature_names = feature_names
+        self.class_names = class_names
+        self.impurity_threshold = impurity_threshold
         self.criterion_types = {'classification': {'criterion': ['gini', 'entropy']},
                                 'regression': {'criterion': ['mse', 'friedman_mse', 'mae']}
                                 }
         self.splitter_types = ['best', 'random']
-
-
-    def apply(self, estimator_type='classification', criterion='gini', splitter='best', max_depth=None, min_samples_split=2,
-              min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=None, seed=None, max_leaf_nodes=None,
-              min_impurity_decrease=0.0, min_impurity_split=None, class_weight=None, class_names=None,
-              presort=False, feature_name=None, impurity_threshold=0.01):
+        self.splitter = splitter if any(splitter in item for item in self.splitter_types) else 'best'
 
         # TODO validate the parameters based on estimator type
         if estimator_type == 'classification':
-            self.__model = DecisionTreeClassifier(criterion=criterion, splitter=splitter, max_depth=max_depth,
+            self.__model = DecisionTreeClassifier(criterion=criterion, splitter=self.splitter, max_depth=max_depth,
                                                   min_samples_split=min_samples_split,
                                                   min_samples_leaf=min_samples_leaf,
                                                   min_weight_fraction_leaf=min_weight_fraction_leaf,
@@ -39,7 +45,7 @@ class TreeSurrogate(BaseGlobalInterpretation):
                                                   min_impurity_split=min_impurity_split,
                                                   class_weight=class_weight, presort=presort)
         else:
-            self.__model = DecisionTreeRegressor(criterion=criterion, splitter=splitter, max_depth=None,
+            self.__model = DecisionTreeRegressor(criterion=criterion, splitter=self.splitter, max_depth=None,
                                                  min_samples_split=min_samples_split,
                                                  min_samples_leaf=min_samples_leaf,
                                                  min_weight_fraction_leaf=min_weight_fraction_leaf,
@@ -47,10 +53,6 @@ class TreeSurrogate(BaseGlobalInterpretation):
                                                  random_state=seed, max_leaf_nodes=max_leaf_nodes,
                                                  min_impurity_decrease=min_impurity_decrease,
                                                  min_impurity_split=min_impurity_split, presort=presort)
-
-            self.feature_names = feature_name
-            self.impurity_threshold = impurity_threshold
-            self.class_names = class_names
 
 
     def learn(self, X, Y, original_y, cv=True, n_iter_search=10, param_grid=None):
@@ -87,6 +89,9 @@ class TreeSurrogate(BaseGlobalInterpretation):
         # Check on the length of any of the metric to determine the number of classes
         # if all is selected then compare against all metrics
         fidelity_score = np.sqrt(np.sum((metric_score - surrogate_metric_score)**2))
+        if fidelity_score > self.impurity_threshold:
+            self.logger.warning('fidelity score:{} of the surrogate model is higher than the impurity threshold: {}'.
+                                format(fidelity_score, self.impurity_threshold))
         return fidelity_score
 
 
@@ -105,17 +110,15 @@ class TreeSurrogate(BaseGlobalInterpretation):
         pass
 
 
-    def plot_global_decisions(self, model, colors=None, enable_node_id=True, random_state=5,
+    def plot_global_decisions(self, model, colors=None, enable_node_id=True, random_state=0,
                               persist=True, file_name="interpretable_tree.png"):
-        g = plot_tree(model, feature_names=self.feature_names, color_list=colors, class_names=self.class_name,
-                      enable_node_id=enable_node_id, seed=random_state)
+        graph_inst = plot_tree(model, feature_names=self.feature_names, color_list=colors, class_names=self.class_name,
+                               enable_node_id=enable_node_id, seed=random_state)
         f_name = "interpretable_tree.png" if file_name is None else file_name
 
         if persist is True:
-            g.write_png(f_name)
-            return 0
-        else:
-            return g
+            graph_inst.write_png(f_name)
+        return graph_inst
 
 
     def plot_local_decisions(self):

@@ -45,7 +45,6 @@ def plot_tree(estimator, feature_names=None, class_names=None, color_list=None, 
 
     # if color is not assigned, pick color uniformly random from the color list defined above
     color_names = color_list if color_list is not None else _get_colors(len(class_names), seed)
-    print(color_names)
     default_color = 'cornsilk'
 
     # Query for the node list to change properties
@@ -89,7 +88,7 @@ def tree_to_text(tree, feature_names, estimator_type='classifier'):
     TREE_LEAF = -1
     TREE_UNDEFINED = -2
 
-    # define if and else string patterns for extracting the decision rules
+    # define "if and else" string patterns for extracting the decision rules
     if_str_pattern = lambda offset, s_c, f_n, node, ie_c: offset + "if {}{}".format(s_c, f_n[node]) + " <= {}"\
         .format(str(s_c[node])) + ie_c + " {"
 
