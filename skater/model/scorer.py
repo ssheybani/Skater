@@ -123,6 +123,9 @@ class MeanAbsoluteError(RegressionScorer):
 
 
 class RSquared(RegressionScorer):
+    # Reference: https://en.wikipedia.org/wiki/Coefficient_of_determination
+    # The score values range between [0, 1]. The best possible value is 1, however one could expect negative values as
+    # well because of the arbitrary model fit.
     type = StaticTypes.scorer_types.increasing
 
     @staticmethod
@@ -175,7 +178,7 @@ class ScorerFactory(object):
         if model.model_type == StaticTypes.model_types.regressor:
             self.mean_squared_error = MeanSquaredError(model)
             self.mean_absolute_error = MeanAbsoluteError(model)
-            self.rsquared = RSquared(model)
+            self.r2 = RSquared(model)
             self.default = self.mean_absolute_error
         elif model.model_type == StaticTypes.model_types.classifier:
             self.cross_entropy = CrossEntropy(model)

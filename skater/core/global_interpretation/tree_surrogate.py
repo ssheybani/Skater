@@ -9,6 +9,7 @@ from skater.core.visualizer.tree_visualizer import plot_tree
 from skater.util.logger import build_logger
 from skater.util.logger import _WARNING
 from skater.util.logger import _INFO
+from skater.util import exceptions
 
 logger = build_logger(_INFO, __name__)
 
@@ -17,7 +18,7 @@ class TreeSurrogate(object):
     __name__ = "TreeSurrogate"
 
     # Reference: http://ftp.cs.wisc.edu/machine-learning/shavlik-group/craven.thesis.pdf
-    def __init__(self, estimator_type='classification', criterion='gini', splitter='best', max_depth=None, min_samples_split=2,
+    def __init__(self, estimator_type='classifier', criterion='gini', splitter='best', max_depth=None, min_samples_split=2,
                  min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=None, seed=None, max_leaf_nodes=None,
                  min_impurity_decrease=0.0, min_impurity_split=None, class_weight=None, class_names=None,
                  presort=False, feature_names=None, impurity_threshold=0.01, log_level=_WARNING):
@@ -27,14 +28,15 @@ class TreeSurrogate(object):
         self.feature_names = feature_names
         self.class_names = class_names
         self.impurity_threshold = impurity_threshold
-        self.criterion_types = {'classification': {'criterion': ['gini', 'entropy']},
-                                'regression': {'criterion': ['mse', 'friedman_mse', 'mae']}
+        self.criterion_types = {'classifier': {'criterion': ['gini', 'entropy']},
+                                'regressor': {'criterion': ['mse', 'friedman_mse', 'mae']}
                                 }
         self.splitter_types = ['best', 'random']
         self.splitter = splitter if any(splitter in item for item in self.splitter_types) else 'best'
+        self.estimator_type = estimator_type
 
         # TODO validate the parameters based on estimator type
-        if estimator_type == 'classification':
+        if estimator_type == 'classifier':
             self.__model = DecisionTreeClassifier(criterion=criterion, splitter=self.splitter, max_depth=max_depth,
                                                   min_samples_split=min_samples_split,
                                                   min_samples_leaf=min_samples_leaf,
@@ -44,7 +46,7 @@ class TreeSurrogate(object):
                                                   min_impurity_decrease=min_impurity_decrease,
                                                   min_impurity_split=min_impurity_split,
                                                   class_weight=class_weight, presort=presort)
-        else:
+        elif estimator_type == 'regressor':
             self.__model = DecisionTreeRegressor(criterion=criterion, splitter=self.splitter, max_depth=None,
                                                  min_samples_split=min_samples_split,
                                                  min_samples_leaf=min_samples_leaf,
@@ -53,9 +55,12 @@ class TreeSurrogate(object):
                                                  random_state=seed, max_leaf_nodes=max_leaf_nodes,
                                                  min_impurity_decrease=min_impurity_decrease,
                                                  min_impurity_split=min_impurity_split, presort=presort)
+        else:
+            raise exceptions.ModelError("Model type not supported. Supported options types{'classifier', 'regressor'}")
 
 
-    def learn(self, X, Y, original_y, cv=True, n_iter_search=10, param_grid=None):
+
+    def learn(self, X, Y, oracle_y, cv=True, n_iter_search=10, param_grid=None, scorer_type='default'):
         if cv is False:
             self.__model.fit(X, Y)
         else:
@@ -81,10 +86,13 @@ class TreeSurrogate(object):
             self.__model = random_search_estimator.best_estimator_
         y_hat_surrogate = self.predict(X)
 
-        model_inst = ModelType(model_type='classifier')
-        scorer = model_inst.scorers.get_scorer_function(scorer_type='f1')
+        model_inst = ModelType(model_type=self.estimator_type)
+        # Default metrics:
+        # {Classification: if probability score used --> cross entropy(log-loss) else --> F1 score}
+        # {Regression: Mean Absolute Error (MAE)}
+        scorer = model_inst.scorers.get_scorer_function(scorer_type='default')
         # TODO This should be abstracted by the model scorer factory
-        metric_score = scorer(original_y, Y)
+        metric_score = scorer(oracle_y, Y)
         surrogate_metric_score = scorer(Y, y_hat_surrogate)
         # Check on the length of any of the metric to determine the number of classes
         # if all is selected then compare against all metrics
