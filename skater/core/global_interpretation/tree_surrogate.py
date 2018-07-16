@@ -24,6 +24,7 @@ class TreeSurrogate(object):
                  presort=False, feature_names=None, impurity_threshold=0.01, log_level=_WARNING):
         self.logger = build_logger(log_level, __name__)
         self.__model = None
+        self.__model_type = None
 
         self.feature_names = feature_names
         self.class_names = class_names
@@ -33,10 +34,10 @@ class TreeSurrogate(object):
                                 }
         self.splitter_types = ['best', 'random']
         self.splitter = splitter if any(splitter in item for item in self.splitter_types) else 'best'
-        self.estimator_type = estimator_type
 
         # TODO validate the parameters based on estimator type
         if estimator_type == 'classifier':
+            self.__model_type = estimator_type
             self.__model = DecisionTreeClassifier(criterion=criterion, splitter=self.splitter, max_depth=max_depth,
                                                   min_samples_split=min_samples_split,
                                                   min_samples_leaf=min_samples_leaf,
@@ -47,7 +48,8 @@ class TreeSurrogate(object):
                                                   min_impurity_split=min_impurity_split,
                                                   class_weight=class_weight, presort=presort)
         elif estimator_type == 'regressor':
-            self.__model = DecisionTreeRegressor(criterion=criterion, splitter=self.splitter, max_depth=None,
+            self.__model_type = estimator_type
+            self.__model = DecisionTreeRegressor(criterion='mse', splitter=self.splitter, max_depth=None,
                                                  min_samples_split=min_samples_split,
                                                  min_samples_leaf=min_samples_leaf,
                                                  min_weight_fraction_leaf=min_weight_fraction_leaf,
@@ -66,7 +68,7 @@ class TreeSurrogate(object):
         else:
             # apply randomized cross validation
             default_grid = {
-                "criterion": ["gini", "entropy"],
+                "criterion": self.criterion_types[self.__model_type]['criterion'],
                 "max_depth": [2, 5, 8],
                 "min_samples_leaf": [1, 2, 4],
                 "max_leaf_nodes": [2, 4, 6]
@@ -86,7 +88,7 @@ class TreeSurrogate(object):
             self.__model = random_search_estimator.best_estimator_
         y_hat_surrogate = self.predict(X)
 
-        model_inst = ModelType(model_type=self.estimator_type)
+        model_inst = ModelType(model_type=self.__model_type)
         # Default metrics:
         # {Classification: if probability score used --> cross entropy(log-loss) else --> F1 score}
         # {Regression: Mean Absolute Error (MAE)}
@@ -106,6 +108,10 @@ class TreeSurrogate(object):
     @property
     def estimator(self):
         return self.__model
+
+    @property
+    def estimator_type(self):
+        return self.__model_type
 
 
     def predict(self, X, prob_score=False):
