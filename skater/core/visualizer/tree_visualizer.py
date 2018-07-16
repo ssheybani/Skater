@@ -36,15 +36,15 @@ def _get_colors(num_classes, random_state=1):
 # https://stackoverflow.com/questions/42891148/changing-colors-for-decision-tree-plot-created-using-export-graphviz
 # Color scheme info: http://wingraphviz.sourceforge.net/wingraphviz/language/colorname.htm
 # Currently, supported only for sklearn models
-def plot_tree(estimator, feature_names=None, class_names=None, color_list=None, enable_node_id=True,
-              coverage=True, seed=2):
+def plot_tree(estimator, estimator_type='classifier', feature_names=None, class_names=None, color_list=None,
+              enable_node_id=True, coverage=True, seed=2):
     dot_data = StringIO()
     export_graphviz(estimator, out_file=dot_data, filled=True, rounded=True,
                     special_characters=True, feature_names=feature_names,
                     class_names=class_names, node_ids=enable_node_id, proportion=coverage)
     graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
 
-    if estimator.estimator_type == 'classifier':
+    if estimator_type == 'classifier':
         # if color is not assigned, pick color uniformly random from the color list defined above
         color_names = color_list if color_list is not None else _get_colors(len(class_names), seed)
         default_color = 'cornsilk'

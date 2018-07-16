@@ -124,9 +124,9 @@ class TreeSurrogate(object):
         pass
 
 
-    def plot_global_decisions(self, model, colors=None, enable_node_id=True, random_state=0,
+    def plot_global_decisions(self, colors=None, enable_node_id=True, random_state=0,
                               persist=True, file_name="interpretable_tree.png"):
-        graph_inst = plot_tree(model, feature_names=self.feature_names, color_list=colors, class_names=self.class_names,
+        graph_inst = plot_tree(self.__model, self.__model_type, feature_names=self.feature_names, color_list=colors, class_names=self.class_names,
                                enable_node_id=enable_node_id, seed=random_state)
         f_name = "interpretable_tree.png" if file_name is None else file_name
 

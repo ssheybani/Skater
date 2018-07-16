@@ -176,8 +176,8 @@ class ScorerFactory(object):
     """
     def __init__(self, model):
         if model.model_type == StaticTypes.model_types.regressor:
-            self.mean_squared_error = MeanSquaredError(model)
-            self.mean_absolute_error = MeanAbsoluteError(model)
+            self.mse = MeanSquaredError(model)
+            self.mae = MeanAbsoluteError(model)
             self.r2 = RSquared(model)
             self.default = self.mean_absolute_error
         elif model.model_type == StaticTypes.model_types.classifier:
