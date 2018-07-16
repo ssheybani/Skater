@@ -179,7 +179,7 @@ class ScorerFactory(object):
             self.mse = MeanSquaredError(model)
             self.mae = MeanAbsoluteError(model)
             self.r2 = RSquared(model)
-            self.default = self.mean_absolute_error
+            self.default = self.mae
         elif model.model_type == StaticTypes.model_types.classifier:
             self.cross_entropy = CrossEntropy(model)
             self.f1 = F1(model)

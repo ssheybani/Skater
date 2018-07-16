@@ -18,7 +18,7 @@ class TreeSurrogate(object):
     __name__ = "TreeSurrogate"
 
     # Reference: http://ftp.cs.wisc.edu/machine-learning/shavlik-group/craven.thesis.pdf
-    def __init__(self, estimator_type='classifier', criterion='gini', splitter='best', max_depth=None, min_samples_split=2,
+    def __init__(self, estimator_type='classifier', splitter='best', max_depth=None, min_samples_split=2,
                  min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=None, seed=None, max_leaf_nodes=None,
                  min_impurity_decrease=0.0, min_impurity_split=None, class_weight=None, class_names=None,
                  presort=False, feature_names=None, impurity_threshold=0.01, log_level=_WARNING):
@@ -38,7 +38,7 @@ class TreeSurrogate(object):
         # TODO validate the parameters based on estimator type
         if estimator_type == 'classifier':
             self.__model_type = estimator_type
-            self.__model = DecisionTreeClassifier(criterion=criterion, splitter=self.splitter, max_depth=max_depth,
+            self.__model = DecisionTreeClassifier(splitter=self.splitter, max_depth=max_depth,
                                                   min_samples_split=min_samples_split,
                                                   min_samples_leaf=min_samples_leaf,
                                                   min_weight_fraction_leaf=min_weight_fraction_leaf,
@@ -49,7 +49,7 @@ class TreeSurrogate(object):
                                                   class_weight=class_weight, presort=presort)
         elif estimator_type == 'regressor':
             self.__model_type = estimator_type
-            self.__model = DecisionTreeRegressor(criterion='mse', splitter=self.splitter, max_depth=None,
+            self.__model = DecisionTreeRegressor(splitter=self.splitter, max_depth=None,
                                                  min_samples_split=min_samples_split,
                                                  min_samples_leaf=min_samples_leaf,
                                                  min_weight_fraction_leaf=min_weight_fraction_leaf,
@@ -69,7 +69,7 @@ class TreeSurrogate(object):
             # apply randomized cross validation
             default_grid = {
                 "criterion": self.criterion_types[self.__model_type]['criterion'],
-                "max_depth": [2, 5, 8],
+                "max_depth": [2, 4, 8],
                 "min_samples_leaf": [1, 2, 4],
                 "max_leaf_nodes": [2, 4, 6]
             }
@@ -98,7 +98,7 @@ class TreeSurrogate(object):
         surrogate_metric_score = scorer(Y, y_hat_surrogate)
         # Check on the length of any of the metric to determine the number of classes
         # if all is selected then compare against all metrics
-        fidelity_score = np.sqrt(np.sum((metric_score - surrogate_metric_score)**2))
+        fidelity_score = np.abs(surrogate_metric_score - metric_score)
         if fidelity_score > self.impurity_threshold:
             self.logger.warning('fidelity score:{} of the surrogate model is higher than the impurity threshold: {}'.
                                 format(fidelity_score, self.impurity_threshold))
