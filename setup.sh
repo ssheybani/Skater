@@ -23,7 +23,6 @@ then
     brew install r-cran-rcpp
     # installing amp
     brew install libgmp3-dev
-    sudo python -m pip install rpy2==2.9.1
 elif [ "$1" = "linux-ubuntu" ]
 then
     # installs R base as well
@@ -38,14 +37,17 @@ then
     sudo apt-get install libgsl0-dev
     sudo apt-get -y install r-base
     sudo apt-get install r-cran-rcpp
-    sudo python -m pip install rpy2==2.9.1
 elif [ "$1" = "linux-rpm" ]
 then
     sudo yum -y install r-base
     sudo yum install r-cran-rcpp
     sudo yum install libgmp3-dev
-    sudo python -m pip install rpy2==2.9.1
 fi
+if [ "$ver" = "36" ] || [ "$ver" = "36" ]; then
+    echo "installing rpy2"
+    sudo python -m pip install rpy2
+fi
+
 # downloads the required R packages locally in the same directory as setup.py
 wget https://cran.r-project.org/src/contrib/Archive/Rcpp/Rcpp_0.12.16.tar.gz
 sudo R CMD INSTALL Rcpp_0.12.16.tar.gz
