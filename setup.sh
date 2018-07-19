@@ -50,3 +50,8 @@ wget https://cran.r-project.org/src/contrib/Archive/arules/arules_1.5-5.tar.gz
 sudo R CMD INSTALL arules_1.5-5.tar.gz
 wget https://cran.r-project.org/src/contrib/sbrl_1.2.tar.gz
 sudo R CMD INSTALL sbrl_1.2.tar.gz
+
+# once the r installation is over, install rpy2==2.9.1
+if [ "$ver" = "36" ] || [ "$ver" = "35" ]; then
+    sudo python -m pip install rpy2==2.9.1
+fi
