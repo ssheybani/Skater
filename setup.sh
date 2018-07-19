@@ -43,10 +43,9 @@ then
     sudo yum install r-cran-rcpp
     sudo yum install libgmp3-dev
 fi
-if [ "$ver" = "36" ] || [ "$ver" = "36" ]; then
-    echo "installing rpy2"
-    sudo python -m pip install rpy2
-fi
+
+echo "installing rpy2"
+sudo python -m pip install rpy2
 
 # downloads the required R packages locally in the same directory as setup.py
 wget https://cran.r-project.org/src/contrib/Archive/Rcpp/Rcpp_0.12.16.tar.gz
