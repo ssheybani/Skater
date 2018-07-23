@@ -379,7 +379,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
         if progressbar:
             self.interpreter.logger.warn("Progress bars slow down runs by 10-20%. For slightly \n"
-                                         "faster runs, do progress_bar=False")
+                                         "faster runs, do progressbar=False")
             mapper = executor_instance.imap
             p = ProgressBar(len(arg_list), units='grid cells')
         else:
