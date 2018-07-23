@@ -45,7 +45,7 @@ then
 fi
 
 echo "installing rpy2"
-sudo python -m pip install rpy2
+sudo python -m pip install rpy2==2.9.4
 
 # downloads the required R packages locally in the same directory as setup.py
 wget https://cran.r-project.org/src/contrib/Archive/Rcpp/Rcpp_0.12.16.tar.gz
