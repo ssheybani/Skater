@@ -92,7 +92,7 @@ class TreeSurrogate(object):
         # Default metrics:
         # {Classification: if probability score used --> cross entropy(log-loss) else --> F1 score}
         # {Regression: Mean Absolute Error (MAE)}
-        scorer = model_inst.scorers.get_scorer_function(scorer_type='default')
+        scorer = model_inst.scorers.get_scorer_function(scorer_type=scorer_type)
         # TODO This should be abstracted by the model scorer factory
         metric_score = scorer(oracle_y, Y)
         surrogate_metric_score = scorer(Y, y_hat_surrogate)
