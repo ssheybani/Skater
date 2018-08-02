@@ -37,23 +37,13 @@ class Scorer(object):
                                                                       model.model_type,
                                                                       cls.model_types)
 
+
     def __call__(self, y_true, y_predicted, sample_weight=None):
         self.check_model(self.model)
         self.check_data(y_true, y_predicted)
         # formatted_y = self.model.transformer(self.model.output_formatter(y_true))
         return self._score(y_true, y_predicted, sample_weight=sample_weight)
 
-    @staticmethod
-    @abstractmethod
-    def _score(model, inputs, y_true):
-        """
-        Private method for getting scores
-        :param model:
-        :param inputs:
-        :param y_true:
-        :return:
-        """
-        pass
 
     @staticmethod
     @abstractmethod
@@ -165,7 +155,7 @@ class F1(ClassifierScorer):
         else:
             preds = y_predicted
 
-        return f1_score(y_true, preds, sample_weight=sample_weight, average='weighted')
+        return f1_score(y_true, preds, sample_weight=sample_weight, average=average)
 
 
 class ScorerFactory(object):
