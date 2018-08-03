@@ -124,14 +124,28 @@ class TreeSurrogate(object):
         pass
 
 
-    def plot_global_decisions(self, colors=None, enable_node_id=True, random_state=0,
-                              persist=True, file_name="interpretable_tree.png"):
+    def plot_global_decisions(self, colors=None, enable_node_id=True, random_state=0, file_name="interpretable_tree.png",
+                              show_img=True, fig_size=(20, 8)):
         graph_inst = plot_tree(self.__model, self.__model_type, feature_names=self.feature_names, color_list=colors,
                                class_names=self.class_names, enable_node_id=enable_node_id, seed=random_state)
         f_name = "interpretable_tree.png" if file_name is None else file_name
+        graph_inst.write_png(f_name)
 
-        if persist is True:
-            graph_inst.write_png(f_name)
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            raise (exceptions.MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
+        except RuntimeError:
+            raise (exceptions.MatplotlibDisplayError("Matplotlib unable to open display"))
+
+        if show_img:
+            plt.rcParams["figure.figsize"] = fig_size
+            img = plt.imread(f_name)
+            if self.__model_type == 'regressor':
+                cax = plt.imshow(img, cmap=plt.cm.get_cmap(graph_inst.get_colorscheme()))
+                plt.colorbar(cax)
+            else:
+                plt.imshow(img)
         return graph_inst
 
 

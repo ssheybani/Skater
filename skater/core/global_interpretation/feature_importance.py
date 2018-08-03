@@ -13,7 +13,6 @@ from ...util.exceptions import *
 from ...util.dataops import divide_zerosafe
 from ...util.progressbar import ProgressBar
 from ...util.static_types import StaticTypes
-from ...model.scorer import Scorer
 
 
 class FeatureImportance(BaseGlobalInterpretation):

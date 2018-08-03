@@ -3,8 +3,16 @@ from sklearn.tree import export_graphviz
 import pydotplus
 import numpy as np
 
+from skater.util import exceptions
+try:
+    from matplotlib.colors import rgb2hex
+    import matplotlib.pyplot as plt
+except ImportError:
+    raise (exceptions.MatplotlibUnavailableError("matplotlib is required but unavailable on the system."))
+
 
 # reference: http://wingraphviz.sourceforge.net/wingraphviz/language/colorname.htm
+# TODO: Make the color scheme for regression and classification homogeneous
 color_schemes = ['aliceblue', 'antiquewhite', 'aquamarine', 'azure', 'beige', 'bisque', 'black', 'blanchedalmond', 'blue',
                  'blueviolet', 'brown', 'burlywood', 'cadetblue', 'chartreuse', 'chocolate', 'coral', 'cornflowerblue',
                  'cornsilk', 'crimson', 'cyan', 'darkgoldenrod', 'darkgreen', 'darkkhaki', 'darkolivegreen', 'darkorange',
@@ -32,35 +40,62 @@ def _get_colors(num_classes, random_state=1):
     return colors
 
 
-# https://stackoverflow.com/questions/48085315/interpreting-graphviz-output-for-decision-tree-regression
-# https://stackoverflow.com/questions/42891148/changing-colors-for-decision-tree-plot-created-using-export-graphviz
-# Color scheme info: http://wingraphviz.sourceforge.net/wingraphviz/language/colorname.htm
-# Currently, supported only for sklearn models
-def plot_tree(estimator, estimator_type='classifier', feature_names=None, class_names=None, color_list=None,
-              enable_node_id=True, coverage=True, seed=2):
+def _generate_graph(est, est_type='classifier', classes=None, features=None,
+                    enable_node_id=True, coverage=True):
     dot_data = StringIO()
-    export_graphviz(estimator, out_file=dot_data, filled=True, rounded=True,
-                    special_characters=True, feature_names=feature_names,
-                    class_names=class_names, node_ids=enable_node_id, proportion=coverage)
+    # class names are needed only for "Classification" for "Regression" it is set to None
+    c_n = classes if est_type == 'classifier' else None
+    export_graphviz(est, out_file=dot_data, filled=True, rounded=True,
+                    special_characters=True, feature_names=features,
+                    class_names=c_n, node_ids=enable_node_id, proportion=coverage)
     graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
+    return graph
 
-    if estimator_type == 'classifier':
-        # if color is not assigned, pick color uniformly random from the color list defined above
-        color_names = color_list if color_list is not None else _get_colors(len(class_names), seed)
-        default_color = 'cornsilk'
 
-        # Query for the node list to change properties
-        nodes = graph.get_node_list()
-        for node in nodes:
-            if node.get_name() not in ('node', 'edge'):
+def _set_node_properites(estimator, estimator_type, graph_instance, color_names, default_color):
+    # Query and assign properties to each node
+    nodes = graph_instance.get_node_list()
+    for node in nodes:
+        if node.get_name() not in ('node', 'edge'):
+            if estimator_type == 'classifier':
                 values = estimator.tree_.value[int(node.get_name())][0]
                 # 1. Color only the leaf nodes, One way to identify leaf nodes is to check on the values which
                 #    should represent a distribution only for one class
                 # 2. mixed nodes get the default color
                 node.set_fillcolor(color_names[np.argmax(values)]) if max(values) == sum(values) \
                     else node.set_fillcolor(default_color)
+            else:
+                # if the estimator type is a "regressor", then the intensity of the color is defined by the
+                # population coverage for a particular value
+                percent = estimator.tree_.n_node_samples[int(node.get_name())] / float(estimator.tree_.n_node_samples[0])
+                rgba = plt.cm.get_cmap(color_names)(percent)
+                hex_code = rgb2hex(rgba)
+                node.set_fillcolor(hex_code)
+    graph_instance.set_colorscheme(color_names)
+    return graph_instance
 
-    # Query for the edge list to change properties
+
+# https://stackoverflow.com/questions/48085315/interpreting-graphviz-output-for-decision-tree-regression
+# https://stackoverflow.com/questions/42891148/changing-colors-for-decision-tree-plot-created-using-export-graphviz
+# Color scheme info: http://wingraphviz.sourceforge.net/wingraphviz/language/colorname.htm
+# Currently, supported only for sklearn models
+def plot_tree(estimator, estimator_type='classifier', feature_names=None, class_names=None, color_list=None,
+              colormap_reg='PuBuGn', enable_node_id=True, coverage=True, seed=2):
+
+    graph = _generate_graph(estimator, estimator_type, feature_names, class_names, color_list, enable_node_id, coverage)
+
+    if estimator_type == 'classifier':
+        # if color is not assigned, pick color uniformly random from the color list defined above if the estimator
+        # type is "classification"
+        colors = color_list if color_list is not None else _get_colors(len(class_names), seed)
+        default_color = 'cornsilk'
+    else:
+        colors = colormap_reg
+        default_color = None
+
+    graph = _set_node_properites(estimator, estimator_type, graph, color_names=colors, default_color=default_color)
+
+    # Set the color scheme for the edges
     edges = graph.get_edge_list()
     for ed in edges:
         ed.set_color('steelblue')
@@ -75,7 +110,7 @@ return_value = lambda estimator_type, v: 'Predicted Label: {}'.format(str(np.arg
 # Reference: https://stackoverflow.com/questions/20224526/how-to-extract-the-decision-rules-from-scikit-learn-decision-tree
 # TODO: Figure out ways to make it generic for other frameworks
 def tree_to_text(tree, feature_names, estimator_type='classifier'):
-    # definining colors
+    # defining colors
     label_value_color = "\033[1;34;49m"  # blue
     split_criteria_color = "\033[0;32;49m"  # green
     if_else_quotes_color = "\033[0;30;49m"  # if and else quotes
@@ -96,7 +131,7 @@ def tree_to_text(tree, feature_names, estimator_type='classifier'):
 
     other_str_pattern = lambda offset, color_val, str_type: offset + color_val + str_type
 
-    def recurse_tree(left_node, right_node, split_criterias, features_names, node, depth=0):
+    def recurse_tree(left_node, right_node, features_names, node, depth=0):
         offset = "  " * depth
         if threshold[node] != TREE_UNDEFINED:
             print(if_str_pattern(offset, split_criteria_color, features_names, node, if_else_quotes_color))
