@@ -71,7 +71,7 @@ def _set_node_properites(estimator, estimator_type, graph_instance, color_names,
                 rgba = plt.cm.get_cmap(color_names)(percent)
                 hex_code = rgb2hex(rgba)
                 node.set_fillcolor(hex_code)
-    graph_instance.set_colorscheme(color_names)
+                graph_instance.set_colorscheme(color_names)
     return graph_instance
 
 
@@ -82,7 +82,7 @@ def _set_node_properites(estimator, estimator_type, graph_instance, color_names,
 def plot_tree(estimator, estimator_type='classifier', feature_names=None, class_names=None, color_list=None,
               colormap_reg='PuBuGn', enable_node_id=True, coverage=True, seed=2):
 
-    graph = _generate_graph(estimator, estimator_type, feature_names, class_names, color_list, enable_node_id, coverage)
+    graph = _generate_graph(estimator, estimator_type, class_names, feature_names, enable_node_id, coverage)
 
     if estimator_type == 'classifier':
         # if color is not assigned, pick color uniformly random from the color list defined above if the estimator
