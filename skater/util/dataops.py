@@ -110,29 +110,33 @@ def json_validator(json_object):
     return True
 
 
-def _render_html(file_name):
+def _render_html(file_name, width=None, height=None):
+    width, height
     from IPython.core.display import HTML
     return HTML(file_name)
 
 
-def _render_image(file_name):
+def _render_image(file_name, width=600, height=300):
     from IPython.display import Image
-    return Image(file_name, retina=True)
+    return Image(file_name, width=width, height=height)
 
 
-def _render_pdf(file_name):
+def _render_pdf(file_name, width=600, height=300):
     from IPython.display import IFrame
-    IFrame(file_name, width=600, height=300)
+    IFrame(file_name, width=width, height=height)
 
 
-def show_in_notebook(file_name_with_type='rendered.html'):
+def show_in_notebook(file_name_with_type='rendered.html', width=600, height=300):
     """ Display generated artifacts(e.g. .png, .html, .jpeg/.jpg) in interactive Jupyter style Notebook
 
     Parameters
     -----------
     file_name_with_type: str
         specify the name of the file to display
-
+    width: int
+        width in pixels to constrain the image
+    height: int
+        height in pixels to constrain the image
     """
     from IPython.core.display import display
     file_type = file_name_with_type.split('/')[-1].split('.')[-1]
@@ -146,7 +150,7 @@ def show_in_notebook(file_name_with_type='rendered.html'):
     }
     select_type = lambda choice_type: choice_dict[file_type]
     logger.info("File Name: {}".format(file_name_with_type))
-    return display(select_type(file_type)(file_name_with_type))
+    return display(select_type(file_type)(file_name_with_type, width, height))
 
 
 class MultiColumnLabelBinarizer(LabelBinarizer):
