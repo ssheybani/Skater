@@ -175,7 +175,7 @@ def standard_scaler(X):
     return X
 
 
-def show_image(X, cmap=None, bins=None, title='Original'):
+def show_image(X, cmap=None, bins=None, intensity_plot=False, width=8, height=8, title='Original'):
     # TODO: Add ability to handle a pre-defined axes for plotting
     import copy
     font = {'family': 'avenir',
@@ -187,12 +187,17 @@ def show_image(X, cmap=None, bins=None, title='Original'):
 
     try:
         import matplotlib.pyplot as plt
-        fig, ax = plt.subplots(1, 2, figsize=(16, 8))
-        ax[0].imshow(_X, cmap=cmap)
-        ax[0].set_title(title)
-        ax[1].hist(_X.ravel(), bins=bins, histtype='step')
-        ax[1].set_xlabel('Pixel intensity', fontdict=font)
-        fig.subplots_adjust(wspace=0.3)
+        n_clmns = 2 if intensity_plot else 1
+        fig, ax = plt.subplots(1, n_clmns, figsize=(width, height))
+        if intensity_plot:
+            ax[0].imshow(_X, cmap=cmap)
+            ax[0].set_title(title)
+            ax[1].hist(_X.ravel(), bins=bins, histtype='step')
+            ax[1].set_xlabel('Pixel intensity', fontdict=font)
+            fig.subplots_adjust(wspace=0.3)
+        else:
+            ax.imshow(_X, cmap=cmap)
+            ax.set_title(title)
     except ImportError:
         raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on the system."))
 
