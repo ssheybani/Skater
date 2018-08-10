@@ -324,7 +324,10 @@ def compute_feature_importance(feature_id, input_data, estimator_fn,
 
     copy_of_data_set[feature_id] = samples.reshape(-1)
 
-    new_predictions = estimator_fn(copy_of_data_set.values)
+    if copy_of_data_set.data_type == np.ndarray:
+        new_predictions = estimator_fn(copy_of_data_set.values)
+    else:
+        new_predictions = estimator_fn(copy_of_data_set.X)
 
     importance = compute_importance(new_predictions,
                                     original_predictions,

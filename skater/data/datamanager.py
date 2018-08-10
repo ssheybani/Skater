@@ -103,7 +103,7 @@ class DataManager(object):
 
         self.X = self._check_X(X)
         self.y = self._check_y(y, self.X)
-        self.data_type = type(X)
+        self.data_type = type(self.X)
         self.metastore = None
 
         self.logger.debug("after transform X.shape: {}".format(self.X.shape))
