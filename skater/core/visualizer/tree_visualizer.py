@@ -102,7 +102,7 @@ def plot_tree(estimator, estimator_type='classifier', feature_names=None, class_
     return graph
 
 
-return_value = lambda estimator_type, v: 'Predicted Label: {}'.format(str(np.argmax(v))) if 'classifier' \
+_return_value = lambda estimator_type, v: 'Predicted Label: {}'.format(str(np.argmax(v))) if 'classifier' \
     else 'Output: {}'.format(str(v))
 
 
@@ -126,22 +126,22 @@ def tree_to_text(tree, feature_names, estimator_type='classifier'):
     TREE_UNDEFINED = -2
 
     # define "if and else" string patterns for extracting the decision rules
-    if_str_pattern = lambda offset, s_c, f_n, node, ie_c: offset + "if {}{}".format(s_c, f_n[node]) + " <= {}"\
-        .format(str(s_c[node])) + ie_c + " {"
+    if_str_pattern = lambda offset, node: offset + "if {}{}".format(split_criteria_color, features_names[node]) \
+        + " <= {}".format(str(threshold[node])) + if_else_quotes_color + " {"
 
-    other_str_pattern = lambda offset, color_val, str_type: offset + color_val + str_type
+    other_str_pattern = lambda offset, str_type: offset + if_else_quotes_color + str_type
 
-    def recurse_tree(left_node, right_node, features_names, node, depth=0):
+    def recurse_tree(left_node, right_node, threshold, node, depth=0):
         offset = "  " * depth
         if threshold[node] != TREE_UNDEFINED:
-            print(if_str_pattern(offset, split_criteria_color, features_names, node, if_else_quotes_color))
+            print(if_str_pattern(offset, node))
             if left_node[node] != TREE_LEAF:
-                recurse_tree(left_node, right_node, threshold, features_names, left_node[node], depth + 1)
-                print(other_str_pattern(offset, if_else_quotes_color, "} else {"))
+                recurse_tree(left_node, right_node, threshold, left_node[node], depth + 1)
+                print(other_str_pattern(offset, "} else {"))
                 if right_node[node] != TREE_LEAF:
-                    recurse_tree(left_node, right_node, threshold, features_names, right_node[node], depth + 1)
-                print(other_str_pattern(offset, if_else_quotes_color, "}"))
+                    recurse_tree(left_node, right_node, threshold, right_node[node], depth + 1)
+                print(other_str_pattern(offset, "}"))
         else:
-            print(offset, label_value_color, return_value(estimator_type, value[node]))
+            print(offset, label_value_color, _return_value(estimator_type, value[node]))
 
-    recurse_tree(left_node, right_node, threshold, features_names, 0)
+    recurse_tree(left_node, right_node, threshold, 0)

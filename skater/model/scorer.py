@@ -78,23 +78,6 @@ class RegressionScorer(Scorer):
             "got {}".format(y_true.shape)
 
 
-class ClassifierScorer(Scorer):
-
-    """
-    * predictions must be N x K matrix with N rows and K classes.
-    * labels must be be N x K matrix with N rows and K classes.
-    """
-
-    model_types = [StaticTypes.model_types.classifier]
-    prediction_types = [StaticTypes.output_types.numeric, StaticTypes.output_types.float, StaticTypes.output_types.int]
-    label_types = [StaticTypes.output_types.numeric, StaticTypes.output_types.float, StaticTypes.output_types.int]
-
-    @staticmethod
-    def check_data(y_true, y_predicted):
-        assert hasattr(y_predicted, 'shape'), 'outputs must have a shape attribute'
-        assert hasattr(y_true, 'shape'), 'y_true must have a shape attribute'
-
-
 # Regression Scorers
 class MeanSquaredError(RegressionScorer):
     type = StaticTypes.scorer_types.decreasing
@@ -123,6 +106,24 @@ class RSquared(RegressionScorer):
         return r2_score(y_true, y_predicted, sample_weight=sample_weight)
 
 
+class ClassifierScorer(Scorer):
+
+    """
+    * predictions must be N x K matrix with N rows and K classes.
+    * labels must be be N x K matrix with N rows and K classes.
+    """
+
+    model_types = [StaticTypes.model_types.classifier]
+    prediction_types = [StaticTypes.output_types.numeric, StaticTypes.output_types.float, StaticTypes.output_types.int]
+    label_types = [StaticTypes.output_types.numeric, StaticTypes.output_types.float, StaticTypes.output_types.int]
+
+    @staticmethod
+    def check_data(y_true, y_predicted):
+        assert hasattr(y_predicted, 'shape'), 'outputs must have a shape attribute'
+        assert hasattr(y_true, 'shape'), 'y_true must have a shape attribute'
+
+
+# Metrics related to Classification
 class CrossEntropy(ClassifierScorer):
     type = StaticTypes.scorer_types.decreasing
 

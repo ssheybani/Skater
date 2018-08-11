@@ -3,7 +3,7 @@ from sklearn.model_selection import RandomizedSearchCV
 import numpy as np
 
 from skater.model.base import ModelType
-from skater.core.visualizer.tree_visualizer import plot_tree
+from skater.core.visualizer.tree_visualizer import plot_tree, tree_to_text
 
 from skater.util.logger import build_logger
 from skater.util.logger import _WARNING
@@ -65,7 +65,7 @@ class TreeSurrogate(object):
         if cv is False:
             self.__model.fit(X, Y)
         else:
-            # apply randomized cross validation
+            # apply randomized cross validation for pruning
             default_grid = {
                 "criterion": self.criterion_types[self.__model_type]['criterion'],
                 "max_depth": [2, 4, 8],
@@ -74,7 +74,7 @@ class TreeSurrogate(object):
             }
             search_space = param_grid if param_grid is not None else default_grid
             # Default scoring Function used by RandomizedSearchCV
-            # Classification: accuracy
+            # Classification: auc
             # Regression: r2_score
             # Cost function aiming to optimize(Total Cost) = measure of fit + measure of complexity
             # References for pruning:
@@ -95,8 +95,7 @@ class TreeSurrogate(object):
         # TODO This should be abstracted by the model scorer factory
         metric_score = scorer(oracle_y, Y)
         surrogate_metric_score = scorer(Y, y_hat_surrogate)
-        # Check on the length of any of the metric to determine the number of classes
-        # if all is selected then compare against all metrics
+
         fidelity_score = np.abs(surrogate_metric_score - metric_score)
         if fidelity_score > self.impurity_threshold:
             self.logger.warning('fidelity score:{} of the surrogate model is higher than the impurity threshold: {}'.
@@ -147,6 +146,10 @@ class TreeSurrogate(object):
             else:
                 plt.imshow(img)
         return graph_inst
+
+
+    def global_decisions_as_txt(self):
+        tree_to_text(self.__model, self.feature_names, self.__model_type)
 
 
     def plot_local_decisions(self):
