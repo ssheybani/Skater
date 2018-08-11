@@ -102,8 +102,8 @@ def plot_tree(estimator, estimator_type='classifier', feature_names=None, class_
     return graph
 
 
-_return_value = lambda estimator_type, v: 'Predicted Label: {}'.format(str(np.argmax(v))) if 'classifier' \
-    else 'Output: {}'.format(str(v))
+_return_value = lambda estimator_type, v: 'Predicted Label: {}'.format(str(np.argmax(v))) \
+    if estimator_type == 'classifier' else 'Value: {}'.format(str(v))
 
 
 # Current implementation is specific to sklearn models.
