@@ -106,42 +106,72 @@ _return_value = lambda estimator_type, v: 'Predicted Label: {}'.format(str(np.ar
     if estimator_type == 'classifier' else 'Value: {}'.format(str(v))
 
 
-# Current implementation is specific to sklearn models.
-# Reference: https://stackoverflow.com/questions/20224526/how-to-extract-the-decision-rules-from-scikit-learn-decision-tree
-# TODO: Figure out ways to make it generic for other frameworks
-def tree_to_text(tree, feature_names, estimator_type='classifier'):
-    # defining colors
-    label_value_color = "\033[1;34;49m"  # blue
-    split_criteria_color = "\033[0;32;49m"  # green
-    if_else_quotes_color = "\033[0;30;49m"  # if and else quotes
-
-    left_node = tree.tree_.children_left
-    right_node = tree.tree_.children_right
-    threshold = tree.tree_.threshold
-    features_names = [feature_names[i] for i in tree.tree_.feature]
-    value = tree.tree_.value
-
+def _global_decisions_as_txt(est_type, label_color, criteria_color, if_else_color, values,
+                             features, thresholds, l_nodes, r_nodes):
     # Reference: https://github.com/scikit-learn/scikit-learn/blob/a24c8b464d094d2c468a16ea9f8bf8d42d949f84/sklearn/tree/_tree.pyx
     TREE_LEAF = -1
     TREE_UNDEFINED = -2
 
     # define "if and else" string patterns for extracting the decision rules
-    if_str_pattern = lambda offset, node: offset + "if {}{}".format(split_criteria_color, features_names[node]) \
-        + " <= {}".format(str(threshold[node])) + if_else_quotes_color + " {"
+    if_str_pattern = lambda offset, node: offset + "if {}{}".format(criteria_color, features[node]) \
+        + " <= {}".format(str(thresholds[node])) + if_else_color + " {"
 
-    other_str_pattern = lambda offset, str_type: offset + if_else_quotes_color + str_type
+    other_str_pattern = lambda offset, str_type: offset + if_else_color + str_type
 
-    def recurse_tree(left_node, right_node, threshold, node, depth=0):
+    def _recurse_tree(left_node, right_node, threshold, node, depth=0):
         offset = "  " * depth
         if threshold[node] != TREE_UNDEFINED:
             print(if_str_pattern(offset, node))
             if left_node[node] != TREE_LEAF:
-                recurse_tree(left_node, right_node, threshold, left_node[node], depth + 1)
+                _recurse_tree(left_node, right_node, threshold, left_node[node], depth + 1)
                 print(other_str_pattern(offset, "} else {"))
                 if right_node[node] != TREE_LEAF:
-                    recurse_tree(left_node, right_node, threshold, right_node[node], depth + 1)
+                    _recurse_tree(left_node, right_node, threshold, right_node[node], depth + 1)
                 print(other_str_pattern(offset, "}"))
         else:
-            print(offset, label_value_color, _return_value(estimator_type, value[node]))
+            print(offset, label_color, _return_value(est_type, values[node]))
 
-    recurse_tree(left_node, right_node, threshold, 0)
+    _recurse_tree(l_nodes, r_nodes, thresholds, 0)
+
+
+def _local_decisions_as_txt(est, est_type, label_color, criteria_color, if_else_color,
+                            values, features, thresholds, input_X):
+    as_str_pattern = lambda offset, node_id, \
+        feature_value: offset + \
+        "As {}{}{}".format(criteria_color, features[node_id], "[" + str(feature_value) + "]") + \
+        " <= {}".format(str(thresholds[node_id])) + if_else_color + " then,"
+
+    path = est.decision_path(input_X)
+    node_indexes = path.indices
+    leaf_id = est.apply(input_X)
+    depth = 0
+    for node_index in node_indexes:
+        offset = "  " * depth
+    if leaf_id != node_index:
+        print(as_str_pattern(offset, node_index, input_X[features[node_index]]))
+        depth += 1
+    else:
+        print(offset, label_color, _return_value(est_type, values[node_index]))
+
+
+# Current implementation is specific to sklearn models.
+# Reference: https://stackoverflow.com/questions/20224526/how-to-extract-the-decision-rules-from-scikit-learn-decision-tree
+# TODO: Figure out ways to make it generic for other frameworks
+def tree_to_text(tree, feature_names, estimator_type='classifier', scope='global', X=None):
+    # defining colors
+    label_value_color = "\033[1;34;49m"  # blue
+    split_criteria_color = "\033[0;32;49m"  # green
+    if_else_quotes_color = "\033[0;30;49m"  # if and else quotes
+
+    left_nodes = tree.tree_.children_left
+    right_nodes = tree.tree_.children_right
+    criterias = tree.tree_.threshold
+    feature_names = [feature_names[i] for i in tree.tree_.feature]
+    values = tree.tree_.value
+
+    if scope == "global":
+        _global_decisions_as_txt(estimator_type, label_value_color, split_criteria_color,
+                                 if_else_quotes_color, values, feature_names, criterias, left_nodes, right_nodes)
+    else:
+        _local_decisions_as_txt(tree, estimator_type, label_value_color, split_criteria_color,
+                                if_else_quotes_color, values, feature_names, criterias, X)
