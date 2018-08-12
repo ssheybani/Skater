@@ -141,9 +141,9 @@ def _local_decisions_as_txt(est, est_type, label_color, criteria_color, if_else_
         "As {}{}{}".format(criteria_color, features[node_id], "[" + str(feature_value) + "]") + \
         " <= {}".format(str(thresholds[node_id])) + if_else_color + " then,"
 
-    path = est.decision_path(input_X)
+    path = est.decision_path(input_X.values.reshape(1, -1))
     node_indexes = path.indices
-    leaf_id = est.apply(input_X)
+    leaf_id = est.apply(input_X.values.reshape(1, -1))
     depth = 0
     for node_index in node_indexes:
         offset = "  " * depth
@@ -171,7 +171,7 @@ def tree_to_text(tree, feature_names, estimator_type='classifier', scope='global
 
     if scope == "global":
         return _global_decisions_as_txt(estimator_type, label_value_color, split_criteria_color,
-                                 if_else_quotes_color, values, feature_names, criterias, left_nodes, right_nodes)
+                                        if_else_quotes_color, values, feature_names, criterias, left_nodes, right_nodes)
     else:
         return _local_decisions_as_txt(tree, estimator_type, label_value_color, split_criteria_color,
-                                if_else_quotes_color, values, feature_names, criterias, X)
+                                       if_else_quotes_color, values, feature_names, criterias, X)
