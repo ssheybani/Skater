@@ -147,11 +147,11 @@ def _local_decisions_as_txt(est, est_type, label_color, criteria_color, if_else_
     depth = 0
     for node_index in node_indexes:
         offset = "  " * depth
-    if leaf_id != node_index:
-        print(as_str_pattern(offset, node_index, input_X[features[node_index]]))
-        depth += 1
-    else:
-        print(offset, label_color, _return_value(est_type, values[node_index]))
+        if leaf_id != node_index:
+            print(as_str_pattern(offset, node_index, input_X[features[node_index]]))
+            depth += 1
+        else:
+            print(offset, label_color, _return_value(est_type, values[node_index]))
 
 
 # Current implementation is specific to sklearn models.
