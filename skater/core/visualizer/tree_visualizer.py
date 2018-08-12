@@ -170,8 +170,8 @@ def tree_to_text(tree, feature_names, estimator_type='classifier', scope='global
     values = tree.tree_.value
 
     if scope == "global":
-        _global_decisions_as_txt(estimator_type, label_value_color, split_criteria_color,
+        return _global_decisions_as_txt(estimator_type, label_value_color, split_criteria_color,
                                  if_else_quotes_color, values, feature_names, criterias, left_nodes, right_nodes)
     else:
-        _local_decisions_as_txt(tree, estimator_type, label_value_color, split_criteria_color,
+        return _local_decisions_as_txt(tree, estimator_type, label_value_color, split_criteria_color,
                                 if_else_quotes_color, values, feature_names, criterias, X)

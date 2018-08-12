@@ -148,8 +148,8 @@ class TreeSurrogate(object):
         return graph_inst
 
 
-    def decisions_as_txt(self, scope='global'):
-        tree_to_text(self.__model, self.feature_names, self.__model_type, scope)
+    def decisions_as_txt(self, scope='global', X=None):
+        tree_to_text(self.__model, self.feature_names, self.__model_type, scope, X)
 
 
     def plot_local_decisions(self):
