@@ -17,6 +17,7 @@ class TreeSurrogate(object):
     __name__ = "TreeSurrogate"
 
     # Reference: http://ftp.cs.wisc.edu/machine-learning/shavlik-group/craven.thesis.pdf
+    # https://en.wikipedia.org/wiki/Decision_tree_learning
     def __init__(self, estimator_type='classifier', splitter='best', max_depth=None, min_samples_split=2,
                  min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=None, seed=None, max_leaf_nodes=None,
                  min_impurity_decrease=0.0, min_impurity_split=None, class_weight=None, class_names=None,
@@ -60,7 +61,7 @@ class TreeSurrogate(object):
             raise exceptions.ModelError("Model type not supported. Supported options types{'classifier', 'regressor'}")
 
 
-    def learn(self, X, Y, oracle_y, cv=True, n_iter_search=10, param_grid=None, scorer_type='default'):
+    def learn(self, X, Y, oracle_y, cv=True, n_iter_search=10, param_grid=None, scorer_type='default', n_jobs=1):
         if cv is False:
             self.__model.fit(X, Y)
         else:
@@ -72,16 +73,14 @@ class TreeSurrogate(object):
                 "max_leaf_nodes": [2, 4, 6]
             }
             search_space = param_grid if param_grid is not None else default_grid
-            # Default scoring Function used by RandomizedSearchCV
-            # Classification: auc
-            # Regression: r2_score
             # Cost function aiming to optimize(Total Cost) = measure of fit + measure of complexity
             # References for pruning:
             # 1. http://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
             # 2. https://www.coursera.org/lecture/ml-classification/optional-pruning-decision-trees-to-avoid-overfitting-qvf6v
-            # Using Randomize Search here to prune the trees for readability
+            # Using Randomize Search here to prune the trees to improve readability without
+            # comprising on model's performance
             random_search_estimator = RandomizedSearchCV(estimator=self.__model, param_distributions=search_space,
-                                                         n_iter=n_iter_search)
+                                                         n_iter=n_iter_search, n_jobs=n_jobs)
             random_search_estimator.fit(X, Y)
             self.__model = random_search_estimator.best_estimator_
         y_hat_surrogate = self.predict(X)
