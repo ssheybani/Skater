@@ -175,7 +175,6 @@ class ScorerFactory(object):
             self.cross_entropy = CrossEntropy(model)
             self.f1 = F1(model)
             if model.probability is not None and not 'unknown':
-                #
                 self.default = self.cross_entropy
             else:
                 self.default = self.f1

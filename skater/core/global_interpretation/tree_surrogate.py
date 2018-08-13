@@ -60,7 +60,6 @@ class TreeSurrogate(object):
             raise exceptions.ModelError("Model type not supported. Supported options types{'classifier', 'regressor'}")
 
 
-
     def learn(self, X, Y, oracle_y, cv=True, n_iter_search=10, param_grid=None, scorer_type='default'):
         if cv is False:
             self.__model.fit(X, Y)
