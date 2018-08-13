@@ -2,6 +2,7 @@
 
 from .global_interpretation.partial_dependence import PartialDependence
 from .global_interpretation.feature_importance import FeatureImportance
+from .global_interpretation.tree_surrogate import TreeSurrogate
 from ..data import DataManager
 from ..util.logger import build_logger
 
@@ -20,7 +21,7 @@ class Interpretation(object):
         >>> interpreter.partial_dependence([feature_id1, feature_id2], regressor.predict)
     """
 
-    def __init__(self, training_data=None, training_labels=None, feature_names=None, index=None,
+    def __init__(self, training_data=None, training_labels=None, class_names=None, feature_names=None, index=None,
                  log_level=30):
         """
         Attaches local and global interpretations
@@ -37,7 +38,10 @@ class Interpretation(object):
         self.logger = build_logger(log_level, __name__)
         self.partial_dependence = PartialDependence(self)
         self.feature_importance = FeatureImportance(self)
+        self.tree_surrogate = TreeSurrogate
         self.data_set = None
+        self.feature_names = feature_names
+        self.class_names = class_names
         self.load_data(training_data,
                        training_labels=training_labels,
                        feature_names=feature_names,

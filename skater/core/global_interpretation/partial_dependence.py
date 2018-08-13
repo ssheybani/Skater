@@ -143,6 +143,7 @@ class PartialDependence(BaseGlobalInterpretation):
     def feature_column_name_formatter(columnname):
         return columnname
 
+
     def _check_features(self, feature_ids):
         if StaticTypes.data_types.is_string(feature_ids) or StaticTypes.data_types.is_numeric(feature_ids):
             feature_ids = [feature_ids]
@@ -162,6 +163,7 @@ class PartialDependence(BaseGlobalInterpretation):
             raise(exceptions.DuplicateFeaturesError(duplicate_features_error_msg))
 
         return feature_ids
+
 
     def partial_dependence(self, feature_ids, modelinstance, filter_classes=None, grid=None,
                            grid_resolution=30, n_jobs=-1, grid_range=None, sample=True,
@@ -240,14 +242,14 @@ class PartialDependence(BaseGlobalInterpretation):
         >>> features = boston.feature_names
 
         >>> rf = RandomForestClassier()
-        >>> rf.fit(X,y)
+        >>> rf.fit(X, y)
 
 
         >>> model = InMemoryModel(rf.predict_proba, examples = X)
         >>> interpreter = Interpretation()
         >>> interpreter.load_data(X)
         >>> feature_ids = ['ZN','CRIM']
-        >>> interpreter.partial_dependence.partial_dependence(features,model)
+        >>> interpreter.partial_dependence.partial_dependence(features, model)
         """
 
         if self.data_set is None:

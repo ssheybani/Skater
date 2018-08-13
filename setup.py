@@ -86,6 +86,7 @@ def setup_package():
             'wordcloud==1.3.1',
             'joblib==0.11',
             'Jinja2==2.10',
+            'pydotplus==2.0.2',
             'bs4'],
         extras_require={
             'all': 'matplotlib'},
