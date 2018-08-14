@@ -36,9 +36,6 @@ class Interpretation(object):
         """
         self._log_level = log_level
         self.logger = build_logger(log_level, __name__)
-        self.partial_dependence = PartialDependence(self)
-        self.feature_importance = FeatureImportance(self)
-        self.tree_surrogate = TreeSurrogate
         self.data_set = None
         self.feature_names = feature_names
         self.class_names = class_names
@@ -46,6 +43,9 @@ class Interpretation(object):
                        training_labels=training_labels,
                        feature_names=feature_names,
                        index=index)
+        self.partial_dependence = PartialDependence(self)
+        self.feature_importance = FeatureImportance(self)
+        self.tree_surrogate = TreeSurrogate
 
 
     def load_data(self, training_data, training_labels=None, feature_names=None, index=None):
