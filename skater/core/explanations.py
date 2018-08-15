@@ -1,10 +1,10 @@
 """Interpretation Class"""
 
-from .global_interpretation.partial_dependence import PartialDependence
-from .global_interpretation.feature_importance import FeatureImportance
-from .global_interpretation.tree_surrogate import TreeSurrogate
-from ..data import DataManager
-from ..util.logger import build_logger
+from skater.core.global_interpretation.partial_dependence import PartialDependence
+from skater.core.global_interpretation.feature_importance import FeatureImportance
+from skater.core.global_interpretation.tree_surrogate import TreeSurrogate
+from skater.data import DataManager
+from skater.util.logger import build_logger
 
 
 class Interpretation(object):
