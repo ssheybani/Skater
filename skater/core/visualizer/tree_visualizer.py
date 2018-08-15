@@ -145,7 +145,7 @@ def _local_decisions_as_txt(est, est_type, label_color, criteria_color, if_else_
     as_str_pattern = lambda offset, node_id, \
         feature_value, sign: offset + \
         "As {}{}{}".format(criteria_color, features[node_id], "[" + str(feature_value) + "]") + \
-        " <= {}".format(str(thresholds[node_id])) + if_else_color + " then,"
+        " {} {}".format(sign, str(thresholds[node_id])) + if_else_color + " then,"
 
     path = est.decision_path(input_X.values.reshape(1, -1))
     node_indexes = path.indices
