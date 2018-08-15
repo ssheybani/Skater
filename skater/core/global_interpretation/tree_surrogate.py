@@ -3,7 +3,6 @@ from sklearn.model_selection import RandomizedSearchCV
 import numpy as np
 
 from skater.model.base import ModelType
-from skater.core.explanations import Interpretation
 from skater.core.visualizer.tree_visualizer import plot_tree, tree_to_text
 
 from skater.util.logger import build_logger
@@ -14,20 +13,21 @@ from skater.util import exceptions
 logger = build_logger(_INFO, __name__)
 
 
-class TreeSurrogate(Interpretation):
+class TreeSurrogate(object):
     __name__ = "TreeSurrogate"
 
     # Reference: http://ftp.cs.wisc.edu/machine-learning/shavlik-group/craven.thesis.pdf
     # https://en.wikipedia.org/wiki/Decision_tree_learning
     def __init__(self, estimator_type='classifier', splitter='best', max_depth=None, min_samples_split=2,
                  min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=None, seed=None, max_leaf_nodes=None,
-                 min_impurity_decrease=0.0, min_impurity_split=None, class_weight=None,
-                 presort=False, impurity_threshold=0.01, log_level=_WARNING):
-        Interpretation.__init__(self)
+                 min_impurity_decrease=0.0, min_impurity_split=None, class_weight=None, class_names=None,
+                 presort=False, feature_names=None, impurity_threshold=0.01, log_level=_WARNING):
         self.logger = build_logger(log_level, __name__)
         self.__model = None
         self.__model_type = None
 
+        self.feature_names = feature_names
+        self.class_names = class_names
         self.impurity_threshold = impurity_threshold
         self.criterion_types = {'classifier': {'criterion': ['gini', 'entropy']},
                                 'regressor': {'criterion': ['mse', 'friedman_mse', 'mae']}
