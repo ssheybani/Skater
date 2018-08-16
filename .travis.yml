@@ -25,6 +25,7 @@ before_install:
   # Useful for debugging any issues with conda
   - conda info -a
   - conda install gxx_linux-64
+  - conda install libgcc
 
 install:
   # https://github.com/tensorflow/tensorflow/issues/6968 (reason for including libtcmalloc-minimal4)
