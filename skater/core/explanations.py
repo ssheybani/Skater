@@ -1,5 +1,4 @@
 """Interpretation Class"""
-
 from skater.core.global_interpretation.partial_dependence import PartialDependence
 from skater.core.global_interpretation.feature_importance import FeatureImportance
 from skater.core.global_interpretation.tree_surrogate import TreeSurrogate

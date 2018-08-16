@@ -61,6 +61,7 @@ def _set_node_properites(estimator, estimator_type, graph_instance, color_names,
     # Query and assign properties to each node
     thresholds = estimator.tree_.threshold
     values = estimator.tree_.value
+
     nodes = graph_instance.get_node_list()
     for node in nodes:
         if node.get_name() not in ('node', 'edge'):
@@ -116,7 +117,6 @@ _return_value = lambda estimator_type, v: 'Predicted Label: {}'.format(str(np.ar
 
 def _global_decisions_as_txt(est_type, label_color, criteria_color, if_else_color, values,
                              features, thresholds, l_nodes, r_nodes):
-
     # define "if and else" string patterns for extracting the decision rules
     if_str_pattern = lambda offset, node: offset + "if {}{}".format(criteria_color, features[node]) \
         + " <= {}".format(str(thresholds[node])) + if_else_color + " {"
