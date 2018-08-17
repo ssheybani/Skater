@@ -33,6 +33,11 @@ color_schemes = ['aliceblue', 'antiquewhite', 'aquamarine', 'azure', 'beige', 'b
                  'turquoise', 'violet', 'violetred', 'wheat', 'white', 'whitesmoke', 'yellow', 'yellowgreen']
 
 
+# Reference: https://github.com/scikit-learn/scikit-learn/blob/a24c8b464d094d2c468a16ea9f8bf8d42d949f84/sklearn/tree/_tree.pyx
+TREE_LEAF = -1
+TREE_UNDEFINED = -2
+
+
 def _get_colors(num_classes, random_state=1):
     np.random.seed(random_state)
     color_index = np.random.randint(0, len(color_schemes), num_classes)
@@ -54,16 +59,20 @@ def _generate_graph(est, est_type='classifier', classes=None, features=None,
 
 def _set_node_properites(estimator, estimator_type, graph_instance, color_names, default_color):
     # Query and assign properties to each node
+    thresholds = estimator.tree_.threshold
+    values = estimator.tree_.value
+
     nodes = graph_instance.get_node_list()
     for node in nodes:
         if node.get_name() not in ('node', 'edge'):
             if estimator_type == 'classifier':
-                values = estimator.tree_.value[int(node.get_name())][0]
-                # 1. Color only the leaf nodes, One way to identify leaf nodes is to check on the values which
-                #    should represent a distribution only for one class
-                # 2. mixed nodes get the default color
-                node.set_fillcolor(color_names[np.argmax(values)]) if max(values) == sum(values) \
-                    else node.set_fillcolor(default_color)
+                value = values[int(node.get_name())][0]
+                # 1. Color only the leaf nodes, where one class is dominant or if it is a leaf node
+                # 2. For mixed population or otherwise set the default color
+                if max(value) == sum(value) or thresholds[int(node.get_name())] == TREE_UNDEFINED:
+                    node.set_fillcolor(color_names[np.argmax(value)])
+                else:
+                    node.set_fillcolor(default_color)
             else:
                 # if the estimator type is a "regressor", then the intensity of the color is defined by the
                 # population coverage for a particular value
@@ -108,10 +117,6 @@ _return_value = lambda estimator_type, v: 'Predicted Label: {}'.format(str(np.ar
 
 def _global_decisions_as_txt(est_type, label_color, criteria_color, if_else_color, values,
                              features, thresholds, l_nodes, r_nodes):
-    # Reference: https://github.com/scikit-learn/scikit-learn/blob/a24c8b464d094d2c468a16ea9f8bf8d42d949f84/sklearn/tree/_tree.pyx
-    TREE_LEAF = -1
-    TREE_UNDEFINED = -2
-
     # define "if and else" string patterns for extracting the decision rules
     if_str_pattern = lambda offset, node: offset + "if {}{}".format(criteria_color, features[node]) \
         + " <= {}".format(str(thresholds[node])) + if_else_color + " {"
@@ -136,10 +141,11 @@ def _global_decisions_as_txt(est_type, label_color, criteria_color, if_else_colo
 
 def _local_decisions_as_txt(est, est_type, label_color, criteria_color, if_else_color,
                             values, features, thresholds, input_X):
+    greater_or_less = lambda f_v, s_c: "<=" if f_v <= s_c else ">"
     as_str_pattern = lambda offset, node_id, \
-        feature_value: offset + \
+        feature_value, sign: offset + \
         "As {}{}{}".format(criteria_color, features[node_id], "[" + str(feature_value) + "]") + \
-        " <= {}".format(str(thresholds[node_id])) + if_else_color + " then,"
+        " {} {}".format(sign, str(thresholds[node_id])) + if_else_color + " then,"
 
     path = est.decision_path(input_X.values.reshape(1, -1))
     node_indexes = path.indices
@@ -148,7 +154,9 @@ def _local_decisions_as_txt(est, est_type, label_color, criteria_color, if_else_
     for node_index in node_indexes:
         offset = "  " * depth
         if leaf_id != node_index:
-            print(as_str_pattern(offset, node_index, input_X[features[node_index]]))
+            feature_value = input_X[features[node_index]]
+            print(as_str_pattern(offset, node_index, feature_value,
+                                 greater_or_less(feature_value, thresholds[node_index])))
             depth += 1
         else:
             print(offset, label_color, _return_value(est_type, values[node_index]))

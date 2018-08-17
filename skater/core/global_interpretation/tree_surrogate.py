@@ -34,6 +34,7 @@ class TreeSurrogate(object):
                                 }
         self.splitter_types = ['best', 'random']
         self.splitter = splitter if any(splitter in item for item in self.splitter_types) else 'best'
+        self.seed = seed
 
         # TODO validate the parameters based on estimator type
         if estimator_type == 'classifier':
@@ -80,7 +81,7 @@ class TreeSurrogate(object):
             # Using Randomize Search here to prune the trees to improve readability without
             # comprising on model's performance
             random_search_estimator = RandomizedSearchCV(estimator=self.__model, param_distributions=search_space,
-                                                         n_iter=n_iter_search, n_jobs=n_jobs)
+                                                         n_iter=n_iter_search, n_jobs=n_jobs, random_state=self.seed)
             random_search_estimator.fit(X, Y)
             self.__model = random_search_estimator.best_estimator_
         y_hat_surrogate = self.predict(X)
