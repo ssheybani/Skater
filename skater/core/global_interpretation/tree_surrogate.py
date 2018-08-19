@@ -14,10 +14,45 @@ logger = build_logger(_INFO, __name__)
 
 
 class TreeSurrogate(object):
-    __name__ = "TreeSurrogate"
+    """ :: Experimental :: The implementation is currently experimental and might change in future.
+    The idea of using TreeSurrogates as means for explaining a model's(Oracle or the base model)
+    learned decision policies(for inductive learning tasks) is inspired by the work of Mark W. Craven
+    described as the TREPAN algorithm. In this explanation learning hypothesis, the base estimator(Oracle)
+    could be any form of supervised learning predictive models. The explanations are approximated using
+    DecisionTrees(both for Classification/Regression) by learning decision boundaries similar to that learned by
+    the Oracle(predictions from the base model are used for learning the DecisionTree representation).
+    The implementation also generates a fidelity score to quantify tree based surrogate model's approximation to the Oracle.
+    Ideally, the score should be 0 for truthful explanation both globally and locally.
 
-    # Reference: http://ftp.cs.wisc.edu/machine-learning/shavlik-group/craven.thesis.pdf
-    # https://en.wikipedia.org/wiki/Decision_tree_learning
+    Parameters
+    ----------
+    estimator_type='classifier'
+    splitter='best'
+    max_depth=None
+    min_samples_split=2
+    min_samples_leaf=1
+    min_weight_fraction_leaf=0.0
+    max_features=None, seed=None
+    max_leaf_nodes=None
+    min_impurity_decrease=0.0
+    min_impurity_split=None
+    class_weight=None
+    class_names=None
+    presort=False
+    feature_names=None
+    impurity_threshold=0.01
+    log_level=_WARNING
+
+
+    References
+    ----------
+    .. [1] Mark W. Craven(1996) EXTRACTING COMPREHENSIBLE MODELS FROM TRAINED NEURAL NETWORKS
+           (http://ftp.cs.wisc.edu/machine-learning/shavlik-group/craven.thesis.pdf)
+    .. [2] Mark W. Craven and Jude W. Shavlik(NIPS, 96). Extracting Thee-Structured Representations of Thained Networks
+           (https://papers.nips.cc/paper/1152-extracting-tree-structured-representations-of-trained-networks.pdf)
+    """
+    __name__ = "TreeSurrogate"
+    
     def __init__(self, estimator_type='classifier', splitter='best', max_depth=None, min_samples_split=2,
                  min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=None, seed=None, max_leaf_nodes=None,
                  min_impurity_decrease=0.0, min_impurity_split=None, class_weight=None, class_names=None,
@@ -149,7 +184,3 @@ class TreeSurrogate(object):
 
     def decisions_as_txt(self, scope='global', X=None):
         tree_to_text(self.__model, self.feature_names, self.__model_type, scope, X)
-
-
-    def plot_local_decisions(self):
-        pass
