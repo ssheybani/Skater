@@ -97,8 +97,8 @@ class TreeSurrogate(object):
             raise exceptions.ModelError("Model type not supported. Supported options types{'classifier', 'regressor'}")
 
 
-    def learn(self, X, Y, oracle_y, cv=True, n_iter_search=10, param_grid=None, scorer_type='default', n_jobs=1):
-        if cv is False:
+    def learn(self, X, Y, oracle_y, prune=True, cv=5, n_iter_search=10, param_grid=None, scorer_type='default', n_jobs=1):
+        if prune is False:
             self.__model.fit(X, Y)
         else:
             # apply randomized cross validation for pruning
@@ -115,7 +115,7 @@ class TreeSurrogate(object):
             # 2. https://www.coursera.org/lecture/ml-classification/optional-pruning-decision-trees-to-avoid-overfitting-qvf6v
             # Using Randomize Search here to prune the trees to improve readability without
             # comprising on model's performance
-            random_search_estimator = RandomizedSearchCV(estimator=self.__model, param_distributions=search_space,
+            random_search_estimator = RandomizedSearchCV(estimator=self.__model, cv=cv, param_distributions=search_space,
                                                          n_iter=n_iter_search, n_jobs=n_jobs, random_state=self.seed)
             random_search_estimator.fit(X, Y)
             self.__model = random_search_estimator.best_estimator_
