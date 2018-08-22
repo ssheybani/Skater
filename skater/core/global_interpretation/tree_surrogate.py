@@ -55,7 +55,7 @@ class TreeSurrogate(object):
     
     def __init__(self, estimator_type='classifier', splitter='best', max_depth=None, min_samples_split=2,
                  min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=None, seed=None, max_leaf_nodes=None,
-                 min_impurity_decrease=0.0, min_impurity_split=None, class_weight=None, class_names=None,
+                 min_impurity_decrease=0.0, min_impurity_split=None, class_weight="balanced", class_names=None,
                  presort=False, feature_names=None, impurity_threshold=0.01, log_level=_WARNING):
         self.logger = build_logger(log_level, __name__)
         self.__model = None
@@ -97,16 +97,33 @@ class TreeSurrogate(object):
             raise exceptions.ModelError("Model type not supported. Supported options types{'classifier', 'regressor'}")
 
 
-    def learn(self, X, Y, oracle_y, prune=True, cv=5, n_iter_search=10, param_grid=None, scorer_type='default', n_jobs=1):
-        if prune is False:
+    def learn(self, X, Y, oracle_y, preprune=True, cv=5, n_iter_search=10,
+              param_grid=None, scorer_type='default', n_jobs=1):
+        """ Learn an approximate representation by constructing a Decision Tree based on the results retrieved by
+        querying the Oracle(base model). Instances used for training should belong to the base learners instance space.
+
+        Parameters
+        ----------
+        X:
+        Y:
+        oracle_y:
+        prune:
+        cv:
+        n_iter_search:
+        param_grid:
+        scorer_type:
+        n_jobs:
+
+        """
+        if preprune is False:
             self.__model.fit(X, Y)
         else:
             # apply randomized cross validation for pruning
             default_grid = {
                 "criterion": self.criterion_types[self.__model_type]['criterion'],
-                "max_depth": [2, 4, 8],
-                "min_samples_leaf": [1, 2, 4],
-                "max_leaf_nodes": [2, 4, 6]
+                "max_depth": [2, 4, 6, 8],  # helps in reducing the depth of the tree
+                "min_samples_leaf": [2, 4],  # restrict the number of samples in a leaf
+                "max_leaf_nodes": [2, 4, 6, 8, 10]  # reduce the number of leaf nodes
             }
             search_space = param_grid if param_grid is not None else default_grid
             # Cost function aiming to optimize(Total Cost) = measure of fit + measure of complexity
@@ -139,26 +156,30 @@ class TreeSurrogate(object):
 
     @property
     def estimator(self):
+        """ Learned approximate surrogate estimator
+        """
         return self.__model
 
 
     @property
     def estimator_type(self):
+        """ Estimator type
+        """
         return self.__model_type
 
 
     def predict(self, X, prob_score=False):
+        """ Predict for input X
+        """
         predict_values = self.__model.predict(X)
         predict_prob_values = self.predict_proba(X) if prob_score is True else None
         return predict_values if predict_prob_values is None else predict_prob_values
 
 
-    def get_params(self):
-        pass
-
-
     def plot_global_decisions(self, colors=None, enable_node_id=True, random_state=0, file_name="interpretable_tree.png",
-                              show_img=True, fig_size=(20, 8)):
+                              show_img=False, fig_size=(20, 8)):
+        """ Visualizes the decision nodes of the surrogate tree.
+        """
         graph_inst = plot_tree(self.__model, self.__model_type, feature_names=self.feature_names, color_list=colors,
                                class_names=self.class_names, enable_node_id=enable_node_id, seed=random_state)
         f_name = "interpretable_tree.png" if file_name is None else file_name
