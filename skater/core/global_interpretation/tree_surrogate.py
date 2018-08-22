@@ -123,7 +123,7 @@ class TreeSurrogate(object):
                 "criterion": self.criterion_types[self.__model_type]['criterion'],
                 "max_depth": [2, 4, 6, 8],  # helps in reducing the depth of the tree
                 "min_samples_leaf": [2, 4],  # restrict the number of samples in a leaf
-                "max_leaf_nodes": [2, 4, 6]  # reduce the number of leaf nodes
+                "max_leaf_nodes": [2, 4, 6, 8, 10]  # reduce the number of leaf nodes
             }
             search_space = param_grid if param_grid is not None else default_grid
             # Cost function aiming to optimize(Total Cost) = measure of fit + measure of complexity
