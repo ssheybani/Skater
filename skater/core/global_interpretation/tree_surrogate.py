@@ -97,14 +97,31 @@ class TreeSurrogate(object):
             raise exceptions.ModelError("Model type not supported. Supported options types{'classifier', 'regressor'}")
 
 
-    def learn(self, X, Y, oracle_y, prune=True, cv=5, n_iter_search=10, param_grid=None, scorer_type='default', n_jobs=1):
+    def learn(self, X, Y, oracle_y, prune=True, cv=5, n_iter_search=10,
+              param_grid=None, scorer_type='default', n_jobs=1):
+        """ Learn an approximate representation by constructing a Decision Tree based on the results retrieved by
+        querying the Oracle(base model). Instances used for training should belong to the base learners instance space.
+
+        Parameters
+        ----------
+        X:
+        Y:
+        oracle_y:
+        prune:
+        cv:
+        n_iter_search:
+        param_grid:
+        scorer_type:
+        n_jobs:
+
+        """
         if prune is False:
             self.__model.fit(X, Y)
         else:
             # apply randomized cross validation for pruning
             default_grid = {
                 "criterion": self.criterion_types[self.__model_type]['criterion'],
-                "max_depth": [2, 4, 8],
+                "max_depth": [2, 4, 6, 8],
                 "min_samples_leaf": [1, 2, 4],
                 "max_leaf_nodes": [2, 4, 6]
             }
