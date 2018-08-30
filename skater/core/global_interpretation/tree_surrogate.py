@@ -56,7 +56,7 @@ class TreeSurrogate(object):
     def __init__(self, estimator_type='classifier', splitter='best', max_depth=None, min_samples_split=2,
                  min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=None, seed=None, max_leaf_nodes=None,
                  min_impurity_decrease=0.0, min_impurity_split=None, class_weight="balanced", class_names=None,
-                 presort=False, feature_names=None, impurity_threshold=0.01, log_level=_WARNING):
+                 presort=False, feature_names=None, impurity_threshold=0.01, log_level=_INFO):
         self.logger = build_logger(log_level, __name__)
         self.__model = None
         self.__model_type = None
@@ -136,7 +136,7 @@ class TreeSurrogate(object):
                                                          n_iter=n_iter_search, n_jobs=n_jobs, random_state=self.seed)
             random_search_estimator.fit(X, Y)
             self.__model = random_search_estimator.best_estimator_
-        y_hat_surrogate = self.predict(X)
+        y_hat_surrogate = self.__model.predict(X)
 
         model_inst = ModelType(model_type=self.__model_type)
         # Default metrics:
@@ -147,11 +147,11 @@ class TreeSurrogate(object):
         metric_score = scorer(oracle_y, Y)
         surrogate_metric_score = scorer(Y, y_hat_surrogate)
 
-        fidelity_score = np.abs(surrogate_metric_score - metric_score)
-        if fidelity_score > self.impurity_threshold:
+        impurity_score = np.abs(surrogate_metric_score - metric_score)
+        if impurity_score > self.impurity_threshold:
             self.logger.warning('fidelity score:{} of the surrogate model is higher than the impurity threshold: {}'.
-                                format(fidelity_score, self.impurity_threshold))
-        return fidelity_score
+                                format(impurity_score, self.impurity_threshold))
+        return impurity_score
 
 
     @property
