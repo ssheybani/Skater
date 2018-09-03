@@ -94,6 +94,7 @@ class TreeSurrogate(object):
 
 
     def _post_pruning(self, X, Y, scorer_type, impurity_threshold, needs_prob=False):
+        self.__model.fit(X, Y)
         pred_func = lambda prob: self.__model.predict(X) if prob is False else self.__model.predict_proba(X)
         y_pred = pred_func(needs_prob)
         self.logger.info("Unique Labels in ground truth provided {}".format(np.unique(Y)))
@@ -101,6 +102,7 @@ class TreeSurrogate(object):
 
         model_inst = ModelType(model_type=self.__model_type, probability=False)
         scorer = model_inst.scorers.get_scorer_function(scorer_type=scorer_type)
+        self.logger.info("Scorer used {}".format(scorer))
         current_score = scorer(Y, y_pred, average='weighted')
         self.logger.info("current score {}".format(current_score))
 
@@ -114,8 +116,9 @@ class TreeSurrogate(object):
             if tree.children_left[index] != tree_leaf or tree.children_right[index] != tree_leaf:
                 tree.children_left[index], tree.children_right[index] = -1, -1
                 new_score = scorer(Y, pred_func(needs_prob), average='weighted')
+                self.logger.info("new score generate {}".format(new_score))
 
-                if current_score - new_score <= impurity_threshold:
+                if np.abs(round(current_score - new_score, 3)) <= impurity_threshold:
                     current_score = new_score
                     removed_node_index.append(index)
                     self.logger.info("Removed index {}".format(removed_node_index))
@@ -165,14 +168,16 @@ class TreeSurrogate(object):
 
         """
         if prune is None:
+            self.logger.info("No pruning applied ...")
             self.__model.fit(X, Y)
         elif prune == 'pre':
             # apply randomized cross validation for pruning
+            self.logger.info("pre pruning applied ...")
             self._pre_pruning(X, Y, cv, n_iter_search, n_jobs, param_grid)
         else:
+            self.logger.info("post pruning applied ...")
             # Since, this is post pruning, we first learn a model
             # and then try to prune the tree controling the model's score using the impurity_threshold
-            self.__model.fit(X, Y)
             self._post_pruning(X, Y, scorer_type, impurity_threshold, needs_prob=False)
         y_hat_surrogate = self.__model.predict(X)
         self.logger.info('Done generating prediction using the surrogate, shape {}'.format(y_hat_surrogate.shape))
@@ -183,14 +188,14 @@ class TreeSurrogate(object):
         # {Regression: Mean Absolute Error (MAE)}
         scorer = model_inst.scorers.get_scorer_function(scorer_type=scorer_type)
         oracle_score = scorer(oracle_y, Y)
-        surrogate_metric_score = scorer(Y, y_hat_surrogate)
+        surrogate_score = scorer(Y, y_hat_surrogate)
         self.logger.info('Done scoring ...')
 
-        impurity_score = np.abs(surrogate_metric_score - oracle_score)
+        impurity_score = np.abs(surrogate_score - oracle_score)
         if impurity_score > self.impurity_threshold:
-            self.logger.warning('impurity score:{} of the surrogate model is higher than the impurity threshold: {}. '
+            self.logger.warning('impurity score: {} of the surrogate model is higher than the impurity threshold: {}. '
                                 'The higher the impurity score, lower is the fidelity/faithfulness '
-                                'of the surrogate model')
+                                'of the surrogate model'.format(impurity_score, impurity_threshold))
         return impurity_score
 
 
@@ -228,7 +233,7 @@ class TreeSurrogate(object):
         try:
             import matplotlib.pyplot as plt
         except ImportError:
-            raise exceptions.MatplotlibUnavailableError("Matplotlib is required but unavailable on your system.")
+            raise exceptions.MatplotlibUnavailableError("Matplotlib is required but unavailable on the system.")
         except RuntimeError:
             raise exceptions.MatplotlibDisplayError("Matplotlib unable to open display")
 
