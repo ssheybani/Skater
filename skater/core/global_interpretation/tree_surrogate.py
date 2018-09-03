@@ -174,9 +174,9 @@ class TreeSurrogate(object):
             # and then try to prune the tree controling the model's score using the impurity_threshold
             self.__model.fit(X, Y)
             self._post_pruning(X, Y, scorer_type, impurity_threshold, needs_prob=False)
-
         y_hat_surrogate = self.__model.predict(X)
         self.logger.info('Done generating prediction using the surrogate, shape {}'.format(y_hat_surrogate.shape))
+
         model_inst = ModelType(model_type=self.__model_type)
         # Default metrics:
         # {Classification: if probability score used --> cross entropy(log-loss) else --> F1 score}
@@ -188,9 +188,9 @@ class TreeSurrogate(object):
 
         impurity_score = np.abs(surrogate_metric_score - oracle_score)
         if impurity_score > self.impurity_threshold:
-            self.logger.warning('impurity score:{} of the surrogate model is higher than the impurity threshold: {}. The'
-                                'higher the impurity score, lower is the fidelity/faithfulness of the surrogate model'.
-                                format(impurity_score, self.impurity_threshold))
+            self.logger.warning('impurity score:{} of the surrogate model is higher than the impurity threshold: {}. '
+                                'The higher the impurity score, lower is the fidelity/faithfulness '
+                                'of the surrogate model')
         return impurity_score
 
 
