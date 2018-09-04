@@ -21,7 +21,8 @@ class TreeSurrogate(object):
     DecisionTrees(both for Classification/Regression) by learning decision boundaries similar to that learned by
     the Oracle(predictions from the base model are used for learning the DecisionTree representation).
     The implementation also generates a fidelity score to quantify tree based surrogate model's
-    approximation to the Oracle. Ideally, the score should be 0 for truthful explanation both globally and locally.
+    approximation to the Oracle. Ideally, the score should be 0 for truthful explanation
+    both globally and locally.
 
     Parameters
     ----------
@@ -122,8 +123,8 @@ class TreeSurrogate(object):
                     current_score = new_score
                     removed_node_index.append(index)
                     self.logger.info("Removed index {}".format(removed_node_index))
-            else:
-                tree.children_left[index], tree.children_right[index] = current_left, current_right
+                else:
+                    tree.children_left[index], tree.children_right[index] = current_left, current_right
         self.logger.info("Node indexes removed {}".format(removed_node_index))
 
 
