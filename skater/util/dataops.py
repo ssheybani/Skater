@@ -126,7 +126,7 @@ def _render_pdf(file_name, width=600, height=300):
     IFrame(file_name, width=width, height=height)
 
 
-def show_in_notebook(file_name_with_type='rendered.html', width=600, height=300):
+def show_in_notebook(file_name_with_type='rendered.html', width=600, height=300, mode=None):
     """ Display generated artifacts(e.g. .png, .html, .jpeg/.jpg) in interactive Jupyter style Notebook
 
     Parameters
@@ -138,19 +138,28 @@ def show_in_notebook(file_name_with_type='rendered.html', width=600, height=300)
     height: int
         height in pixels to constrain the image
     """
-    from IPython.core.display import display
-    file_type = file_name_with_type.split('/')[-1].split('.')[-1]
-    choice_dict = {
-        'html': _render_html,
-        'png': _render_image,
-        'jpeg': _render_image,
-        'jpg': _render_image,
-        'svg': _render_image,
-        'pdf': _render_pdf
-    }
-    select_type = lambda choice_type: choice_dict[file_type]
-    logger.info("File Name: {}".format(file_name_with_type))
-    return display(select_type(file_type)(file_name_with_type, width, height))
+    from IPython.core.display import display, HTML
+    if mode is not 'interactive':
+        file_type = file_name_with_type.split('/')[-1].split('.')[-1]
+        choice_dict = {
+            'html': _render_html,
+            'png': _render_image,
+            'jpeg': _render_image,
+            'jpg': _render_image,
+            'svg': _render_image,
+            'pdf': _render_pdf
+        }
+        select_type = lambda choice_type: choice_dict[file_type]
+        logger.info("File Name: {}".format(file_name_with_type))
+        return display(select_type(file_type)(file_name_with_type, width, height))
+    else:
+        # For now using iframe for some interactive plotting. This should be replaced with a better plotting interface
+        iframe = '<div style="-webkit-overflow-scrolling:touch; overflow-x:hidden; ' \
+                 'overflow-y:auto; width:{}; height:{}; margin: -1.2em; -webkit-transform: scale(0.9) -moz-transform-scale(0.5)"> ' \
+                 '<iframe src={} style="width:100%; height:100%; frameborder:1px;">' \
+                 '</iframe>' \
+                 '</div>'.format(file_name_with_type, width, height)
+        return HTML(iframe)
 
 
 class MultiColumnLabelBinarizer(LabelBinarizer):

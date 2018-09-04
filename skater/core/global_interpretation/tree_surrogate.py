@@ -52,13 +52,12 @@ class TreeSurrogate(object):
            (https://papers.nips.cc/paper/1152-extracting-tree-structured-representations-of-trained-networks.pdf)
     """
     __name__ = "TreeSurrogate"
-    
+
     def __init__(self, estimator_type='classifier', splitter='best', max_depth=None, min_samples_split=2,
                  min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=None, seed=None, max_leaf_nodes=None,
                  min_impurity_decrease=0.0, min_impurity_split=None, class_weight="balanced", class_names=None,
                  presort=False, feature_names=None, impurity_threshold=0.01, log_level=_INFO):
         self.logger = build_logger(log_level, __name__)
-        self.__model = None
         self.__model_type = None
 
         self.feature_names = feature_names
@@ -72,40 +71,42 @@ class TreeSurrogate(object):
         self.__model_type = estimator_type
         # TODO validate the parameters based on estimator type
         if estimator_type == 'classifier':
-            self.__model = DecisionTreeClassifier(splitter=self.splitter, max_depth=max_depth,
-                                                  min_samples_split=min_samples_split,
-                                                  min_samples_leaf=min_samples_leaf,
-                                                  min_weight_fraction_leaf=min_weight_fraction_leaf,
-                                                  max_features=max_features, random_state=seed,
-                                                  max_leaf_nodes=max_leaf_nodes,
-                                                  min_impurity_decrease=min_impurity_decrease,
-                                                  min_impurity_split=min_impurity_split,
-                                                  class_weight=class_weight, presort=presort)
+            est = DecisionTreeClassifier(splitter=self.splitter, max_depth=max_depth,
+                                         min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf,
+                                         min_weight_fraction_leaf=min_weight_fraction_leaf,
+                                         max_features=max_features, random_state=seed,
+                                         max_leaf_nodes=max_leaf_nodes,
+                                         min_impurity_decrease=min_impurity_decrease,
+                                         min_impurity_split=min_impurity_split,
+                                         class_weight=class_weight, presort=presort)
         elif estimator_type == 'regressor':
-            self.__model = DecisionTreeRegressor(splitter=self.splitter, max_depth=None,
-                                                 min_samples_split=min_samples_split,
-                                                 min_samples_leaf=min_samples_leaf,
-                                                 min_weight_fraction_leaf=min_weight_fraction_leaf,
-                                                 max_features=max_features,
-                                                 random_state=seed, max_leaf_nodes=max_leaf_nodes,
-                                                 min_impurity_decrease=min_impurity_decrease,
-                                                 min_impurity_split=min_impurity_split, presort=presort)
+            est = DecisionTreeRegressor(splitter=self.splitter, max_depth=None,
+                                        min_samples_split=min_samples_split,
+                                        min_samples_leaf=min_samples_leaf,
+                                        min_weight_fraction_leaf=min_weight_fraction_leaf,
+                                        max_features=max_features,
+                                        random_state=seed, max_leaf_nodes=max_leaf_nodes,
+                                        min_impurity_decrease=min_impurity_decrease,
+                                        min_impurity_split=min_impurity_split, presort=presort)
         else:
             raise exceptions.ModelError("Model type not supported. Supported options types{'classifier', 'regressor'}")
+        self.__model = est
 
 
-    def _post_pruning(self, X, Y, scorer_type, impurity_threshold, needs_prob=False, verbose=False):
+    def _post_pruning(self, model_instance, X, Y, scorer_type, impurity_threshold, needs_prob=False, verbose=False):
         self.__model.fit(X, Y)
         pred_func = lambda prob: self.__model.predict(X) if prob is False else self.__model.predict_proba(X)
         y_pred = pred_func(needs_prob)
-        self.logger.info("Unique Labels in ground truth provided {}".format(np.unique(Y)))
-        self.logger.info("Unique Labels in predictions generated {}".format(np.unique(y_pred)))
+        if verbose:
+            # makes sense for classification use-case, be cautious when enabling for regression
+            self.logger.info("Unique Labels in ground truth provided {}".format(np.unique(Y)))
+            self.logger.info("Unique Labels in predictions generated {}".format(np.unique(y_pred)))
 
-        model_inst = ModelType(model_type=self.__model_type, probability=False)
+        model_inst = model_instance
         scorer = model_inst.scorers.get_scorer_function(scorer_type=scorer_type)
         self.logger.info("Scorer used {}".format(scorer))
-        original_score = scorer(Y, y_pred, average='weighted')
-        self.logger.info("current score {}".format(original_score))
+        original_score = scorer(Y, y_pred)
+        self.logger.info("original score using base model {}".format(original_score))
 
         tree = self.__model.tree_
         no_of_nodes = tree.node_count
@@ -116,19 +117,20 @@ class TreeSurrogate(object):
             current_left, current_right = tree.children_left[index], tree.children_right[index]
             if tree.children_left[index] != tree_leaf or tree.children_right[index] != tree_leaf:
                 tree.children_left[index], tree.children_right[index] = -1, -1
-                new_score = scorer(Y, pred_func(needs_prob), average='weighted')
+                new_score = scorer(Y, pred_func(needs_prob))
                 if verbose:
                     self.logger.info("new score generate {}".format(new_score))
 
                 if round(original_score - new_score, 3) <= impurity_threshold:
                     removed_node_index.append(index)
                     if verbose:
-                        self.logger.info("Removed index {}".format(removed_node_index))
+                        self.logger.info("Removed nodes: (index:{}-->[left node: {}, right node: {}])"
+                                         .format(index, current_left, current_right))
                 else:
                     tree.children_left[index], tree.children_right[index] = current_left, current_right
                     if verbose:
                         self.logger.info("Added index {} back".format(index))
-        self.logger.info("Node indexes removed {}".format(removed_node_index))
+        self.logger.info("Summary: childrens of the following node indexes are removed {}".format(removed_node_index))
 
 
     def _pre_pruning(self, X, Y, cv=5, n_iter_search=10, n_jobs=1, param_grid=None):
@@ -153,7 +155,7 @@ class TreeSurrogate(object):
         self.__model = random_search_estimator.best_estimator_
 
 
-    def learn(self, X, Y, oracle_y, prune='post', cv=5, n_iter_search=10,
+    def learn(self, model_instance, X, Y, oracle_y, prune='post', cv=5, n_iter_search=10,
               scorer_type='default', n_jobs=1, param_grid=None, impurity_threshold=0.01, verbose=False):
         """ Learn an approximate representation by constructing a Decision Tree based on the results retrieved by
         querying the Oracle(base model). Instances used for training should belong to the base learners instance space.
@@ -182,11 +184,14 @@ class TreeSurrogate(object):
             self.logger.info("post pruning applied ...")
             # Since, this is post pruning, we first learn a model
             # and then try to prune the tree controling the model's score using the impurity_threshold
-            self._post_pruning(X, Y, scorer_type, impurity_threshold, needs_prob=False, verbose=verbose)
+            self._post_pruning(model_instance, X, Y, scorer_type, impurity_threshold, needs_prob=False, verbose=verbose)
         y_hat_surrogate = self.__model.predict(X)
         self.logger.info('Done generating prediction using the surrogate, shape {}'.format(y_hat_surrogate.shape))
 
-        model_inst = ModelType(model_type=self.__model_type)
+        model_inst = model_instance
+        if not isinstance(model_inst, ModelType):
+            raise(exceptions.ModelError("Incorrect estimator used, \n"
+                                        "create one with skater.model.local.InMemoryModel"))
         # Default metrics:
         # {Classification: if probability score used --> cross entropy(log-loss) else --> F1 score}
         # {Regression: Mean Absolute Error (MAE)}
@@ -195,7 +200,7 @@ class TreeSurrogate(object):
         surrogate_score = scorer(Y, y_hat_surrogate)
         self.logger.info('Done scoring ...')
 
-        impurity_score = np.abs(surrogate_score - oracle_score)
+        impurity_score = round(oracle_score - surrogate_score, 3)
         if impurity_score > self.impurity_threshold:
             self.logger.warning('impurity score: {} of the surrogate model is higher than the impurity threshold: {}. '
                                 'The higher the impurity score, lower is the fidelity/faithfulness '
