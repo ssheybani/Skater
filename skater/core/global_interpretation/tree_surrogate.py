@@ -94,7 +94,7 @@ class TreeSurrogate(object):
             raise exceptions.ModelError("Model type not supported. Supported options types{'classifier', 'regressor'}")
 
 
-    def _post_pruning(self, X, Y, scorer_type, impurity_threshold, needs_prob=False):
+    def _post_pruning(self, X, Y, scorer_type, impurity_threshold, needs_prob=False, verbose=False):
         self.__model.fit(X, Y)
         pred_func = lambda prob: self.__model.predict(X) if prob is False else self.__model.predict_proba(X)
         y_pred = pred_func(needs_prob)
@@ -104,8 +104,8 @@ class TreeSurrogate(object):
         model_inst = ModelType(model_type=self.__model_type, probability=False)
         scorer = model_inst.scorers.get_scorer_function(scorer_type=scorer_type)
         self.logger.info("Scorer used {}".format(scorer))
-        current_score = scorer(Y, y_pred, average='weighted')
-        self.logger.info("current score {}".format(current_score))
+        original_score = scorer(Y, y_pred, average='weighted')
+        self.logger.info("current score {}".format(original_score))
 
         tree = self.__model.tree_
         no_of_nodes = tree.node_count
@@ -117,14 +117,17 @@ class TreeSurrogate(object):
             if tree.children_left[index] != tree_leaf or tree.children_right[index] != tree_leaf:
                 tree.children_left[index], tree.children_right[index] = -1, -1
                 new_score = scorer(Y, pred_func(needs_prob), average='weighted')
-                self.logger.info("new score generate {}".format(new_score))
+                if verbose:
+                    self.logger.info("new score generate {}".format(new_score))
 
-                if np.abs(round(current_score - new_score, 3)) <= impurity_threshold:
-                    current_score = new_score
+                if round(original_score - new_score, 3) <= impurity_threshold:
                     removed_node_index.append(index)
-                    self.logger.info("Removed index {}".format(removed_node_index))
+                    if verbose:
+                        self.logger.info("Removed index {}".format(removed_node_index))
                 else:
                     tree.children_left[index], tree.children_right[index] = current_left, current_right
+                    if verbose:
+                        self.logger.info("Added index {} back".format(index))
         self.logger.info("Node indexes removed {}".format(removed_node_index))
 
 
@@ -151,7 +154,7 @@ class TreeSurrogate(object):
 
 
     def learn(self, X, Y, oracle_y, prune='post', cv=5, n_iter_search=10,
-              scorer_type='default', n_jobs=1, param_grid=None, impurity_threshold=0.01):
+              scorer_type='default', n_jobs=1, param_grid=None, impurity_threshold=0.01, verbose=False):
         """ Learn an approximate representation by constructing a Decision Tree based on the results retrieved by
         querying the Oracle(base model). Instances used for training should belong to the base learners instance space.
 
@@ -179,7 +182,7 @@ class TreeSurrogate(object):
             self.logger.info("post pruning applied ...")
             # Since, this is post pruning, we first learn a model
             # and then try to prune the tree controling the model's score using the impurity_threshold
-            self._post_pruning(X, Y, scorer_type, impurity_threshold, needs_prob=False)
+            self._post_pruning(X, Y, scorer_type, impurity_threshold, needs_prob=False, verbose=verbose)
         y_hat_surrogate = self.__model.predict(X)
         self.logger.info('Done generating prediction using the surrogate, shape {}'.format(y_hat_surrogate.shape))
 
