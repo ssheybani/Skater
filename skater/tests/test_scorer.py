@@ -13,7 +13,7 @@ class TestScorer(unittest.TestCase):
         X, y = make_moons(1000, noise=0.5)
         cls.X_train, cls.X_test, cls.y_train, cls.y_test = train_test_split(X, y)
         cls.classifier_est = DecisionTreeClassifier(max_depth=5)
-        cls.classifier_est.fit(cls.X_train)
+        cls.classifier_est.fit(cls.X_train, cls.y_train)
 
 
     def test_compute_default_scores(self):
@@ -22,5 +22,5 @@ class TestScorer(unittest.TestCase):
         scorer = model_inst.scorers.get_scorer_function(scorer_type='default')
         y_hat = self.classifier_est.predict(self.X_test)
         value = scorer(self.y_test, y_hat, average='weighted')
-        self.assertEqual(scorer.__name__ == 'f1-score')
+        self.assertEqual(scorer.__name__ == 'f1-score', True)
         self.assertEquals(value > 0, True)
