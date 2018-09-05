@@ -58,11 +58,11 @@ class TreeSurrogate(object):
         if not isinstance(model_instance, ModelType):
             raise exceptions.ModelError("Incorrect estimator used, create one with skater.model.local.InMemoryModel")
         self.model_inst = model_instance
-        self.logger = build_logger(model_instance.logger.log_level, __name__)
+        self.logger = build_logger(model_instance.logger.level, __name__)
         self.__model_type = None
 
         self.feature_names = model_instance.feature_names
-        self.class_names = model_instance.class_names
+        self.class_names = model_instance.target_names
         self.impurity_threshold = impurity_threshold
         self.criterion_types = {'classifier': {'criterion': ['gini', 'entropy']},
                                 'regressor': {'criterion': ['mse', 'friedman_mse', 'mae']}}
@@ -131,7 +131,7 @@ class TreeSurrogate(object):
                     tree.children_left[index], tree.children_right[index] = current_left, current_right
                     if verbose:
                         self.logger.info("Added index {} back".format(index))
-        self.logger.info("Summary: childrens of the following node indexes are removed {}".format(removed_node_index))
+        self.logger.info("Summary: childrens of the following nodes are removed {}".format(removed_node_index))
 
 
     def _pre_pruning(self, X, Y, cv=5, n_iter_search=10, n_jobs=1, param_grid=None):

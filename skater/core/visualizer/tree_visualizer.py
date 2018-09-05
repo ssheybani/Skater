@@ -61,6 +61,8 @@ def _set_node_properites(estimator, estimator_type, graph_instance, color_names,
     # Query and assign properties to each node
     thresholds = estimator.tree_.threshold
     values = estimator.tree_.value
+    left_node = estimator.tree_.children_left
+    right_node = estimator.tree_.children_right
 
     nodes = graph_instance.get_node_list()
     for node in nodes:
@@ -69,7 +71,8 @@ def _set_node_properites(estimator, estimator_type, graph_instance, color_names,
                 value = values[int(node.get_name())][0]
                 # 1. Color only the leaf nodes, where one class is dominant or if it is a leaf node
                 # 2. For mixed population or otherwise set the default color
-                if max(value) == sum(value) or thresholds[int(node.get_name())] == TREE_UNDEFINED:
+                if max(value) == sum(value) or thresholds[int(node.get_name())] == TREE_UNDEFINED or \
+                        left_node[int(node.get_name())] and right_node[int(node.get_name())] == TREE_LEAF:
                     node.set_fillcolor(color_names[np.argmax(value)])
                 else:
                     node.set_fillcolor(default_color)
