@@ -211,5 +211,5 @@ class ScorerFactory(object):
                                              "or allowed for model type".format(scorer_type)
         scorer = self.__dict__[scorer_type]._score
         scorer.type = self.__dict__[scorer_type].type
-        scorer.name = self.__dict__[scorer_type].name
+        scorer.name = self.__dict__[scorer_type].__name__
         return scorer

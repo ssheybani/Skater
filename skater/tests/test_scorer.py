@@ -8,11 +8,12 @@ from skater.model import InMemoryModel
 
 class TestScorer(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         X, y = make_moons(1000, noise=0.5)
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y)
-        self.classifier_est = DecisionTreeClassifier(max_depth=5)
-        self.classifier_est.fit(self.X_train)
+        cls.X_train, cls.X_test, cls.y_train, cls.y_test = train_test_split(X, y)
+        cls.classifier_est = DecisionTreeClassifier(max_depth=5)
+        cls.classifier_est.fit(cls.X_train)
 
 
     def test_compute_default_scores(self):

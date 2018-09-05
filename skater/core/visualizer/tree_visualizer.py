@@ -5,10 +5,10 @@ import numpy as np
 
 from skater.util import exceptions
 try:
-    from matplotlib.colors import rgb2hex
     import matplotlib.pyplot as plt
+    from matplotlib.colors import rgb2hex
 except ImportError:
-    raise (exceptions.MatplotlibUnavailableError("matplotlib is required but unavailable on the system."))
+    raise exceptions.MatplotlibUnavailableError("matplotlib is required but unavailable on the system.")
 
 
 # reference: http://wingraphviz.sourceforge.net/wingraphviz/language/colorname.htm
