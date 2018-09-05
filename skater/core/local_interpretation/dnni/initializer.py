@@ -1,8 +1,7 @@
 # -*- coding: UTF-8 -*-
-
+import warnings
 import numpy as np
 from tensorflow.python.ops import nn_grad, math_grad
-import warnings
 from skater.util.logger import build_logger
 from skater.util.logger import _INFO
 
