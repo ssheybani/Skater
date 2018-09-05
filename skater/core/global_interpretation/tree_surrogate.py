@@ -6,10 +6,8 @@ from skater.model.base import ModelType
 from skater.core.visualizer.tree_visualizer import plot_tree, tree_to_text
 
 from skater.util.logger import build_logger
-from skater.util.logger import _INFO
+from skater.util.logger import _INFO, _DEBUG
 from skater.util import exceptions
-
-logger = build_logger(_INFO, __name__)
 
 
 class TreeSurrogate(object):
@@ -57,7 +55,7 @@ class TreeSurrogate(object):
 
         if not isinstance(oracle, ModelType):
             raise exceptions.ModelError("Incorrect estimator used, create one with skater.model.local.InMemoryModel")
-        self.model_inst = oracle
+        self.oracle = oracle
         self.logger = build_logger(oracle.logger.level, __name__)
         self.__model_type = None
 
@@ -95,14 +93,13 @@ class TreeSurrogate(object):
         self.__model = est
 
 
-    def _post_pruning(self, X, Y, scorer_type, impurity_threshold, needs_prob=False, verbose=False):
+    def _post_pruning(self, X, Y, scorer_type, impurity_threshold, needs_prob=False):
         self.__model.fit(X, Y)
         pred_func = lambda prob: self.__model.predict(X) if prob is False else self.__model.predict_proba(X)
         y_pred = pred_func(needs_prob)
-        if verbose:
-            # makes sense for classification use-case, be cautious when enabling for regression
-            self.logger.info("Unique Labels in ground truth provided {}".format(np.unique(Y)))
-            self.logger.info("Unique Labels in predictions generated {}".format(np.unique(y_pred)))
+        # makes sense for classification use-case, be cautious when enabling for regression
+        self.logger.debug("Unique Labels in ground truth provided {}".format(np.unique(Y)))
+        self.logger.debug("Unique Labels in predictions generated {}".format(np.unique(y_pred)))
 
         scorer = self.oracle.scorers.get_scorer_function(scorer_type=scorer_type)
         self.logger.info("Scorer used {}".format(scorer))
@@ -119,18 +116,15 @@ class TreeSurrogate(object):
             if tree.children_left[index] != tree_leaf or tree.children_right[index] != tree_leaf:
                 tree.children_left[index], tree.children_right[index] = -1, -1
                 new_score = scorer(Y, pred_func(needs_prob))
-                if verbose:
-                    self.logger.info("new score generate {}".format(new_score))
+                self.logger.debug("new score generate {}".format(new_score))
 
                 if round(original_score - new_score, 3) <= impurity_threshold:
                     removed_node_index.append(index)
-                    if verbose:
-                        self.logger.info("Removed nodes: (index:{}-->[left node: {}, right node: {}])"
-                                         .format(index, current_left, current_right))
+                    self.logger.debug("Removed nodes: (index:{}-->[left node: {}, right node: {}])"
+                                      .format(index, current_left, current_right))
                 else:
                     tree.children_left[index], tree.children_right[index] = current_left, current_right
-                    if verbose:
-                        self.logger.info("Added index {} back".format(index))
+                    self.logger.debug("Added index {} back".format(index))
         self.logger.info("Summary: childrens of the following nodes are removed {}".format(removed_node_index))
 
 
@@ -142,6 +136,7 @@ class TreeSurrogate(object):
             "max_leaf_nodes": [2, 4, 6, 8, 10]  # reduce the number of leaf nodes
         }
         search_space = param_grid if param_grid is not None else default_grid
+        self.logger.debug("Default search space used for CV : {}".format(search_space))
         # Cost function aiming to optimize(Total Cost) = measure of fit + measure of complexity
         # References for pruning:
         # 1. http://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
@@ -176,7 +171,10 @@ class TreeSurrogate(object):
         impurity_threshold: default=0.01
         verbose: default=False
         """
-        y_hat_original = self.oracle.predict(X)
+
+        self.logger.setLevel(_DEBUG) if verbose else self.logger.setLevel(_INFO)
+        # Below is an anti-pattern but had to use it. Should fix it in the long term
+        y_hat_original = self.oracle._execute(X)
         y_train = y_hat_original if use_oracle else Y
         if prune is None:
             self.logger.info("No pruning applied ...")
@@ -189,7 +187,7 @@ class TreeSurrogate(object):
             self.logger.info("post pruning applied ...")
             # Since, this is post pruning, we first learn a model
             # and then try to prune the tree controling the model's score using the impurity_threshold
-            self._post_pruning(X, y_train, scorer_type, impurity_threshold, needs_prob=False, verbose=verbose)
+            self._post_pruning(X, y_train, scorer_type, impurity_threshold, needs_prob=False)
         y_hat_surrogate = self.__model.predict(X)
         self.logger.info('Done generating prediction using the surrogate, shape {}'.format(y_hat_surrogate.shape))
 
@@ -197,13 +195,13 @@ class TreeSurrogate(object):
         # {Classification: if probability score used --> cross entropy(log-loss) else --> F1 score}
         # {Regression: Mean Absolute Error (MAE)}
         scorer = self.oracle.scorers.get_scorer_function(scorer_type=scorer_type)
-        oracle_score = scorer(Y, y_hat_original)
+        oracle_score = round(scorer(Y, y_hat_original), 3)
         # Since surrogate model is build against the base model's(Oracle's) predicted
         # behavior y_true=y_train
-        surrogate_score = scorer(y_train, y_hat_surrogate)
+        surrogate_score = round(scorer(y_train, y_hat_surrogate), 3)
         self.logger.info('Done scoring, surrogate score {}; oracle score {}'.format(surrogate_score, oracle_score))
 
-        impurity_score = round(oracle_score - surrogate_score, 3)
+        impurity_score = oracle_score - surrogate_score
         if impurity_score > self.impurity_threshold:
             self.logger.warning('impurity score: {} of the surrogate model is higher than the impurity threshold: {}. '
                                 'The higher the impurity score, lower is the fidelity/faithfulness '
