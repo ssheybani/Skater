@@ -50,26 +50,26 @@ class TreeSurrogate(object):
     """
     __name__ = "TreeSurrogate"
 
-    def __init__(self, model_instance, splitter='best', max_depth=None, min_samples_split=2,
+    def __init__(self, oracle, splitter='best', max_depth=None, min_samples_split=2,
                  min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=None, seed=None, max_leaf_nodes=None,
                  min_impurity_decrease=0.0, min_impurity_split=None, class_weight="balanced",
                  presort=False, impurity_threshold=0.01):
 
-        if not isinstance(model_instance, ModelType):
+        if not isinstance(oracle, ModelType):
             raise exceptions.ModelError("Incorrect estimator used, create one with skater.model.local.InMemoryModel")
-        self.model_inst = model_instance
-        self.logger = build_logger(model_instance.logger.level, __name__)
+        self.model_inst = oracle
+        self.logger = build_logger(oracle.logger.level, __name__)
         self.__model_type = None
 
-        self.feature_names = model_instance.feature_names
-        self.class_names = model_instance.target_names
+        self.feature_names = oracle.feature_names
+        self.class_names = oracle.target_names
         self.impurity_threshold = impurity_threshold
         self.criterion_types = {'classifier': {'criterion': ['gini', 'entropy']},
                                 'regressor': {'criterion': ['mse', 'friedman_mse', 'mae']}}
         self.splitter_types = ['best', 'random']
         self.splitter = splitter if any(splitter in item for item in self.splitter_types) else 'best'
         self.seed = seed
-        self.__model_type = model_instance.model_type
+        self.__model_type = oracle.model_type
 
         # TODO validate the parameters based on estimator type
         if self.__model_type == 'classifier':
@@ -104,7 +104,7 @@ class TreeSurrogate(object):
             self.logger.info("Unique Labels in ground truth provided {}".format(np.unique(Y)))
             self.logger.info("Unique Labels in predictions generated {}".format(np.unique(y_pred)))
 
-        scorer = self.model_inst.scorers.get_scorer_function(scorer_type=scorer_type)
+        scorer = self.oracle.scorers.get_scorer_function(scorer_type=scorer_type)
         self.logger.info("Scorer used {}".format(scorer))
         original_score = scorer(Y, y_pred)
         self.logger.info("original score using base model {}".format(original_score))
@@ -137,7 +137,7 @@ class TreeSurrogate(object):
     def _pre_pruning(self, X, Y, cv=5, n_iter_search=10, n_jobs=1, param_grid=None):
         default_grid = {
             "criterion": self.criterion_types[self.__model_type]['criterion'],
-            "max_depth": [2, 4, 6, 8],  # helps in reducing the depth of the tree
+            "max_depth": [2, 4, 6, 8, 10],  # helps in reducing the depth of the tree
             "min_samples_leaf": [2, 4],  # restrict the number of samples in a leaf
             "max_leaf_nodes": [2, 4, 6, 8, 10]  # reduce the number of leaf nodes
         }
@@ -156,7 +156,7 @@ class TreeSurrogate(object):
         self.__model = random_search_estimator.best_estimator_
 
 
-    def learn(self, X, Y, oracle_y, prune='post', cv=5, n_iter_search=10,
+    def learn(self, X, Y, use_oracle=True, prune='post', cv=5, n_iter_search=10,
               scorer_type='default', n_jobs=1, param_grid=None, impurity_threshold=0.01, verbose=False):
         """ Learn an approximate representation by constructing a Decision Tree based on the results retrieved by
         querying the Oracle(base model). Instances used for training should belong to the base learners instance space.
@@ -165,7 +165,8 @@ class TreeSurrogate(object):
         ----------
         X:
         Y:
-        oracle_y:
+        use_oracle: if True build a surrogate model against the predictions of the base model else use the ground truth
+                    to build an interpretable tree based model
         prune: None, 'pre', 'post'
         cv: used only for 'pre-pruning' right now
         n_iter_search:
@@ -175,28 +176,32 @@ class TreeSurrogate(object):
         impurity_threshold: default=0.01
         verbose: default=False
         """
+        y_hat_original = self.oracle.predict(X)
+        y_train = y_hat_original if use_oracle else Y
         if prune is None:
             self.logger.info("No pruning applied ...")
-            self.__model.fit(X, Y)
+            self.__model.fit(X, y_train)
         elif prune == 'pre':
             # apply randomized cross validation for pruning
             self.logger.info("pre pruning applied ...")
-            self._pre_pruning(X, Y, cv, n_iter_search, n_jobs, param_grid)
+            self._pre_pruning(X, y_train, cv, n_iter_search, n_jobs, param_grid)
         else:
             self.logger.info("post pruning applied ...")
             # Since, this is post pruning, we first learn a model
             # and then try to prune the tree controling the model's score using the impurity_threshold
-            self._post_pruning(X, Y, scorer_type, impurity_threshold, needs_prob=False, verbose=verbose)
+            self._post_pruning(X, y_train, scorer_type, impurity_threshold, needs_prob=False, verbose=verbose)
         y_hat_surrogate = self.__model.predict(X)
         self.logger.info('Done generating prediction using the surrogate, shape {}'.format(y_hat_surrogate.shape))
 
         # Default metrics:
         # {Classification: if probability score used --> cross entropy(log-loss) else --> F1 score}
         # {Regression: Mean Absolute Error (MAE)}
-        scorer = self.model_inst.scorers.get_scorer_function(scorer_type=scorer_type)
-        oracle_score = scorer(oracle_y, Y)
-        surrogate_score = scorer(Y, y_hat_surrogate)
-        self.logger.info('Done scoring ...')
+        scorer = self.oracle.scorers.get_scorer_function(scorer_type=scorer_type)
+        oracle_score = scorer(Y, y_hat_original)
+        # Since surrogate model is build against the base model's(Oracle's) predicted
+        # behavior y_true=y_train
+        surrogate_score = scorer(y_train, y_hat_surrogate)
+        self.logger.info('Done scoring, surrogate score {}; oracle score {}'.format(surrogate_score, oracle_score))
 
         impurity_score = round(oracle_score - surrogate_score, 3)
         if impurity_score > self.impurity_threshold:
