@@ -22,5 +22,10 @@ class TestScorer(unittest.TestCase):
         scorer = model_inst.scorers.get_scorer_function(scorer_type='default')
         y_hat = self.classifier_est.predict(self.X_test)
         value = scorer(self.y_test, y_hat, average='weighted')
-        self.assertEqual(scorer.__name__ == 'f1-score', True)
+        self.assertEqual(scorer.name == 'f1-score', True)
         self.assertEquals(value > 0, True)
+
+
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestScorer)
+    unittest.TextTestRunner(verbosity=2).run(suite)
