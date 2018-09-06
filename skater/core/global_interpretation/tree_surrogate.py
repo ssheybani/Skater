@@ -172,7 +172,10 @@ class TreeSurrogate(object):
         verbose: default=False
         """
 
-        self.logger.setLevel(_DEBUG) if verbose else self.logger.setLevel(_INFO)
+        if verbose:
+            self.logger.setLevel(_DEBUG)
+        else:
+            self.logger.setLevel(_INFO)
         # Below is an anti-pattern but had to use it. Should fix it in the long term
         y_hat_original = self.oracle._execute(X)
         y_train = y_hat_original if use_oracle else Y
