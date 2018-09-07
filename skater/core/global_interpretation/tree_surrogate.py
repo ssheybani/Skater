@@ -129,7 +129,7 @@ class TreeSurrogate(object):
                 new_score = scorer(Y, self.pred_func(X, needs_prob))
                 self.logger.debug("new score generate {}".format(new_score))
 
-                if self._optimizer_condition(original_score, new_score, scorer.type, impurity_threshold):
+                if self.__optimizer_condition(original_score, new_score, scorer.type, impurity_threshold):
                     removed_node_index.append(index)
                     self.logger.debug("Removed nodes: (index:{}-->[left node: {}, right node: {}])"
                                       .format(index, current_left, current_right))
