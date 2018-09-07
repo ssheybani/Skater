@@ -1,9 +1,10 @@
+import unittest
+
 import keras
 from keras.datasets import mnist
 from keras.models import Sequential, Model, load_model, model_from_yaml
 from keras import backend as K
 
-import unittest
 from skater.core.local_interpretation.dnni.deep_interpreter import DeepInterpreter
 
 
