@@ -93,8 +93,8 @@ class TreeSurrogate(object):
         self.__model = est
         self.pred_func = lambda X, prob: self.__model.predict(X) if prob is False else self.__model.predict_proba(X)
 
-
-    def __optimizer_condition(self, o_s, new_s, scoring_type, threshold):
+    @staticmethod
+    def __optimizer_condition(o_s, new_s, scoring_type, threshold):
         # if optimizing on a loss function then the type is decreasing vs optimizing on a model metric which is increasing
         if scoring_type == 'decreasing':
             return round(o_s, 3) + threshold >= round(new_s, 3)
@@ -129,7 +129,7 @@ class TreeSurrogate(object):
                 new_score = scorer(Y, self.pred_func(X, needs_prob))
                 self.logger.debug("new score generate {}".format(new_score))
 
-                if self.__optimizer_condition(original_score, new_score, scorer.type, impurity_threshold):
+                if TreeSurrogate.__optimizer_condition(original_score, new_score, scorer.type, impurity_threshold):
                     removed_node_index.append(index)
                     self.logger.debug("Removed nodes: (index:{}-->[left node: {}, right node: {}])"
                                       .format(index, current_left, current_right))
@@ -210,7 +210,7 @@ class TreeSurrogate(object):
             self.logger.info("post pruning applied ...")
             # Since, this is post pruning, we first learn a model
             # and then try to prune the tree controling the model's score using the impurity_threshold
-            self._post_pruning(X, y_train, scorer_type, impurity_threshold, needs_prob=self.oracle.proability)
+            self._post_pruning(X, y_train, scorer_type, impurity_threshold, needs_prob=self.oracle.probability)
         y_hat_surrogate = self.pred_func(X, self.oracle.probability)
         self.logger.info('Done generating prediction using the surrogate, shape {}'.format(y_hat_surrogate.shape))
 

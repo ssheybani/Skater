@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 from multiprocess import Pool
 import functools
-import sys
 
 from ...data import DataManager
 from .base import BaseGlobalInterpretation

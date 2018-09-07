@@ -18,7 +18,7 @@ class TestScorer(unittest.TestCase):
 
     def test_compute_default_scores(self):
         # For classification default scorer is weighted F1-score
-        model_inst = InMemoryModel(self.classifier_est.predict_proba, examples=self.X_train, model_type='classifier')
+        model_inst = InMemoryModel(self.classifier_est.predict, examples=self.X_train, model_type='classifier')
         scorer = model_inst.scorers.get_scorer_function(scorer_type='default')
         self.assertEqual(scorer.name == 'f1-score', True)
 
@@ -28,8 +28,9 @@ class TestScorer(unittest.TestCase):
 
 
     def test_compute_log_loss(self):
-        model_inst = InMemoryModel(self.classifier_est.predict_proba, examples=self.X_train, model_type='classifier')
-        scorer = model_inst.scorers.get_scorer_function(scorer_type='cross_entropy')
+        model_inst = InMemoryModel(self.classifier_est.predict_proba, examples=self.X_train, probability=True,
+                                   model_type='classifier')
+        scorer = model_inst.scorers.get_scorer_function(scorer_type='default')
         self.assertEqual(scorer.name == 'cross-entropy', True)
 
         y_hat = self.classifier_est.predict_proba(self.X_test)
