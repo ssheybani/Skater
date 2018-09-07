@@ -24,7 +24,7 @@ class TreeSurrogate(object):
 
     Parameters
     ----------
-    estimator_type='classifier'
+    oracle
     splitter='best'
     max_depth=None
     min_samples_split=2
@@ -48,7 +48,7 @@ class TreeSurrogate(object):
     """
     __name__ = "TreeSurrogate"
 
-    def __init__(self, oracle, splitter='best', max_depth=None, min_samples_split=2,
+    def __init__(self, oracle=None, splitter='best', max_depth=None, min_samples_split=2,
                  min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=None, seed=None, max_leaf_nodes=None,
                  min_impurity_decrease=0.0, min_impurity_split=None, class_weight="balanced",
                  presort=False, impurity_threshold=0.01):
@@ -91,15 +91,26 @@ class TreeSurrogate(object):
         else:
             raise exceptions.ModelError("Model type not supported. Supported options types{'classifier', 'regressor'}")
         self.__model = est
+        self.pred_func = lambda X, prob: self.__model.predict(X) if prob is False else self.__model.predict_proba(X)
+
+
+    def __optimizer_condition(self, o_s, new_s, scoring_type, threshold):
+        # if optimizing on a loss function then the type is decreasing vs optimizing on a model metric which is increasing
+        if scoring_type == 'decreasing':
+            return round(o_s, 3) + threshold >= round(new_s, 3)
+        else:
+            return round(o_s, 3) - threshold <= round(new_s, 3)
 
 
     def _post_pruning(self, X, Y, scorer_type, impurity_threshold, needs_prob=False):
         self.__model.fit(X, Y)
-        pred_func = lambda prob: self.__model.predict(X) if prob is False else self.__model.predict_proba(X)
-        y_pred = pred_func(needs_prob)
+        y_pred = self.pred_func(X, needs_prob)
         # makes sense for classification use-case, be cautious when enabling for regression
         self.logger.debug("Unique Labels in ground truth provided {}".format(np.unique(Y)))
-        self.logger.debug("Unique Labels in predictions generated {}".format(np.unique(y_pred)))
+        if needs_prob is False:
+            self.logger.debug("Unique Labels in predictions generated {}".format(np.unique(y_pred)))
+        else:
+            self.logger.debug("Probability scoring is enabled min:{}/max:{}".format(np.min(y_pred), np.max(y_pred)))
 
         scorer = self.oracle.scorers.get_scorer_function(scorer_type=scorer_type)
         self.logger.info("Scorer used {}".format(scorer))
@@ -115,10 +126,10 @@ class TreeSurrogate(object):
             current_left, current_right = tree.children_left[index], tree.children_right[index]
             if tree.children_left[index] != tree_leaf or tree.children_right[index] != tree_leaf:
                 tree.children_left[index], tree.children_right[index] = -1, -1
-                new_score = scorer(Y, pred_func(needs_prob))
+                new_score = scorer(Y, self.pred_func(X, needs_prob))
                 self.logger.debug("new score generate {}".format(new_score))
 
-                if round(original_score - new_score, 3) <= impurity_threshold:
+                if self._optimizer_condition(original_score, new_score, scorer.type, impurity_threshold):
                     removed_node_index.append(index)
                     self.logger.debug("Removed nodes: (index:{}-->[left node: {}, right node: {}])"
                                       .format(index, current_left, current_right))
@@ -178,7 +189,16 @@ class TreeSurrogate(object):
             self.logger.setLevel(_INFO)
         # Below is an anti-pattern but had to use it. Should fix it in the long term
         y_hat_original = self.oracle._execute(X)
-        y_train = y_hat_original if use_oracle else Y
+
+        # TODO: Revisit the check on using probability or class labels
+        if use_oracle and self.oracle.proability:
+            y_train = np.array(list(map(np.argmax, y_hat_original)))
+        elif use_oracle:
+            y_train = y_hat_original
+        else:
+            # this is when y_train is being passed and the desire is to build an interpretable tree based model
+            y_train = Y
+
         if prune is None:
             self.logger.info("No pruning applied ...")
             self.__model.fit(X, y_train)
@@ -190,8 +210,8 @@ class TreeSurrogate(object):
             self.logger.info("post pruning applied ...")
             # Since, this is post pruning, we first learn a model
             # and then try to prune the tree controling the model's score using the impurity_threshold
-            self._post_pruning(X, y_train, scorer_type, impurity_threshold, needs_prob=False)
-        y_hat_surrogate = self.__model.predict(X)
+            self._post_pruning(X, y_train, scorer_type, impurity_threshold, needs_prob=self.oracle.proability)
+        y_hat_surrogate = self.pred_func(X, self.oracle.probability)
         self.logger.info('Done generating prediction using the surrogate, shape {}'.format(y_hat_surrogate.shape))
 
         # Default metrics:

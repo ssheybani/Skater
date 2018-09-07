@@ -179,7 +179,9 @@ class ScorerFactory(object):
         elif model.model_type == StaticTypes.model_types.classifier:
             self.cross_entropy = CrossEntropy(model)
             self.f1 = F1(model)
-            if model.probability is not None and not 'unknown':
+            # TODO: Not sure why the first condition is relevant, probably some early design decision.
+            # TODO Need to check other examples and add more test before removing the first check completely
+            if model.probability is not None and not 'unknown' or model.probability is True:
                 self.default = self.cross_entropy
             else:
                 self.default = self.f1
