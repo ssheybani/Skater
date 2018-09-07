@@ -191,7 +191,7 @@ class TreeSurrogate(object):
         y_hat_original = self.oracle._execute(X)
 
         # TODO: Revisit the check on using probability or class labels
-        if use_oracle and self.oracle.proability:
+        if use_oracle and self.oracle.probability:
             y_train = np.array(list(map(np.argmax, y_hat_original)))
         elif use_oracle:
             y_train = y_hat_original
