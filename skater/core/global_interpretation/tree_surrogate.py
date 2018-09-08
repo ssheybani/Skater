@@ -212,7 +212,7 @@ class TreeSurrogate(object):
         elif prune == 'pre':
             # apply randomized cross validation for pruning
             self.logger.info("pre pruning applied ...")
-            self._pre_pruning(X, y_train, cv, n_iter_search, n_jobs, param_grid)
+            self._pre_pruning(X, y_train, scorer_type, cv, n_iter_search, n_jobs, param_grid)
         else:
             self.logger.info("post pruning applied ...")
             # Since, this is post pruning, we first learn a model
