@@ -235,7 +235,7 @@ class TreeSurrogate(object):
         surrogate_score = round(scorer(y_train, y_hat_surrogate), 3)
         self.logger.info('Done scoring, surrogate score {}; oracle score {}'.format(surrogate_score, oracle_score))
 
-        impurity_score = oracle_score - surrogate_score
+        impurity_score = round(oracle_score - surrogate_score, 3)
         if impurity_score > self.impurity_threshold:
             self.logger.warning('impurity score: {} of the surrogate model is higher than the impurity threshold: {}. '
                                 'The higher the impurity score, lower is the fidelity/faithfulness '
