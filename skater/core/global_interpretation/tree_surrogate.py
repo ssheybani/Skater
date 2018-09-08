@@ -116,7 +116,7 @@ class TreeSurrogate(object):
             self.logger.debug("Probability scoring is enabled min:{}/max:{}".format(np.min(y_pred), np.max(y_pred)))
 
         scorer = self.oracle.scorers.get_scorer_function(scorer_type=scorer_type)
-        self.logger.info("Scorer used {}".format(scorer))
+        self.logger.info("Scorer used {}".format(scorer.name))
         original_score = scorer(Y, y_pred)
         self.logger.info("original score using base model {}".format(original_score))
 
@@ -142,7 +142,7 @@ class TreeSurrogate(object):
         self.logger.info("Summary: childrens of the following nodes are removed {}".format(removed_node_index))
 
 
-    def _pre_pruning(self, X, Y, scorer_type, cv=5, n_iter_search=10, n_jobs=1, param_grid=None):
+    def _pre_pruning(self, X, Y, scorer_type, cv=5, n_iter_search=10, n_jobs=1, param_grid=None, verbose=False):
         default_grid = {
             "criterion": self.criterion_types[self.__model_type]['criterion'],
             "max_depth": [2, 4, 6, 8, 10],  # helps in reducing the depth of the tree
@@ -158,10 +158,12 @@ class TreeSurrogate(object):
         # Using Randomize Search here to prune the trees to improve readability without
         # comprising on model's performance
         scorer = self.oracle.scorers.get_scorer_function(scorer_type=scorer_type)
+        self.logger.info("Scorer used {}".format(scorer.name))
         scorering_func = make_scorer(scorer, greater_is_better=scorer.type)
+        verbose_level = 0 if verbose is False else 4
         random_search_estimator = RandomizedSearchCV(estimator=self.__model, cv=cv, param_distributions=search_space,
                                                      scoring=scorering_func, n_iter=n_iter_search, n_jobs=n_jobs,
-                                                     random_state=self.seed)
+                                                     random_state=self.seed, verbose=verbose_level)
         # train a surrogate DT
         random_search_estimator.fit(X, Y)
         # access the best estimator
@@ -212,7 +214,7 @@ class TreeSurrogate(object):
         elif prune == 'pre':
             # apply randomized cross validation for pruning
             self.logger.info("pre pruning applied ...")
-            self._pre_pruning(X, y_train, scorer_type, cv, n_iter_search, n_jobs, param_grid)
+            self._pre_pruning(X, y_train, scorer_type, cv, n_iter_search, n_jobs, param_grid, verbose)
         else:
             self.logger.info("post pruning applied ...")
             # Since, this is post pruning, we first learn a model
