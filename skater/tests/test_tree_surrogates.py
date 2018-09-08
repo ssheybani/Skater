@@ -1,9 +1,9 @@
 import unittest
 
 import pandas as pd
-from sklearn.datasets import make_moons
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.model_selection._split import train_test_split
+from skfit.datasets import make_moons
+from skfit.tree import DecisionTreeClassifier
+from skfit.model_selection._split import train_test_split
 
 from skater.core.explanations import Interpretation
 from skater.model import InMemoryModel
@@ -29,22 +29,22 @@ class TestTreeSurrogates(unittest.TestCase):
     # all the below tests are with F1-score
     def test_surrogate_no_pruning(self):
         surrogate_explainer = self.interpreter.tree_surrogate(oracle=self.model_inst, seed=5)
-        result = surrogate_explainer.learn(self.X_train_c, self.y_train_c, use_oracle=True,
-                                           prune=None, scorer_type='default')
+        result = surrogate_explainer.fit(self.X_train_c, self.y_train_c, use_oracle=True,
+                                         prune=None, scorer_type='default')
         self.assertEquals(result < 0, True)
 
 
     def test_surrogate_with_prepruning(self):
         surrogate_explainer = self.interpreter.tree_surrogate(oracle=self.model_inst, seed=5)
-        result = surrogate_explainer.learn(self.X_train_c, self.y_train_c, use_oracle=True,
-                                           prune='pre', scorer_type='f1')
+        result = surrogate_explainer.fit(self.X_train_c, self.y_train_c, use_oracle=True,
+                                         prune='pre', scorer_type='f1')
         self.assertEquals(result < 0, True)
 
 
     def test_surrogate_with_postpruning(self):
         surrogate_explainer = self.interpreter.tree_surrogate(oracle=self.model_inst, seed=5)
-        result = surrogate_explainer.learn(self.X_train_c, self.y_train_c, use_oracle=True,
-                                           prune='post', scorer_type='f1')
+        result = surrogate_explainer.fit(self.X_train_c, self.y_train_c, use_oracle=True,
+                                         prune='post', scorer_type='f1')
         self.assertEquals(result < 0, True)
 
 
@@ -53,8 +53,8 @@ class TestTreeSurrogates(unittest.TestCase):
                                    model_type='classifier', feature_names=self.X_c.columns,
                                    target_names=self.target_names, log_level=_INFO, probability=True)
         surrogate_explainer = self.interpreter.tree_surrogate(oracle=model_inst, seed=5)
-        result = surrogate_explainer.learn(self.X_train_c, self.y_train_c, use_oracle=True,
-                                           prune='post', scorer_type='default')
+        result = surrogate_explainer.fit(self.X_train_c, self.y_train_c, use_oracle=True,
+                                         prune='post', scorer_type='default')
         self.assertEqual(surrogate_explainer.scorer_name_, 'cross-entropy', True)
         self.assertEquals(result != 0, True)
 

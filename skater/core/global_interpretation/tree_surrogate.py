@@ -171,8 +171,8 @@ class TreeSurrogate(object):
         self.__best_score = random_search_estimator.best_score_
 
 
-    def learn(self, X, Y, use_oracle=True, prune='post', cv=5, n_iter_search=10,
-              scorer_type='default', n_jobs=1, param_grid=None, impurity_threshold=0.01, verbose=False):
+    def fit(self, X, Y, use_oracle=True, prune='post', cv=5, n_iter_search=10,
+            scorer_type='default', n_jobs=1, param_grid=None, impurity_threshold=0.01, verbose=False):
         """ Learn an approximate representation by constructing a Decision Tree based on the results retrieved by
         querying the Oracle(base model). Instances used for training should belong to the base learners instance space.
 
