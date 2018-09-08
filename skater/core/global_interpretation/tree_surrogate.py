@@ -1,5 +1,6 @@
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.model_selection import RandomizedSearchCV
+from sklearn.metrics import make_scorer
 import numpy as np
 
 from skater.model.base import ModelType
@@ -58,7 +59,6 @@ class TreeSurrogate(object):
         self.oracle = oracle
         self.logger = build_logger(oracle.logger.level, __name__)
         self.__model_type = None
-
         self.feature_names = oracle.feature_names
         self.class_names = oracle.target_names
         self.impurity_threshold = impurity_threshold
@@ -68,6 +68,8 @@ class TreeSurrogate(object):
         self.splitter = splitter if any(splitter in item for item in self.splitter_types) else 'best'
         self.seed = seed
         self.__model_type = oracle.model_type
+        self.__scorer_name = None
+        self.__best_score = None
 
         # TODO validate the parameters based on estimator type
         if self.__model_type == 'classifier':
@@ -91,7 +93,8 @@ class TreeSurrogate(object):
         else:
             raise exceptions.ModelError("Model type not supported. Supported options types{'classifier', 'regressor'}")
         self.__model = est
-        self.pred_func = lambda X, prob: self.__model.predict(X) if prob is False else self.__model.predict_proba(X)
+        self.__pred_func = lambda X, prob: self.__model.predict(X) if prob is False else self.__model.predict_proba(X)
+
 
     @staticmethod
     def __optimizer_condition(o_s, new_s, scoring_type, threshold):
@@ -104,7 +107,7 @@ class TreeSurrogate(object):
 
     def _post_pruning(self, X, Y, scorer_type, impurity_threshold, needs_prob=False):
         self.__model.fit(X, Y)
-        y_pred = self.pred_func(X, needs_prob)
+        y_pred = self.__pred_func(X, needs_prob)
         # makes sense for classification use-case, be cautious when enabling for regression
         self.logger.debug("Unique Labels in ground truth provided {}".format(np.unique(Y)))
         if needs_prob is False:
@@ -126,7 +129,7 @@ class TreeSurrogate(object):
             current_left, current_right = tree.children_left[index], tree.children_right[index]
             if tree.children_left[index] != tree_leaf or tree.children_right[index] != tree_leaf:
                 tree.children_left[index], tree.children_right[index] = -1, -1
-                new_score = scorer(Y, self.pred_func(X, needs_prob))
+                new_score = scorer(Y, self.__pred_func(X, needs_prob))
                 self.logger.debug("new score generate {}".format(new_score))
 
                 if TreeSurrogate.__optimizer_condition(original_score, new_score, scorer.type, impurity_threshold):
@@ -139,7 +142,7 @@ class TreeSurrogate(object):
         self.logger.info("Summary: childrens of the following nodes are removed {}".format(removed_node_index))
 
 
-    def _pre_pruning(self, X, Y, cv=5, n_iter_search=10, n_jobs=1, param_grid=None):
+    def _pre_pruning(self, X, Y, scorer_type, cv=5, n_iter_search=10, n_jobs=1, param_grid=None):
         default_grid = {
             "criterion": self.criterion_types[self.__model_type]['criterion'],
             "max_depth": [2, 4, 6, 8, 10],  # helps in reducing the depth of the tree
@@ -154,12 +157,16 @@ class TreeSurrogate(object):
         # 2. https://www.coursera.org/lecture/ml-classification/optional-pruning-decision-trees-to-avoid-overfitting-qvf6v
         # Using Randomize Search here to prune the trees to improve readability without
         # comprising on model's performance
+        scorer = self.oracle.scorers.get_scorer_function(scorer_type=scorer_type)
+        scorering_func = make_scorer(scorer, greater_is_better=scorer.type)
         random_search_estimator = RandomizedSearchCV(estimator=self.__model, cv=cv, param_distributions=search_space,
-                                                     n_iter=n_iter_search, n_jobs=n_jobs, random_state=self.seed)
+                                                     scoring=scorering_func, n_iter=n_iter_search, n_jobs=n_jobs,
+                                                     random_state=self.seed)
         # train a surrogate DT
         random_search_estimator.fit(X, Y)
         # access the best estimator
         self.__model = random_search_estimator.best_estimator_
+        self.__best_score = random_search_estimator.best_score_
 
 
     def learn(self, X, Y, use_oracle=True, prune='post', cv=5, n_iter_search=10,
@@ -211,13 +218,15 @@ class TreeSurrogate(object):
             # Since, this is post pruning, we first learn a model
             # and then try to prune the tree controling the model's score using the impurity_threshold
             self._post_pruning(X, y_train, scorer_type, impurity_threshold, needs_prob=self.oracle.probability)
-        y_hat_surrogate = self.pred_func(X, self.oracle.probability)
+        y_hat_surrogate = self.__pred_func(X, self.oracle.probability)
         self.logger.info('Done generating prediction using the surrogate, shape {}'.format(y_hat_surrogate.shape))
 
         # Default metrics:
         # {Classification: if probability score used --> cross entropy(log-loss) else --> F1 score}
         # {Regression: Mean Absolute Error (MAE)}
         scorer = self.oracle.scorers.get_scorer_function(scorer_type=scorer_type)
+        self.__scorer_name = scorer.name
+
         oracle_score = round(scorer(Y, y_hat_original), 3)
         # Since surrogate model is build against the base model's(Oracle's) predicted
         # behavior y_true=y_train
@@ -244,6 +253,15 @@ class TreeSurrogate(object):
         """ Estimator type
         """
         return self.__model_type
+
+    @property
+    def best_score_(self):
+        return self.__best_score
+
+
+    @property
+    def scorer_name_(self):
+        return self.__scorer_name
 
 
     def predict(self, X, prob_score=False):

@@ -24,7 +24,7 @@ class TestScorer(unittest.TestCase):
         scorer = model_inst.scorers.get_scorer_function(scorer_type='default')
         self.assertEqual(scorer.name == 'f1-score', True)
 
-        scorer = model_inst.scorers.get_scorer_function(scorer_type='f1_score')
+        scorer = model_inst.scorers.get_scorer_function(scorer_type='f1')
         self.assertEqual(scorer.name == 'f1-score', True)
 
         y_hat = self.classifier_est.predict(self.X_test)

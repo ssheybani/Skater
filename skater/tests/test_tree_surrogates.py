@@ -1,9 +1,9 @@
-import pandas as pd
+import unittest
 
+import pandas as pd
 from sklearn.datasets import make_moons
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection._split import train_test_split
-import unittest
 
 from skater.core.explanations import Interpretation
 from skater.model import InMemoryModel
@@ -26,7 +26,7 @@ class TestTreeSurrogates(unittest.TestCase):
                                        model_type='classifier', unique_values=[0, 1], feature_names=cls.X_c.columns,
                                        target_names=cls.target_names, log_level=_INFO)
 
-
+    # all the below tests are with F1-score
     def test_surrogate_no_pruning(self):
         surrogate_explainer = self.interpreter.tree_surrogate(oracle=self.model_inst, seed=5)
         result = surrogate_explainer.learn(self.X_train_c, self.y_train_c, use_oracle=True,
@@ -46,6 +46,17 @@ class TestTreeSurrogates(unittest.TestCase):
         result = surrogate_explainer.learn(self.X_train_c, self.y_train_c, use_oracle=True,
                                            prune='post', scorer_type='f1')
         self.assertEquals(result < 0, True)
+
+
+    def test_surrogate_with_cross_entropy(self):
+        model_inst = InMemoryModel(self.classifier_est.predict_proba, examples=self.X_train_c,
+                                   model_type='classifier', feature_names=self.X_c.columns,
+                                   target_names=self.target_names, log_level=_INFO, probability=True)
+        surrogate_explainer = self.interpreter.tree_surrogate(oracle=model_inst, seed=5)
+        result = surrogate_explainer.learn(self.X_train_c, self.y_train_c, use_oracle=True,
+                                           prune='post', scorer_type='default')
+        self.assertEqual(surrogate_explainer.scorer_name_, 'cross-entropy', True)
+        self.assertEquals(result != 0, True)
 
 
 if __name__ == '__main__':
