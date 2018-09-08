@@ -1,9 +1,9 @@
 import unittest
 
 import pandas as pd
-from skfit.datasets import make_moons
-from skfit.tree import DecisionTreeClassifier
-from skfit.model_selection._split import train_test_split
+from sklearn.datasets import make_moons
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection._split import train_test_split
 
 from skater.core.explanations import Interpretation
 from skater.model import InMemoryModel
