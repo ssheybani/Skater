@@ -25,20 +25,61 @@ class TreeSurrogate(object):
 
     Parameters
     ----------
-    oracle
-    splitter='best'
-    max_depth=None
-    min_samples_split=2
-    min_samples_leaf=1
-    min_weight_fraction_leaf=0.0
-    max_features=None, seed=None
-    max_leaf_nodes=None
-    min_impurity_decrease=0.0
-    min_impurity_split=None
-    class_weight=None
-    presort=False
-    impurity_threshold=0.01
+    oracle : InMemory instance type
+        model instance having access to the base estimator(InMemory/DeployedModel). Currently, only InMemory is
+        is supported.
+    splitter : str, (default='best')
+        Strategy used to split at each the node. Supported strategies('best' or 'random')
+    max_depth : int, (default=None)
+        Defines the maximum depth of a tree. If 'None' then nodes are expanded till all leaves are pure or contain less
+        than min_samples_split samples. Deeper trees are prone to be more expensive and tend to overfit. Pruning is a
+        technique which could be applied to avoid overfitting.
+    min_samples_split : int/float, (default=2)
+        Defines the minimum number of samples required to split an internal node.
+        - 'int' : specifies the minimum number of samples
+        - 'float' : then represents a percentage. Minimum number of samples is computed as
+          `ceil(min_samples_split*n_samples)
+    min_samples_leaf : int/float, (default=1)
+        Defines requirement for a leaf node. The minimum number of samples needed to be a leaf node.
+        - int : specifies the minimum number of samples
+        - float : then represents a percentage. Minimum number of samples is computed as
+          `ceil(min_samples_split*n_samples)
+    min_weight_fraction_leaf : float, (default=0.0)
+        Defines requirement for a leaf node. The minimum weight percentage of the sum total of the weights of
+        all input samples.
+    max_features : int, float, string or None, (default=None)
+        Defines number of features to consider for the best possible split
+        - None : all specified features are used (oracle.feature_names)
+        - int : uses specified values as `max_features` at each split.
+        - float : as a percentage. Value for split is computed as `int(max_features * n_features)`.
+        - "auto" : `max_features=sqrt(n_features)`.
+        - "sqrt" : `max_features=sqrt(n_features)`.
+        - "log2" : `max_features=log2(n_features)`.
+    seed : int, (default=None)
+        seed for random number generator
+    max_leaf_nodes : int or None, (default=None)
+        TreeSurrogates are constructed top-down in best first manner(best decrease in relative impurity)
+        If None, results in maximum possible number of leaf nodes. This tends to overfitting
+    min_impurity_decrease : float, (default=0.0)
+        Tree node is considered for splitting if relative decrease in impurity is >= `min_impurity_decrease`
+    class_weight : dict, list of dicts, str:"balanced" or None (default="balanced")
+        Weights associated with classes for handling data imbalance.
+        - None : all classes have equal weights
+        - "balanced" : adjusts the class weights automatically. Weights are assigned inversely propotional
+          to class frequencies ``n_samples / (n_classes * np.bincount(y))``
+    presort : bool, (default=False)
+        Sorts the data before building surrogates trees to find the best splits. When dealing with larger datasets,
+        setting it to True might result in increasing computation time because of the pre sorting opertation.
+    impurity_threshold : float, (default=0.01)
+        Specifies the acceptable disparity between the Oracle and TreeSurrogates. The higher the difference between
+        the Oracle and TreeSurrogate less faithful are the explanations generated.
 
+    Attributes
+    ----------
+    estimator_
+    estimator_type_
+    best_score_
+    scorer_name_
 
     References
     ----------
@@ -46,6 +87,8 @@ class TreeSurrogate(object):
            (http://ftp.cs.wisc.edu/machine-learning/shavlik-group/craven.thesis.pdf)
     .. [2] Mark W. Craven and Jude W. Shavlik(NIPS, 96). Extracting Thee-Structured Representations of Thained Networks
            (https://papers.nips.cc/paper/1152-extracting-tree-structured-representations-of-trained-networks.pdf)
+    .. [3] DecisionTreeClassifier: http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html
+    .. [4] DecisionTreeRegressor: http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html
     """
     __name__ = "TreeSurrogate"
 
@@ -79,7 +122,6 @@ class TreeSurrogate(object):
                                          max_features=max_features, random_state=seed,
                                          max_leaf_nodes=max_leaf_nodes,
                                          min_impurity_decrease=min_impurity_decrease,
-                                         min_impurity_split=min_impurity_split,
                                          class_weight=class_weight, presort=presort)
         elif self.__model_type == 'regressor':
             est = DecisionTreeRegressor(splitter=self.splitter, max_depth=None,
@@ -88,7 +130,6 @@ class TreeSurrogate(object):
                                         min_weight_fraction_leaf=min_weight_fraction_leaf,
                                         max_features=max_features,
                                         random_state=seed, max_leaf_nodes=max_leaf_nodes,
-                                        min_impurity_decrease=min_impurity_decrease,
                                         min_impurity_split=min_impurity_split, presort=presort)
         else:
             raise exceptions.ModelError("Model type not supported. Supported options types{'classifier', 'regressor'}")
@@ -178,18 +219,18 @@ class TreeSurrogate(object):
 
         Parameters
         ----------
-        X:
-        Y:
-        use_oracle: if True build a surrogate model against the predictions of the base model else use the ground truth
+        X :
+        Y :
+        use_oracle : if True build a surrogate model against the predictions of the base model else use the ground truth
                     to build an interpretable tree based model
-        prune: None, 'pre', 'post'
-        cv: used only for 'pre-pruning' right now
-        n_iter_search:
-        scorer_type:
-        n_jobs:
-        param_grid:
-        impurity_threshold: default=0.01
-        verbose: default=False
+        prune : None, 'pre', 'post'
+        cv : used only for 'pre-pruning' right now
+        n_iter_search :
+        scorer_type :
+        n_jobs :
+        param_grid :
+        impurity_threshold : (default=0.01)
+        verbose : (default=False)
         """
 
         if verbose:
@@ -244,14 +285,14 @@ class TreeSurrogate(object):
 
 
     @property
-    def estimator(self):
+    def estimator_(self):
         """ Learned approximate surrogate estimator
         """
         return self.__model
 
 
     @property
-    def estimator_type(self):
+    def estimator_type_(self):
         """ Estimator type
         """
         return self.__model_type
@@ -276,7 +317,7 @@ class TreeSurrogate(object):
 
     def plot_global_decisions(self, colors=None, enable_node_id=True, random_state=0, file_name="interpretable_tree.png",
                               show_img=False, fig_size=(20, 8)):
-        """ Visualizes the decision nodes of the surrogate tree.
+        """ Visualizes the decision policies of the surrogate tree.
         """
         graph_inst = plot_tree(self.__model, self.__model_type, feature_names=self.feature_names, color_list=colors,
                                class_names=self.class_names, enable_node_id=enable_node_id, seed=random_state)
@@ -302,4 +343,6 @@ class TreeSurrogate(object):
 
 
     def decisions_as_txt(self, scope='global', X=None):
+        """ Retrieve the decision policies as text
+        """
         tree_to_text(self.__model, self.feature_names, self.__model_type, scope, X)
