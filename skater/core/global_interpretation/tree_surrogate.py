@@ -329,11 +329,15 @@ class TreeSurrogate(object):
 
     @property
     def best_score_(self):
+        """ Best score post pre-pruning
+        """
         return self.__best_score
 
 
     @property
     def scorer_name_(self):
+        """ Cost function used for optimization
+        """
         return self.__scorer_name
 
 
