@@ -183,7 +183,6 @@ class ModelType(object):
         ----------
         examples: array type
 
-
         """
         if isinstance(examples, (pd.DataFrame, np.ndarray)):
             return examples

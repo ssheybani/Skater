@@ -9,6 +9,7 @@ from skater.core.visualizer.tree_visualizer import plot_tree, tree_to_text
 from skater.util.logger import build_logger
 from skater.util.logger import _INFO, _DEBUG
 from skater.util import exceptions
+from skater.data import DataManager
 
 
 class TreeSurrogate(object):
@@ -186,8 +187,8 @@ class TreeSurrogate(object):
     def _pre_pruning(self, X, Y, scorer_type, cv=5, n_iter_search=10, n_jobs=1, param_grid=None, verbose=False):
         default_grid = {
             "criterion": self.criterion_types[self.__model_type]['criterion'],
-            "max_depth": [2, 4, 6, 8, 10],  # helps in reducing the depth of the tree
-            "min_samples_leaf": [2, 4],  # restrict the number of samples in a leaf
+            "max_depth": [2, 4, 6, 8, 10, 12],  # helps in reducing the depth of the tree
+            "min_samples_leaf": [2, 4],  # restrict the minimum number of samples in a leaf
             "max_leaf_nodes": [2, 4, 6, 8, 10]  # reduce the number of leaf nodes
         }
         search_space = param_grid if param_grid is not None else default_grid
@@ -219,24 +220,52 @@ class TreeSurrogate(object):
 
         Parameters
         ----------
-        X :
-        Y :
-        use_oracle : if True build a surrogate model against the predictions of the base model else use the ground truth
-                    to build an interpretable tree based model
-        prune : None, 'pre', 'post'
-        cv : used only for 'pre-pruning' right now
-        n_iter_search :
-        scorer_type :
-        n_jobs :
-        param_grid :
-        impurity_threshold : (default=0.01)
-        verbose : (default=False)
+        X : numpy.ndarray, pandas.DataFrame
+            Training input samples
+        Y : numpy.ndarray, target values(ground truth)
+        use_oracle : bool, (defaul=True)
+            - True, builds a surrogate model against the predictions of the base model(Oracle)
+            - False, learns an interpretable tree based model using the supplied training examples and ground truth
+        prune : None, str (default="post")
+            Pruning is a useful technique to controle the complexity of the tree (keeping the trees comprehensive
+            and interpretable) without compromising on model's accuracy. Avoiding to build large and deep trees
+            also helps in preventing overfitting.
+            - "pre" : Also known as forward/online pruning. This pruning process uses a termination
+            condition(high and low thresholds) to prematurely terminate some of the branches and nodes.
+            Cross Validation is applied to measure the goodness of the fit while the tree is pruned.
+            - "post" : Also known as backward pruning. The pruning process is applied post the construction of the
+                       Tree using the specified model parameters. This involves reducing the branches and nodes using
+                       a cost function. The current implementation support cost optimizatio using
+                       Model's scoric metrics(e.g. r2, log-loss, f1, ...)
+        cv : int, (default=5)
+            Randomized cross validation used only for 'pre-pruning' right now.
+        n_iter_search : int, (default=10)
+            Number of parameter setting combinations that are sampled for pre-pruning.
+        scorer_type : str, (default="default")
+        n_jobs : int (default=1)
+            Number of jobs to run in parallel.
+        param_grid : dict
+            Dictionary of parameters to specify the termination condition for pre-pruning.
+        impurity_threshold : float, (default=0.01)
+            Specifies acceptable performance drop when using Tree based surrogates to replicate the decision policies
+            learned by the Oracle
+        verbose : bool (default=False)
+            Helps control the verbosity.
+
+        References
+        ----------
+        .. [1] Nikita Patel and Saurabh Upadhyay(2012)
+               Study of Various Decision Tree Pruning Methods with their Empirical Comparison in WEKA
+               (https://pdfs.semanticscholar.org/025b/8c109c38dc115024e97eb0ede5ea873fffdb.pdf)
         """
 
         if verbose:
             self.logger.setLevel(_DEBUG)
         else:
             self.logger.setLevel(_INFO)
+        # DataManager does type checking as well
+        dm = DataManager(X, Y)
+        X, Y = dm.X, dm.y
         # Below is an anti-pattern but had to use it. Should fix it in the long term
         y_hat_original = self.oracle._execute(X)
 
@@ -296,6 +325,7 @@ class TreeSurrogate(object):
         """ Estimator type
         """
         return self.__model_type
+
 
     @property
     def best_score_(self):

@@ -461,6 +461,7 @@ class DataManager(object):
         # do we need to coerce labels to a particular data type?
         return self.y[numeric_index]
 
+
     @classmethod
     def _check_input(cls, dataset):
         """
@@ -470,8 +471,8 @@ class DataManager(object):
         """
         if not isinstance(dataset, (pd.DataFrame)):
             err_msg = "dataset must be a pandas.DataFrame"
-            raise(exceptions.DataSetError(err_msg))
+            raise exceptions.DataSetError(err_msg)
 
         if len(dataset) == 0:
             err_msg = "dataset is empty"
-            raise (exceptions.DataSetError(err_msg))
+            raise exceptions.DataSetError(err_msg)
