@@ -87,6 +87,7 @@ def setup_package():
             'joblib==0.11',
             'Jinja2==2.10',
             'pydotplus==2.0.2',
+            'plotly==3.2.0',
             'bs4'],
         extras_require={
             'all': 'matplotlib'},
