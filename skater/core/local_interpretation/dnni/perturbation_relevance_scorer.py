@@ -1,8 +1,9 @@
 # -*- coding: UTF-8 -*-
+import numpy as np
+
 from skater.core.local_interpretation.dnni.initializer import Initializer
 from skater.util.logger import build_logger
 from skater.util.logger import _INFO
-import numpy as np
 
 
 class BasePerturbationMethod(Initializer):

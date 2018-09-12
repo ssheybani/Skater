@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 from multiprocess import Pool
 import functools
-import sys
 
 from ...data import DataManager
 from .base import BaseGlobalInterpretation
@@ -510,13 +509,11 @@ class PartialDependence(BaseGlobalInterpretation):
 
         try:
             global pyplot
-            global ScalarFormatter
             global Axes3D
             global mpl_axes
             global cm
             global tick_formatter
             from matplotlib.axes._subplots import Axes as mpl_axes
-            # from matplotlib.ticker import ScalarFormatter
             from mpl_toolkits.mplot3d import Axes3D
             from matplotlib import pyplot, cm
             from ...util.plotting import tick_formatter
