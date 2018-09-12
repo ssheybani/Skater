@@ -2,7 +2,9 @@
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 import subprocess
-import os, io, sys
+import os
+import io
+import sys
 import contextlib
 
 
@@ -34,11 +36,7 @@ class InvokingShScript(install):
             dir_path = os.path.dirname(os.path.realpath(__file__))
             shell_script_path = os.path.join(dir_path, 'setup.sh')
 
-            subprocess.check_output([
-            'bash',
-            shell_script_path,
-            self.ostype
-            ])
+            subprocess.check_output(['bash', shell_script_path, self.ostype])
         install.do_egg_install(self)
 
 
@@ -53,6 +51,7 @@ def chdir(new_dir):
         del sys.path[0]
         os.chdir(old_dir)
 
+
 def setup_package():
     root = os.path.abspath(os.path.dirname(__file__))
 
@@ -66,7 +65,6 @@ def setup_package():
 
     setup(
         name=about['__title__'],
-        zip_safe=False,
         packages=find_packages(),
         description=about['__summary__'],
         long_description=readme,
@@ -76,19 +74,24 @@ def setup_package():
         url=about['__uri__'],
         license=about['__license__'],
         cmdclass={'install': InvokingShScript},
+        include_package_data=True,
         install_requires=[
             'scikit-learn>=0.18',
-            'pandas>=0.19',
+            'scikit-image==0.14',
+            'pandas>=0.22.0',
             'ds-lime>=0.1.1.21',
             'requests',
             'multiprocess',
             'dill>=0.2.6',
             'wordcloud==1.3.1',
             'joblib==0.11',
-            'rpy2==2.9.1; python_version>"3.0"',
-            'Jinja2==2.10'],
-        extras_require ={'all':'matplotlib'},
-        )
+            'Jinja2==2.10',
+            'pydotplus==2.0.2',
+            'bs4'],
+        extras_require={
+            'all': 'matplotlib'},
+        zip_safe=False)
+
 
 if __name__ == '__main__':
     setup_package()

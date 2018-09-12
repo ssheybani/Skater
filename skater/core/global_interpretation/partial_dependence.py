@@ -143,6 +143,7 @@ class PartialDependence(BaseGlobalInterpretation):
     def feature_column_name_formatter(columnname):
         return columnname
 
+
     def _check_features(self, feature_ids):
         if StaticTypes.data_types.is_string(feature_ids) or StaticTypes.data_types.is_numeric(feature_ids):
             feature_ids = [feature_ids]
@@ -162,6 +163,7 @@ class PartialDependence(BaseGlobalInterpretation):
             raise(exceptions.DuplicateFeaturesError(duplicate_features_error_msg))
 
         return feature_ids
+
 
     def partial_dependence(self, feature_ids, modelinstance, filter_classes=None, grid=None,
                            grid_resolution=30, n_jobs=-1, grid_range=None, sample=True,
@@ -229,7 +231,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
         return_metadata: boolean
 
-        :Example:
+        :Examples:
         >>> from skater.model import InMemoryModel
         >>> from skater.core.explanations import Interpretation
         >>> from sklearn.ensemble import RandomForestClassier
@@ -240,14 +242,14 @@ class PartialDependence(BaseGlobalInterpretation):
         >>> features = boston.feature_names
 
         >>> rf = RandomForestClassier()
-        >>> rf.fit(X,y)
+        >>> rf.fit(X, y)
 
 
-        >>> model = InMemoryModel(rf, examples = X)
+        >>> model = InMemoryModel(rf.predict_proba, examples = X)
         >>> interpreter = Interpretation()
         >>> interpreter.load_data(X)
         >>> feature_ids = ['ZN','CRIM']
-        >>> interpreter.partial_dependence.partial_dependence(features,model)
+        >>> interpreter.partial_dependence.partial_dependence(features, model)
         """
 
         if self.data_set is None:
@@ -379,7 +381,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
         if progressbar:
             self.interpreter.logger.warn("Progress bars slow down runs by 10-20%. For slightly \n"
-                                         "faster runs, do progress_bar=False")
+                                         "faster runs, do progressbar=False")
             mapper = executor_instance.imap
             p = ProgressBar(len(arg_list), units='grid cells')
         else:
@@ -481,7 +483,7 @@ class PartialDependence(BaseGlobalInterpretation):
             estimate: the variance of the partial dependence estimates
             prediction: the variances of the predictions at the given point
 
-        Example
+        Examples
         --------
         >>> from sklearn.ensemble import GradientBoostingRegressor
         >>> from sklearn.datasets.california_housing import fetch_california_housing

@@ -1,3 +1,53 @@
-#Compiled source
-*.pyc
-/skater/util/static_types.py
+# Documentation
+docs/build/*
+
+*.py[cod]
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+htmlcov
+.coverage
+.tox
+
+# pycharm
+.idea
+
+# Used by py.test
+.cache
+.pytest_cache/
+__pycache__
+
+# Others
+*~
+*.dat
+*.pstats
+*.stats
+*.npy
+*.zip
+*.predict
+*.pkl
+.DS_Store
+.idea
+.mypy_cache
+.buildinfo
+*.gz

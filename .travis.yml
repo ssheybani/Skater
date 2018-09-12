@@ -25,10 +25,14 @@ before_install:
   # Useful for debugging any issues with conda
   - conda info -a
   - conda install gxx_linux-64
+  - conda install libgcc
+  - export LD_LIBRARY_PATH=${prefix}/lib:$LD_LIBRARY_PATH
 
 install:
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib pandas flake8 coverage
+  # https://github.com/tensorflow/tensorflow/issues/6968 (reason for including libtcmalloc-minimal4)
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy cython scipy h5py flake8 coverage
   - source activate test-environment
+  - conda install -c conda-forge matplotlib
   - pip install codecov # not on conda
   - pip install coveralls
   - if [[ "$TRAVIS_PYTHON_VERSION" > "3.0" ]]; then
@@ -36,6 +40,21 @@ install:
     else
       python setup.py install;
     fi
+  - if [[ "$TRAVIS_PYTHON_VERSION" > "3.0" ]]; then
+      python -m pip install --upgrade --force-reinstall tensorflow==1.4.0;
+      python -W ignore -c "import tensorflow as tf";
+    else
+      sudo apt-get install libtcmalloc-minimal4;
+      export LD_PRELOAD="/usr/lib/libtcmalloc_minimal.so.4";
+      python -m pip install --upgrade --force-reinstall tensorflow==1.4.0;
+      python -W ignore -c "import tensorflow as tf";
+    fi
+  - if [[ "$TRAVIS_PYTHON_VERSION" > "3.0" ]]; then
+       python -m pip install --upgrade --force-reinstall keras==2.0.8;
+    else
+       python -m pip install --upgrade --force-reinstall keras==2.0.8;
+    fi
+  - python -W ignore -c "import keras as k"
   - python -c "import scipy"
   - python -c "import numpy"
   - python -c "import lime"
@@ -52,6 +71,7 @@ after_success:
 branches:
   only:
     - master
+    - compute_relevance_dev2
 notifications:
   #slack:
   #secure:

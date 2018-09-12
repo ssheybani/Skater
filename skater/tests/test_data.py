@@ -100,6 +100,14 @@ class TestData(unittest.TestCase):
                                                            "not loaded properly"
         assert data_set.index == self.index, "Index from DataFrame not loaded properly"
         assert_array_equal(data_set.X, self.X)
+        try:
+            feature_info = data_set.feature_info
+            for feature in self.feature_names:
+                assert feature in feature_info
+        except ValueError as e:
+            raise e
+        except KeyError as e:
+            assert False, "{:} not found in feature_info".format(feature)
 
 
     def test_generate_grid_1_variable(self):

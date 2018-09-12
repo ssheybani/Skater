@@ -31,7 +31,6 @@ then
     sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
     sudo add-apt-repository -y ppa:marutter/rrutter
     sudo apt-get update
-    sudo apt-get upgrade
     sudo apt-get install libgmp3-dev
     sudo apt-get install gsl-bin
     sudo apt-get install libgsl2
@@ -44,8 +43,12 @@ then
     sudo yum install r-cran-rcpp
     sudo yum install libgmp3-dev
 fi
+
+echo "installing rpy2"
+sudo python -m pip install rpy2==2.9.4
+
 # downloads the required R packages locally in the same directory as setup.py
-wget https://cran.r-project.org/src/contrib/Rcpp_0.12.16.tar.gz
+wget https://cran.r-project.org/src/contrib/Archive/Rcpp/Rcpp_0.12.16.tar.gz
 sudo R CMD INSTALL Rcpp_0.12.16.tar.gz
 wget https://cran.r-project.org/src/contrib/Archive/arules/arules_1.5-5.tar.gz
 sudo R CMD INSTALL arules_1.5-5.tar.gz

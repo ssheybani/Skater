@@ -137,14 +137,19 @@ class ModelType(object):
         :param scorer:
         :return:
         """
-        if not self.has_metadata:
-            raise NotImplementedError("The model needs metadata before "
-                                      "the scorer can be used. Please first"
-                                      "run model.predict(X) on a couple examples"
-                                      "first")
-        else:
-            scorers = ScorerFactory(self)
-            return scorers
+        # TODO: This is a temporary work around. I feel that Scorer component needs to be designed slightly different.
+        # Ideally, with the initialization of the Interpretation instance we want to get Interpretation Algorithms all
+        # ready to go. Similary, when we initialize InMemory model/Deploy model,
+        # we should be able to specifying the evaluation type but giving user the freedom to specify the metric
+        # later as well. The below, condition is commented to implement TreeSurrogate.
+        # if not self.has_metadata:
+        #     raise NotImplementedError("The model needs metadata before "
+        #                               "the scorer can be used. Please first"
+        #                               "run model.predict(X) on a couple examples"
+        #                               "first")
+        # else:
+        scorers = ScorerFactory(self)
+        return scorers
 
     @abc.abstractmethod
     def _execute(self, *args, **kwargs):

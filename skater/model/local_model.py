@@ -118,6 +118,7 @@ class InMemoryModel(ModelType):
         else:
             return results
 
+
     def _get_static_predictor(self):
 
         predict_fn = partial(self._predict,

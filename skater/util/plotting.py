@@ -206,16 +206,16 @@ def tick_formatter(powerlimits=None):
     return formatter
 
 
-def plot_from_df(data_df, column_name_to_sort, x_label, y_label, ascending=True, display_size=(8,8)):
+def plot_from_df(data_df, column_name_to_sort, x_label, y_label, ascending=True, display_size=(8, 8)):
     try:
         import matplotlib.pyplot as plt
     except ImportError:
         raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
 
     plt.style.use('ggplot')
-    f, ax = plt.subplots(1, figsize = display_size)
-    data_df.sort_values(column_name_to_sort, ascending=ascending).plot(kind='barh', ax=ax, color='blue',
-                                                title='Feature ranking')
+    f, ax = plt.subplots(1, figsize=display_size)
+    data_df.sort_values(column_name_to_sort, ascending=ascending).plot(kind='barh', ax=ax,
+                                                                       color='blue', title='Feature ranking')
     plt.xlabel(x_label)
     plt.ylabel(y_label)
     ax.set_yticklabels(data_df.features)

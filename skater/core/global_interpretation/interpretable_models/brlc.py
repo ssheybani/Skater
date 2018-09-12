@@ -1,18 +1,17 @@
 # coding=utf-8
-
 from skater.util import exceptions
-from rpy2.robjects.packages import importr
-from rpy2.robjects import pandas2ri
+
 import numbers
 import numpy as np
 import pandas as pd
 import rpy2.robjects as ro
+from rpy2.robjects.packages import importr
+from rpy2.robjects import pandas2ri
 pandas2ri.activate()
 
 
 class BRLC(object):
-    """
-    :: Experimental :: The implementation is currently experimental and might change in future
+    """ :: Experimental :: The implementation is currently experimental and might change in future
 
     BRLC(Bayesian Rule List Classifier) is a python wrapper for SBRL(Scalable Bayesian Rule list).
     SBRL is a scalable Bayesian Rule List. It's a generative estimator to build hierarchical interpretable
@@ -21,37 +20,55 @@ class BRLC(object):
 
     Parameters
     ----------
-    iterations: int (default=30000)
+    iterations : int (default=30000)
         number of iterations for each MCMC chain.
-    pos_sign: int (default=1)
+
+    pos_sign : int (default=1)
         sign for the positive labels in the "label" column.
-    neg_sign: int (default=0)
-     sign for the negative labels in the "label" column.
-    min_rule_len: int (default=1)
+
+    neg_sign : int (default=0)
+        sign for the negative labels in the "label" column.
+
+    min_rule_len : int (default=1)
         minimum number of cardinality for rules to be mined from the data-frame.
-    max_rule_len: int (default=8)
+
+    max_rule_len : int (default=8)
         maximum number of cardinality for rules to be mined from the data-frame.
-    min_support_pos: float (default=0.1)
+
+    min_support_pos : float (default=0.1)
         a number between 0 and 1, for the minimum percentage support for the positive observations.
-    min_support_neg: float (default 0.1)
+
+    min_support_neg : float (default 0.1)
         a number between 0 and 1, for the minimum percentage support for the negative observations.
-    eta: int (default=1)
+
+    eta : int (default=1)
         a hyper-parameter for the expected cardinality of the rules in the optimal rule list.
-    n_chains: int (default=10)
-    alpha: int (default=1)
-        a prior pseudo-count for the positive(alpha1) and negative(alpha0) classes. Default values (1, 1)
-    lambda_: int (default=8)
+
+    n_chains : int (default=10)
+        number of chains
+
+    alpha : int (default=1)
+        a prior pseudo-count for the positive(alpha1) and negative(alpha0) classes. \
+        Default values (1, 1)
+
+    lambda_ : int (default=8)
         a hyper-parameter for the expected length of the rule list.
-    discretize: bool (default=True)
+
+    discretize : bool (default=True)
         apply discretizer to handle continuous features.
-    drop_features: bool (default=False)
+
+    drop_features : bool (default=False)
         once continuous features are discretized, use this flag to either retain or drop them from the dataframe
+
 
     References
     ----------
+
     .. [1] Letham et.al(2015) Interpretable classifiers using rules and Bayesian analysis:
-    Building a better stroke prediction model (https://arxiv.org/abs/1511.01644)
+               Building a better stroke prediction model (https://arxiv.org/abs/1511.01644)
+
     .. [2] Yang et.al(2016) Scalable Bayesian Rule Lists (https://arxiv.org/abs/1602.08610)
+
     .. [3] https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py
 
 
@@ -113,20 +130,26 @@ class BRLC(object):
 
         Parameters
         -----------
-        X: pandas.DataFrame
+        X : pandas.DataFrame
             Dataframe containing continuous features
-        column_list: list/tuple
-        no_of_quantiles: int or list
+
+        column_list : list/tuple
+
+        no_of_quantiles : int or list
             Number of quantiles, e.g. deciles(10), quartiles(4) or as a list of quantiles[0, .25, .5, .75, 1.]
             if 'None' then [0, .25, .5, .75, 1.] is used
-        labels_for_bin: labels for the resulting bins
-        precision: int
+
+        labels_for_bin : labels for the resulting bins
+
+        precision : int
             precision for storing and creating bins
+
 
         Returns
         --------
         new_X: pandas.DataFrame
             Contains discretized features
+
 
         Examples
         ---------
@@ -176,13 +199,15 @@ class BRLC(object):
 
         Parameters
         -----------
-            X: pandas.DataFrame object, that could be used by the model for training.
+            X : pandas.DataFrame object, that could be used by the model for training.
                  It must not have a column named 'label'
-            y_true: pandas.Series, 1-D array to store ground truth labels
+
+            y_true : pandas.Series, 1-D array to store ground truth labels
 
         Returns
         -------
             SBRL model instance: rpy2.robjects.vectors.ListVector
+
 
         Examples
         ---------

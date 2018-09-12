@@ -1,5 +1,4 @@
 from sklearn.metrics import log_loss, mean_absolute_error, mean_squared_error, r2_score, f1_score
-from sklearn.utils.multiclass import type_of_target
 from abc import ABCMeta, abstractmethod
 
 from ..util.static_types import StaticTypes
@@ -8,9 +7,7 @@ from ..util.static_types import StaticTypes
 class Scorer(object):
     """
     Base Class for all skater scoring functions.
-
     Any Scoring function must consume a model.
-
     Any scorer must determine the types of models that are compatible.
 
     """
@@ -31,6 +28,7 @@ class Scorer(object):
         assert all([i in StaticTypes.output_types._valid_ for i in cls.prediction_types])
         assert all([i in StaticTypes.output_types._valid_ for i in cls.label_types])
 
+
     @classmethod
     def check_model(cls, model):
 
@@ -39,23 +37,13 @@ class Scorer(object):
                                                                       model.model_type,
                                                                       cls.model_types)
 
+
     def __call__(self, y_true, y_predicted, sample_weight=None):
         self.check_model(self.model)
         self.check_data(y_true, y_predicted)
         # formatted_y = self.model.transformer(self.model.output_formatter(y_true))
         return self._score(y_true, y_predicted, sample_weight=sample_weight)
 
-    @staticmethod
-    @abstractmethod
-    def _score(model, inputs, y_true):
-        """
-        Private method for getting scores
-        :param model:
-        :param inputs:
-        :param y_true:
-        :return:
-        """
-        pass
 
     @staticmethod
     @abstractmethod
@@ -90,23 +78,6 @@ class RegressionScorer(Scorer):
             "got {}".format(y_true.shape)
 
 
-class ClassifierScorer(Scorer):
-
-    """
-    * predictions must be N x K matrix with N rows and K classes.
-    * labels must be be N x K matrix with N rows and K classes.
-    """
-
-    model_types = [StaticTypes.model_types.classifier]
-    prediction_types = [StaticTypes.output_types.numeric, StaticTypes.output_types.float, StaticTypes.output_types.int]
-    label_types = [StaticTypes.output_types.numeric, StaticTypes.output_types.float, StaticTypes.output_types.int]
-
-    @staticmethod
-    def check_data(y_true, y_predicted):
-        assert hasattr(y_predicted, 'shape'), 'outputs must have a shape attribute'
-        assert hasattr(y_true, 'shape'), 'y_true must have a shape attribute'
-
-
 # Regression Scorers
 class MeanSquaredError(RegressionScorer):
     type = StaticTypes.scorer_types.decreasing
@@ -125,6 +96,9 @@ class MeanAbsoluteError(RegressionScorer):
 
 
 class RSquared(RegressionScorer):
+    # Reference: https://en.wikipedia.org/wiki/Coefficient_of_determination
+    # The score values range between [0, 1]. The best possible value is 1, however one could expect negative values as
+    # well because of the arbitrary model fit.
     type = StaticTypes.scorer_types.increasing
 
     @staticmethod
@@ -132,6 +106,24 @@ class RSquared(RegressionScorer):
         return r2_score(y_true, y_predicted, sample_weight=sample_weight)
 
 
+class ClassifierScorer(Scorer):
+
+    """
+    * predictions must be N x K matrix with N rows and K classes.
+    * labels must be be N x K matrix with N rows and K classes.
+    """
+
+    model_types = [StaticTypes.model_types.classifier]
+    prediction_types = [StaticTypes.output_types.numeric, StaticTypes.output_types.float, StaticTypes.output_types.int]
+    label_types = [StaticTypes.output_types.numeric, StaticTypes.output_types.float, StaticTypes.output_types.int]
+
+    @staticmethod
+    def check_data(y_true, y_predicted):
+        assert hasattr(y_predicted, 'shape'), 'outputs must have a shape attribute'
+        assert hasattr(y_true, 'shape'), 'y_true must have a shape attribute'
+
+
+# Metrics related to Classification
 class CrossEntropy(ClassifierScorer):
     type = StaticTypes.scorer_types.decreasing
 
@@ -151,7 +143,7 @@ class F1(ClassifierScorer):
     type = StaticTypes.scorer_types.increasing
 
     @staticmethod
-    def _score(y_true, y_predicted, sample_weight=None):
+    def _score(y_true, y_predicted, sample_weight=None, average='weighted'):
         """
 
         :param X: Dense X of probabilities, or binary indicator
@@ -164,7 +156,7 @@ class F1(ClassifierScorer):
         else:
             preds = y_predicted
 
-        return f1_score(y_true, preds, sample_weight=sample_weight, average='weighted')
+        return f1_score(y_true, preds, sample_weight=sample_weight, average=average)
 
 
 class ScorerFactory(object):
@@ -175,14 +167,14 @@ class ScorerFactory(object):
     """
     def __init__(self, model):
         if model.model_type == StaticTypes.model_types.regressor:
-            self.mean_squared_error = MeanSquaredError(model)
-            self.mean_absolute_error = MeanAbsoluteError(model)
-            self.rsquared = RSquared(model)
-            self.default = self.mean_absolute_error
+            self.mse = MeanSquaredError(model)
+            self.mae = MeanAbsoluteError(model)
+            self.r2 = RSquared(model)
+            self.default = self.mae
         elif model.model_type == StaticTypes.model_types.classifier:
             self.cross_entropy = CrossEntropy(model)
             self.f1 = F1(model)
-            if model.probability:
+            if model.probability is not None and not 'unknown':
                 self.default = self.cross_entropy
             else:
                 self.default = self.f1

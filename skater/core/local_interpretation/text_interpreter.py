@@ -1,16 +1,5 @@
-# Reference:
-# 1. https://github.com/cod3licious/textcatvis
-# 2. https://buhrmann.github.io/tfidf-analysis.html
-
 import numpy as np
-import pandas as pd
-
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import chi2
-
 from skater.util.text_ops import cleaner
-from skater.util.dataops import convert_dataframe_to_dict
 
 
 def _handling_ngrams_wts(original_feat_dict):

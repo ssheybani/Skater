@@ -1,52 +1,14 @@
 from __future__ import division
 import numpy as np
 from sklearn.preprocessing import LabelBinarizer
+from skater.util.logger import build_logger
+from skater.util.logger import _INFO
+
+logger = build_logger(_INFO, __name__)
 
 
 def flatten(array):
     return [item for sublist in array for item in sublist]
-
-
-class MultiColumnLabelBinarizer(LabelBinarizer):
-    def __init__(self, neg_label=0, pos_label=1, sparse_output=False):
-        self.neg_label = neg_label
-        self.pos_label = pos_label
-        self.sparse_output = sparse_output
-        self.binarizers = []
-
-
-    def fit(self, X):
-        for x in X.T:
-            binarizer = LabelBinarizer()
-            binarizer.fit(x)
-            self.binarizers.append(binarizer)
-
-
-    def transform(self, X):
-        results = []
-        for i, x in enumerate(X.T):
-            results.append(self.binarizers[i].transform(x))
-        return np.concatenate(results, axis=1)
-
-
-    def fit_transform(self, X):
-        self.fit(X)
-        return self.transform(X)
-
-
-    def inverse_transform(self, X):
-        results = []
-        column_counter = 0
-
-        for i, binarizer in enumerate(self.binarizers):
-            n_cols = binarizer.classes_.shape[0]
-            x_subset = X[:, column_counter:column_counter + n_cols]
-            inv = binarizer.inverse_transform(x_subset)
-            if len(inv.shape) == 1:
-                inv = inv[:, np.newaxis]
-            results.append(inv)
-            column_counter += n_cols
-        return np.concatenate(results, axis=1)
 
 
 def add_column_numpy_array(array, new_col):
@@ -130,6 +92,104 @@ def divide_zerosafe(a, b):
         c[~np.isfinite(c)] = 0  # -inf inf NaN
     return c
 
-# Lamda for converting data-frame to a dictionary
+
+# Lambda for converting data-frame to a dictionary
 convert_dataframe_to_dict = lambda key_column_name, value_column_name, df: \
     df.set_index(key_column_name).to_dict()[value_column_name]
+
+
+def json_validator(json_object):
+    """ json validator
+    """
+    # Reference: https://stackoverflow.com/questions/5508509/how-do-i-check-if-a-string-is-valid-json-in-python
+    import json
+    try:
+        json.loads(json_object)
+    except ValueError:
+        return False
+    return True
+
+
+def _render_html(file_name, width=None, height=None):
+    width, height
+    from IPython.core.display import HTML
+    return HTML(file_name)
+
+
+def _render_image(file_name, width=600, height=300):
+    from IPython.display import Image
+    return Image(file_name, width=width, height=height)
+
+
+def _render_pdf(file_name, width=600, height=300):
+    from IPython.display import IFrame
+    IFrame(file_name, width=width, height=height)
+
+
+def show_in_notebook(file_name_with_type='rendered.html', width=600, height=300):
+    """ Display generated artifacts(e.g. .png, .html, .jpeg/.jpg) in interactive Jupyter style Notebook
+
+    Parameters
+    -----------
+    file_name_with_type: str
+        specify the name of the file to display
+    width: int
+        width in pixels to constrain the image
+    height: int
+        height in pixels to constrain the image
+    """
+    from IPython.core.display import display
+    file_type = file_name_with_type.split('/')[-1].split('.')[-1]
+    choice_dict = {
+        'html': _render_html,
+        'png': _render_image,
+        'jpeg': _render_image,
+        'jpg': _render_image,
+        'svg': _render_image,
+        'pdf': _render_pdf
+    }
+    select_type = lambda choice_type: choice_dict[file_type]
+    logger.info("File Name: {}".format(file_name_with_type))
+    return display(select_type(file_type)(file_name_with_type, width, height))
+
+
+class MultiColumnLabelBinarizer(LabelBinarizer):
+    def __init__(self, neg_label=0, pos_label=1, sparse_output=False):
+        self.neg_label = neg_label
+        self.pos_label = pos_label
+        self.sparse_output = sparse_output
+        self.binarizers = []
+
+
+    def fit(self, X):
+        for x in X.T:
+            binarizer = LabelBinarizer()
+            binarizer.fit(x)
+            self.binarizers.append(binarizer)
+
+
+    def transform(self, X):
+        results = []
+        for i, x in enumerate(X.T):
+            results.append(self.binarizers[i].transform(x))
+        return np.concatenate(results, axis=1)
+
+
+    def fit_transform(self, X):
+        self.fit(X)
+        return self.transform(X)
+
+
+    def inverse_transform(self, X):
+        results = []
+        column_counter = 0
+
+        for i, binarizer in enumerate(self.binarizers):
+            n_cols = binarizer.classes_.shape[0]
+            x_subset = X[:, column_counter:column_counter + n_cols]
+            inv = binarizer.inverse_transform(x_subset)
+            if len(inv.shape) == 1:
+                inv = inv[:, np.newaxis]
+            results.append(inv)
+            column_counter += n_cols
+        return np.concatenate(results, axis=1)

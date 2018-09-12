@@ -85,17 +85,13 @@ class TestPartialDependence(unittest.TestCase):
                                                                         sample=True)
         self.assertEquals(pdp_df.shape, (30, 4))  # default grid resolution is 30
 
+
     def test_pd_with_categorical_features(self):
         interpreter = Interpretation(self.sample_x_categorical, feature_names=self.categorical_feature_names)
         try:
             interpreter.partial_dependence.partial_dependence([self.categorical_feature_names[0]], self.categorical_model)
         except:
             self.fail("PD computation function failed with categorical features")
-        try:
-            interpreter.partial_dependence.plot_partial_dependence([self.categorical_feature_names], self.categorical_model)
-        except:
-            self.fail("PDP plotting function failed with categorical features")
-
 
 
     def test_partial_dependence_binary_classification(self):
@@ -159,8 +155,6 @@ class TestPartialDependence(unittest.TestCase):
                                                       pdp_df.columns.values]))
 
 
-
-
     def test_pdp_regression_coefs_closeness(self, epsilon=1):
         pdp_df = self.interpreter.partial_dependence.partial_dependence([self.features[0]],
                                                                         self.regressor_predict_fn)
@@ -186,6 +180,7 @@ class TestPartialDependence(unittest.TestCase):
             self.fail("2D regressor pd failed")
 
 
+    @unittest.skip("Related to plotting ...")
     def test_plot_1D_pdp(self):
         try:
             self.interpreter.partial_dependence.plot_partial_dependence([self.features[0]],
@@ -195,6 +190,7 @@ class TestPartialDependence(unittest.TestCase):
             self.fail("1D regressor plot failed")
 
 
+    @unittest.skip("Related to plotting ...")
     def test_plot_1D_pdp_with_sampling(self):
         try:
             self.interpreter.partial_dependence.plot_partial_dependence(
@@ -206,6 +202,7 @@ class TestPartialDependence(unittest.TestCase):
             self.fail("1D classifier plot with sampling failed")
 
 
+    @unittest.skip("Related to plotting ...")
     def test_plot_2D_pdp(self):
         try:
             self.interpreter.partial_dependence.plot_partial_dependence(self.features[:2],
@@ -215,6 +212,8 @@ class TestPartialDependence(unittest.TestCase):
         except:
             self.fail("2D partial dep plot failed")
 
+
+    @unittest.skip("Related to plotting ...")
     def test_plot_2D_pdp_with_sampling(self):
         try:
             self.interpreter.partial_dependence.plot_partial_dependence(self.features[:2],
@@ -306,16 +305,8 @@ class TestPartialDependence(unittest.TestCase):
                                                                    self.classifier_predict_fn,
                                                                    grid_resolution=10,
                                                                    variance_type='prediction')
-            self.interpreter.partial_dependence.plot_partial_dependence(self.features[:1],
-                                                                        self.classifier_predict_fn,
-                                                                        grid_resolution=10,
-                                                                        variance_type='prediction')
         except:
             self.fail("pd with Variance Type=prediction failed")
-
-
-
-
 
 
 if __name__ == '__main__':
