@@ -1,16 +1,15 @@
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.model_selection import RandomizedSearchCV
+from sklearn.metrics import make_scorer
 import numpy as np
 
 from skater.model.base import ModelType
 from skater.core.visualizer.tree_visualizer import plot_tree, tree_to_text
 
 from skater.util.logger import build_logger
-from skater.util.logger import _WARNING
-from skater.util.logger import _INFO
+from skater.util.logger import _INFO, _DEBUG
 from skater.util import exceptions
-
-logger = build_logger(_INFO, __name__)
+from skater.data import DataManager
 
 
 class TreeSurrogate(object):
@@ -21,28 +20,67 @@ class TreeSurrogate(object):
     could be any form of supervised learning predictive models. The explanations are approximated using
     DecisionTrees(both for Classification/Regression) by learning decision boundaries similar to that learned by
     the Oracle(predictions from the base model are used for learning the DecisionTree representation).
-    The implementation also generates a fidelity score to quantify tree based surrogate model's approximation to the Oracle.
-    Ideally, the score should be 0 for truthful explanation both globally and locally.
+    The implementation also generates a fidelity score to quantify tree based surrogate model's
+    approximation to the Oracle. Ideally, the score should be 0 for truthful explanation
+    both globally and locally.
 
     Parameters
     ----------
-    estimator_type='classifier'
-    splitter='best'
-    max_depth=None
-    min_samples_split=2
-    min_samples_leaf=1
-    min_weight_fraction_leaf=0.0
-    max_features=None, seed=None
-    max_leaf_nodes=None
-    min_impurity_decrease=0.0
-    min_impurity_split=None
-    class_weight=None
-    class_names=None
-    presort=False
-    feature_names=None
-    impurity_threshold=0.01
-    log_level=_WARNING
+    oracle : InMemory instance type
+        model instance having access to the base estimator(InMemory/DeployedModel). Currently, only InMemory is
+        is supported.
+    splitter : str, (default='best')
+        Strategy used to split at each the node. Supported strategies('best' or 'random')
+    max_depth : int, (default=None)
+        Defines the maximum depth of a tree. If 'None' then nodes are expanded till all leaves are pure or contain less
+        than min_samples_split samples. Deeper trees are prone to be more expensive and tend to overfit. Pruning is a
+        technique which could be applied to avoid overfitting.
+    min_samples_split : int/float, (default=2)
+        Defines the minimum number of samples required to split an internal node.
+        - 'int' : specifies the minimum number of samples
+        - 'float' : then represents a percentage. Minimum number of samples is computed as
+          `ceil(min_samples_split*n_samples)
+    min_samples_leaf : int/float, (default=1)
+        Defines requirement for a leaf node. The minimum number of samples needed to be a leaf node.
+        - int : specifies the minimum number of samples
+        - float : then represents a percentage. Minimum number of samples is computed as
+          `ceil(min_samples_split*n_samples)
+    min_weight_fraction_leaf : float, (default=0.0)
+        Defines requirement for a leaf node. The minimum weight percentage of the sum total of the weights of
+        all input samples.
+    max_features : int, float, string or None, (default=None)
+        Defines number of features to consider for the best possible split
+        - None : all specified features are used (oracle.feature_names)
+        - int : uses specified values as `max_features` at each split.
+        - float : as a percentage. Value for split is computed as `int(max_features * n_features)`.
+        - "auto" : `max_features=sqrt(n_features)`.
+        - "sqrt" : `max_features=sqrt(n_features)`.
+        - "log2" : `max_features=log2(n_features)`.
+    seed : int, (default=None)
+        seed for random number generator
+    max_leaf_nodes : int or None, (default=None)
+        TreeSurrogates are constructed top-down in best first manner(best decrease in relative impurity)
+        If None, results in maximum possible number of leaf nodes. This tends to overfitting
+    min_impurity_decrease : float, (default=0.0)
+        Tree node is considered for splitting if relative decrease in impurity is >= `min_impurity_decrease`
+    class_weight : dict, list of dicts, str:"balanced" or None (default="balanced")
+        Weights associated with classes for handling data imbalance.
+        - None : all classes have equal weights
+        - "balanced" : adjusts the class weights automatically. Weights are assigned inversely propotional
+          to class frequencies ``n_samples / (n_classes * np.bincount(y))``
+    presort : bool, (default=False)
+        Sorts the data before building surrogates trees to find the best splits. When dealing with larger datasets,
+        setting it to True might result in increasing computation time because of the pre sorting opertation.
+    impurity_threshold : float, (default=0.01)
+        Specifies the acceptable disparity between the Oracle and TreeSurrogates. The higher the difference between
+        the Oracle and TreeSurrogate less faithful are the explanations generated.
 
+    Attributes
+    ----------
+    estimator_
+    estimator_type_
+    best_score_
+    scorer_name_
 
     References
     ----------
@@ -50,135 +88,270 @@ class TreeSurrogate(object):
            (http://ftp.cs.wisc.edu/machine-learning/shavlik-group/craven.thesis.pdf)
     .. [2] Mark W. Craven and Jude W. Shavlik(NIPS, 96). Extracting Thee-Structured Representations of Thained Networks
            (https://papers.nips.cc/paper/1152-extracting-tree-structured-representations-of-trained-networks.pdf)
+    .. [3] DecisionTreeClassifier: http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html
+    .. [4] DecisionTreeRegressor: http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html
     """
     __name__ = "TreeSurrogate"
-    
-    def __init__(self, estimator_type='classifier', splitter='best', max_depth=None, min_samples_split=2,
-                 min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=None, seed=None, max_leaf_nodes=None,
-                 min_impurity_decrease=0.0, min_impurity_split=None, class_weight="balanced", class_names=None,
-                 presort=False, feature_names=None, impurity_threshold=0.01, log_level=_INFO):
-        self.logger = build_logger(log_level, __name__)
-        self.__model = None
-        self.__model_type = None
 
-        self.feature_names = feature_names
-        self.class_names = class_names
+    def __init__(self, oracle=None, splitter='best', max_depth=None, min_samples_split=2,
+                 min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=None, seed=None, max_leaf_nodes=None,
+                 min_impurity_decrease=0.0, min_impurity_split=None, class_weight="balanced",
+                 presort=False, impurity_threshold=0.01):
+
+        if not isinstance(oracle, ModelType):
+            raise exceptions.ModelError("Incorrect estimator used, create one with skater.model.local.InMemoryModel")
+        self.oracle = oracle
+        self.logger = build_logger(oracle.logger.level, __name__)
+        self.__model_type = None
+        self.feature_names = oracle.feature_names
+        self.class_names = oracle.target_names
         self.impurity_threshold = impurity_threshold
         self.criterion_types = {'classifier': {'criterion': ['gini', 'entropy']},
-                                'regressor': {'criterion': ['mse', 'friedman_mse', 'mae']}
-                                }
+                                'regressor': {'criterion': ['mse', 'friedman_mse', 'mae']}}
         self.splitter_types = ['best', 'random']
         self.splitter = splitter if any(splitter in item for item in self.splitter_types) else 'best'
         self.seed = seed
+        self.__model_type = oracle.model_type
+        self.__scorer_name = None
+        self.__best_score = None
 
         # TODO validate the parameters based on estimator type
-        if estimator_type == 'classifier':
-            self.__model_type = estimator_type
-            self.__model = DecisionTreeClassifier(splitter=self.splitter, max_depth=max_depth,
-                                                  min_samples_split=min_samples_split,
-                                                  min_samples_leaf=min_samples_leaf,
-                                                  min_weight_fraction_leaf=min_weight_fraction_leaf,
-                                                  max_features=max_features, random_state=seed,
-                                                  max_leaf_nodes=max_leaf_nodes,
-                                                  min_impurity_decrease=min_impurity_decrease,
-                                                  min_impurity_split=min_impurity_split,
-                                                  class_weight=class_weight, presort=presort)
-        elif estimator_type == 'regressor':
-            self.__model_type = estimator_type
-            self.__model = DecisionTreeRegressor(splitter=self.splitter, max_depth=None,
-                                                 min_samples_split=min_samples_split,
-                                                 min_samples_leaf=min_samples_leaf,
-                                                 min_weight_fraction_leaf=min_weight_fraction_leaf,
-                                                 max_features=max_features,
-                                                 random_state=seed, max_leaf_nodes=max_leaf_nodes,
-                                                 min_impurity_decrease=min_impurity_decrease,
-                                                 min_impurity_split=min_impurity_split, presort=presort)
+        if self.__model_type == 'classifier':
+            est = DecisionTreeClassifier(splitter=self.splitter, max_depth=max_depth,
+                                         min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf,
+                                         min_weight_fraction_leaf=min_weight_fraction_leaf,
+                                         max_features=max_features, random_state=seed,
+                                         max_leaf_nodes=max_leaf_nodes,
+                                         min_impurity_decrease=min_impurity_decrease,
+                                         class_weight=class_weight, presort=presort)
+        elif self.__model_type == 'regressor':
+            est = DecisionTreeRegressor(splitter=self.splitter, max_depth=None,
+                                        min_samples_split=min_samples_split,
+                                        min_samples_leaf=min_samples_leaf,
+                                        min_weight_fraction_leaf=min_weight_fraction_leaf,
+                                        max_features=max_features,
+                                        random_state=seed, max_leaf_nodes=max_leaf_nodes,
+                                        min_impurity_split=min_impurity_split, presort=presort)
         else:
             raise exceptions.ModelError("Model type not supported. Supported options types{'classifier', 'regressor'}")
+        self.__model = est
+        self.__pred_func = lambda X, prob: self.__model.predict(X) if prob is False else self.__model.predict_proba(X)
 
 
-    def learn(self, X, Y, oracle_y, preprune=True, cv=5, n_iter_search=10,
-              param_grid=None, scorer_type='default', n_jobs=1):
+    @staticmethod
+    def __optimizer_condition(o_s, new_s, scoring_type, threshold):
+        # if optimizing on a loss function then the type is decreasing vs optimizing on a model metric which is increasing
+        if scoring_type == 'decreasing':
+            return round(o_s, 3) + threshold >= round(new_s, 3)
+        else:
+            return round(o_s, 3) - threshold <= round(new_s, 3)
+
+
+    def _post_pruning(self, X, Y, scorer_type, impurity_threshold, needs_prob=False):
+        self.__model.fit(X, Y)
+        y_pred = self.__pred_func(X, needs_prob)
+        # makes sense for classification use-case, be cautious when enabling for regression
+        self.logger.debug("Unique Labels in ground truth provided {}".format(np.unique(Y)))
+        if needs_prob is False:
+            self.logger.debug("Unique Labels in predictions generated {}".format(np.unique(y_pred)))
+        else:
+            self.logger.debug("Probability scoring is enabled min:{}/max:{}".format(np.min(y_pred), np.max(y_pred)))
+
+        scorer = self.oracle.scorers.get_scorer_function(scorer_type=scorer_type)
+        self.logger.info("Scorer used {}".format(scorer.name))
+        original_score = scorer(Y, y_pred)
+        self.logger.info("original score using base model {}".format(original_score))
+
+        tree = self.__model.tree_
+        no_of_nodes = tree.node_count
+        tree_leaf = -1  # value to identify a leaf node in a tree
+
+        removed_node_index = []
+        for index in range(no_of_nodes):
+            current_left, current_right = tree.children_left[index], tree.children_right[index]
+            if tree.children_left[index] != tree_leaf or tree.children_right[index] != tree_leaf:
+                tree.children_left[index], tree.children_right[index] = -1, -1
+                new_score = scorer(Y, self.__pred_func(X, needs_prob))
+                self.logger.debug("new score generate {}".format(new_score))
+
+                if TreeSurrogate.__optimizer_condition(original_score, new_score, scorer.type, impurity_threshold):
+                    removed_node_index.append(index)
+                    self.logger.debug("Removed nodes: (index:{}-->[left node: {}, right node: {}])"
+                                      .format(index, current_left, current_right))
+                else:
+                    tree.children_left[index], tree.children_right[index] = current_left, current_right
+                    self.logger.debug("Added index {} back".format(index))
+        self.logger.info("Summary: childrens of the following nodes are removed {}".format(removed_node_index))
+
+
+    def _pre_pruning(self, X, Y, scorer_type, cv=5, n_iter_search=10, n_jobs=1, param_grid=None, verbose=False):
+        default_grid = {
+            "criterion": self.criterion_types[self.__model_type]['criterion'],
+            "max_depth": [2, 4, 6, 8, 10, 12],  # helps in reducing the depth of the tree
+            "min_samples_leaf": [2, 4],  # restrict the minimum number of samples in a leaf
+            "max_leaf_nodes": [2, 4, 6, 8, 10]  # reduce the number of leaf nodes
+        }
+        search_space = param_grid if param_grid is not None else default_grid
+        self.logger.debug("Default search space used for CV : {}".format(search_space))
+        # Cost function aiming to optimize(Total Cost) = measure of fit + measure of complexity
+        # References for pruning:
+        # 1. http://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
+        # 2. https://www.coursera.org/lecture/ml-classification/optional-pruning-decision-trees-to-avoid-overfitting-qvf6v
+        # Using Randomize Search here to prune the trees to improve readability without
+        # comprising on model's performance
+        scorer = self.oracle.scorers.get_scorer_function(scorer_type=scorer_type)
+        self.logger.info("Scorer used {}".format(scorer.name))
+        scorering_func = make_scorer(scorer, greater_is_better=scorer.type)
+        verbose_level = 0 if verbose is False else 4
+        random_search_estimator = RandomizedSearchCV(estimator=self.__model, cv=cv, param_distributions=search_space,
+                                                     scoring=scorering_func, n_iter=n_iter_search, n_jobs=n_jobs,
+                                                     random_state=self.seed, verbose=verbose_level)
+        # train a surrogate DT
+        random_search_estimator.fit(X, Y)
+        # access the best estimator
+        self.__model = random_search_estimator.best_estimator_
+        self.__best_score = random_search_estimator.best_score_
+
+
+    def fit(self, X, Y, use_oracle=True, prune='post', cv=5, n_iter_search=10,
+            scorer_type='default', n_jobs=1, param_grid=None, impurity_threshold=0.01, verbose=False):
         """ Learn an approximate representation by constructing a Decision Tree based on the results retrieved by
         querying the Oracle(base model). Instances used for training should belong to the base learners instance space.
 
         Parameters
         ----------
-        X:
-        Y:
-        oracle_y:
-        prune:
-        cv:
-        n_iter_search:
-        param_grid:
-        scorer_type:
-        n_jobs:
+        X : numpy.ndarray, pandas.DataFrame
+            Training input samples
+        Y : numpy.ndarray, target values(ground truth)
+        use_oracle : bool, (defaul=True)
+            - True, builds a surrogate model against the predictions of the base model(Oracle)
+            - False, learns an interpretable tree based model using the supplied training examples and ground truth
+        prune : None, str (default="post")
+            Pruning is a useful technique to controle the complexity of the tree (keeping the trees comprehensive
+            and interpretable) without compromising on model's accuracy. Avoiding to build large and deep trees
+            also helps in preventing overfitting.
+            - "pre" : Also known as forward/online pruning. This pruning process uses a termination
+            condition(high and low thresholds) to prematurely terminate some of the branches and nodes.
+            Cross Validation is applied to measure the goodness of the fit while the tree is pruned.
+            - "post" : Also known as backward pruning. The pruning process is applied post the construction of the
+                       Tree using the specified model parameters. This involves reducing the branches and nodes using
+                       a cost function. The current implementation support cost optimizatio using
+                       Model's scoric metrics(e.g. r2, log-loss, f1, ...)
+        cv : int, (default=5)
+            Randomized cross validation used only for 'pre-pruning' right now.
+        n_iter_search : int, (default=10)
+            Number of parameter setting combinations that are sampled for pre-pruning.
+        scorer_type : str, (default="default")
+        n_jobs : int (default=1)
+            Number of jobs to run in parallel.
+        param_grid : dict
+            Dictionary of parameters to specify the termination condition for pre-pruning.
+        impurity_threshold : float, (default=0.01)
+            Specifies acceptable performance drop when using Tree based surrogates to replicate the decision policies
+            learned by the Oracle
+        verbose : bool (default=False)
+            Helps control the verbosity.
 
+        References
+        ----------
+        .. [1] Nikita Patel and Saurabh Upadhyay(2012)
+               Study of Various Decision Tree Pruning Methods with their Empirical Comparison in WEKA
+               (https://pdfs.semanticscholar.org/025b/8c109c38dc115024e97eb0ede5ea873fffdb.pdf)
         """
-        if preprune is False:
-            self.__model.fit(X, Y)
-        else:
-            # apply randomized cross validation for pruning
-            default_grid = {
-                "criterion": self.criterion_types[self.__model_type]['criterion'],
-                "max_depth": [2, 4, 6, 8],  # helps in reducing the depth of the tree
-                "min_samples_leaf": [2, 4],  # restrict the number of samples in a leaf
-                "max_leaf_nodes": [2, 4, 6, 8, 10]  # reduce the number of leaf nodes
-            }
-            search_space = param_grid if param_grid is not None else default_grid
-            # Cost function aiming to optimize(Total Cost) = measure of fit + measure of complexity
-            # References for pruning:
-            # 1. http://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
-            # 2. https://www.coursera.org/lecture/ml-classification/optional-pruning-decision-trees-to-avoid-overfitting-qvf6v
-            # Using Randomize Search here to prune the trees to improve readability without
-            # comprising on model's performance
-            random_search_estimator = RandomizedSearchCV(estimator=self.__model, cv=cv, param_distributions=search_space,
-                                                         n_iter=n_iter_search, n_jobs=n_jobs, random_state=self.seed)
-            random_search_estimator.fit(X, Y)
-            self.__model = random_search_estimator.best_estimator_
-        y_hat_surrogate = self.__model.predict(X)
 
-        model_inst = ModelType(model_type=self.__model_type)
+        if verbose:
+            self.logger.setLevel(_DEBUG)
+        else:
+            self.logger.setLevel(_INFO)
+        # DataManager does type checking as well
+        dm = DataManager(X, Y)
+        X, Y = dm.X, dm.y
+        # Below is an anti-pattern but had to use it. Should fix it in the long term
+        y_hat_original = self.oracle._execute(X)
+
+        # TODO: Revisit the check on using probability or class labels
+        if use_oracle and self.oracle.probability:
+            y_train = np.array(list(map(np.argmax, y_hat_original)))
+        elif use_oracle:
+            y_train = y_hat_original
+        else:
+            # this is when y_train is being passed and the desire is to build an interpretable tree based model
+            y_train = Y
+
+        if prune is None:
+            self.logger.info("No pruning applied ...")
+            self.__model.fit(X, y_train)
+        elif prune == 'pre':
+            # apply randomized cross validation for pruning
+            self.logger.info("pre pruning applied ...")
+            self._pre_pruning(X, y_train, scorer_type, cv, n_iter_search, n_jobs, param_grid, verbose)
+        else:
+            self.logger.info("post pruning applied ...")
+            # Since, this is post pruning, we first learn a model
+            # and then try to prune the tree controling the model's score using the impurity_threshold
+            self._post_pruning(X, y_train, scorer_type, impurity_threshold, needs_prob=self.oracle.probability)
+        y_hat_surrogate = self.__pred_func(X, self.oracle.probability)
+        self.logger.info('Done generating prediction using the surrogate, shape {}'.format(y_hat_surrogate.shape))
+
         # Default metrics:
         # {Classification: if probability score used --> cross entropy(log-loss) else --> F1 score}
         # {Regression: Mean Absolute Error (MAE)}
-        scorer = model_inst.scorers.get_scorer_function(scorer_type=scorer_type)
-        # TODO This should be abstracted by the model scorer factory
-        metric_score = scorer(oracle_y, Y)
-        surrogate_metric_score = scorer(Y, y_hat_surrogate)
+        scorer = self.oracle.scorers.get_scorer_function(scorer_type=scorer_type)
+        self.__scorer_name = scorer.name
 
-        impurity_score = np.abs(surrogate_metric_score - metric_score)
+        oracle_score = round(scorer(Y, y_hat_original), 3)
+        # Since surrogate model is build against the base model's(Oracle's) predicted
+        # behavior y_true=y_train
+        surrogate_score = round(scorer(y_train, y_hat_surrogate), 3)
+        self.logger.info('Done scoring, surrogate score {}; oracle score {}'.format(surrogate_score, oracle_score))
+
+        impurity_score = round(oracle_score - surrogate_score, 3)
         if impurity_score > self.impurity_threshold:
-            self.logger.warning('fidelity score:{} of the surrogate model is higher than the impurity threshold: {}'.
-                                format(impurity_score, self.impurity_threshold))
+            self.logger.warning('impurity score: {} of the surrogate model is higher than the impurity threshold: {}. '
+                                'The higher the impurity score, lower is the fidelity/faithfulness '
+                                'of the surrogate model'.format(impurity_score, impurity_threshold))
         return impurity_score
 
 
     @property
-    def estimator(self):
+    def estimator_(self):
         """ Learned approximate surrogate estimator
         """
         return self.__model
 
 
     @property
-    def estimator_type(self):
+    def estimator_type_(self):
         """ Estimator type
         """
         return self.__model_type
+
+
+    @property
+    def best_score_(self):
+        """ Best score post pre-pruning
+        """
+        return self.__best_score
+
+
+    @property
+    def scorer_name_(self):
+        """ Cost function used for optimization
+        """
+        return self.__scorer_name
 
 
     def predict(self, X, prob_score=False):
         """ Predict for input X
         """
         predict_values = self.__model.predict(X)
-        predict_prob_values = self.predict_proba(X) if prob_score is True else None
+        predict_prob_values = self.__model.predict_proba(X) if prob_score is True else None
         return predict_values if predict_prob_values is None else predict_prob_values
 
 
     def plot_global_decisions(self, colors=None, enable_node_id=True, random_state=0, file_name="interpretable_tree.png",
                               show_img=False, fig_size=(20, 8)):
-        """ Visualizes the decision nodes of the surrogate tree.
+        """ Visualizes the decision policies of the surrogate tree.
         """
         graph_inst = plot_tree(self.__model, self.__model_type, feature_names=self.feature_names, color_list=colors,
                                class_names=self.class_names, enable_node_id=enable_node_id, seed=random_state)
@@ -188,9 +361,9 @@ class TreeSurrogate(object):
         try:
             import matplotlib.pyplot as plt
         except ImportError:
-            raise (exceptions.MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
+            raise exceptions.MatplotlibUnavailableError("Matplotlib is required but unavailable on the system.")
         except RuntimeError:
-            raise (exceptions.MatplotlibDisplayError("Matplotlib unable to open display"))
+            raise exceptions.MatplotlibDisplayError("Matplotlib unable to open display")
 
         if show_img:
             plt.rcParams["figure.figsize"] = fig_size
@@ -204,4 +377,6 @@ class TreeSurrogate(object):
 
 
     def decisions_as_txt(self, scope='global', X=None):
+        """ Retrieve the decision policies as text
+        """
         tree_to_text(self.__model, self.feature_names, self.__model_type, scope, X)

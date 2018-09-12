@@ -1,16 +1,16 @@
 # -*- coding: UTF-8 -*-
+from tensorflow.python.framework import ops
+import tensorflow as tf
+
+from collections import OrderedDict
+import warnings
+
 from skater.core.local_interpretation.dnni.gradient_relevance_scorer import BaseGradientMethod
 from skater.core.local_interpretation.dnni.gradient_relevance_scorer import LRP
 from skater.core.local_interpretation.dnni.gradient_relevance_scorer import IntegratedGradients
 from skater.core.local_interpretation.dnni.perturbation_relevance_scorer import Occlusion
 from skater.core.local_interpretation.dnni.initializer import Initializer
 
-
-from tensorflow.python.framework import ops
-import tensorflow as tf
-
-from collections import OrderedDict
-import warnings
 from skater.util.logger import build_logger
 from skater.util.logger import _WARNING
 from skater.util.logger import _INFO
