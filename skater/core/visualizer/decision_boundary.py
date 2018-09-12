@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import pandas as pd
 
 from skater.util import exceptions
 
@@ -9,7 +10,7 @@ try:
     import plotly.graph_objs as go
     from plotly import tools
 except ImportError:
-    raise exceptions.plotlyUnavailableError("plotly is required but unavailable on your system.")
+    raise exceptions.PlotlyUnavailableError("plotly is required but unavailable on your system.")
 
 try:
     import matplotlib.pyplot as plt
@@ -26,28 +27,28 @@ def _create_meshgrid(xx, yy, plot_step=0.02):
     ymin, ymax = yy.min() - 0.5, yy.max() + 0.5
     xx, yy = np.meshgrid(np.arange(xmin, xmax, plot_step),
                          np.arange(ymin, ymax, plot_step))
-    return xx, yy
+    x_ = pd.DataFrame({'F1': xx.ravel(), 'F2': yy.ravel()})
+    return x_
 
 
-def _generate_contours(est, xx, yy, color_map, ax, **params):
-    Z = est.predict(np.c_[xx.ravel(), yy.ravel()])
-    Z = Z.reshape(xx.shape)
-    cf = ax.contourf(xx, yy, Z, alpha=0.8, cmap=color_map, **params)
+def _generate_contours(est, X_, color_map, ax, **params):
+    Z = est.predict(X_).reshape(X_.shape[0])
+    cf = ax.contourf(X_.iloc[:, 0], X_.iloc[:, 1], Z, alpha=0.8, cmap=color_map, **params)
     return cf
 
 
 # Reference: https://plot.ly/scikit-learn/plot-voting-decision-regions/
-def interactive_plot(est, X0, X1, Y, x_label="X1", y_label="X2", file_name='decision_iplot'):
+def interactive_plot(est, X0, X1, Y, x_label="X1", y_label="X2",
+                     file_name='decision_iplot', height=10, width=10):
     figure = tools.make_subplots(rows=1, cols=1, print_grid=False)
 
-    xx, yy = _create_meshgrid(X0, X1)
-    Z = est.predict(np.c_[xx.ravel(), yy.ravel()])
-    Z = Z.reshape(xx.shape)
+    X_ = _create_meshgrid(X0, X1)
+    Z = est.predict(X_).reshape(X_.shape[0])
 
     # generate the contour
-    trace1 = go.Contour(x=xx[0], y=yy[:, 1], z=Z, colorscale='Viridis', opacity=0.2, showscale=False)
+    trace1 = go.Contour(x=X_.iloc[:, 0], y=X_.iloc[:, 1], z=Z, colorscale='Viridis', opacity=0.2, showscale=False)
 
-    # plot the points
+    # Scatter plot is generated using the original specified data points
     trace2 = go.Scatter(x=X0, y=X1, showlegend=False, mode='markers',
                         marker=dict(color=Y, line=dict(color='black', width=1),
                                     colorscale='Viridis', showscale=True))
@@ -70,7 +71,9 @@ def interactive_plot(est, X0, X1, Y, x_label="X1", y_label="X2", file_name='deci
                    ticks='',
                    showticklabels=True,
                    title=y_label),
-        plot_bgcolor='rgba(0, 0, 0, 0)'
+        plot_bgcolor='rgba(0, 0, 0, 0)',
+        width=width,
+        height=height
     )
 
     figure.update(layout=layout)
@@ -78,24 +81,32 @@ def interactive_plot(est, X0, X1, Y, x_label="X1", y_label="X2", file_name='deci
     return py, figure
 
 
-def plot_decision_boundary(est, X0, X1, Y, color_map=None, mode='static', random_state=0,
-                           width=12, height=10, title='decision_boundary', x0_label='X1', x1_label='X2',
-                           enable_axis=False, file_name='decision_plot', **params):
+def plot_decision_boundary(est, X0, X1, Y, mode='static', width=12, height=10,
+                           retrain=True, title='decision_boundary',
+                           x0_label='X1', x1_label='X2', feature_names=None,
+                           static_color_map=None, enable_axis=False,
+                           file_name='decision_plot', random_state=0, **params):
+    f_n = ['F1', 'F2'] if feature_names is None else feature_names
+    X = pd.concat([X0, X1], keys=f_n, axis=1)
+    if retrain:
+        est.fit(X, Y)
+
     if mode == 'static':
         colors = list(mcolors.CSS4_COLORS.keys())
         n_classes = len(np.unique(Y))
         random.seed(random_state)
         random.shuffle(colors)
         color_list = colors[:n_classes]
-        cm = ListedColormap(color_list) if color_map is None else ListedColormap(color_map)
+        cm = ListedColormap(color_list) if static_color_map is None \
+            else ListedColormap(static_color_map)
 
-        X_grid, y_grid = _create_meshgrid(X0, X1)
         fig, ax = plt.subplots(1, 1, figsize=(width, height))
-        cs = _generate_contours(est, X_grid, y_grid, cm, ax, **params)
+        X_grid = _create_meshgrid(X0, X1)
+        cs = _generate_contours(est, X_grid, cm, ax, **params)
         # set other properties of the plot
         ax.scatter(X0, X1, c=Y, cmap=cm, alpha=0.6, linewidths=0.9, edgecolors='white')
-        ax.set_xlim(X_grid.min(), X_grid.max())
-        ax.set_ylim(y_grid.min(), y_grid.max())
+        ax.set_xlim(X_grid.iloc[:, 0].min(), X_grid.iloc[:, 0].max())
+        ax.set_ylim(X_grid.iloc[:, 1].min(), X_grid.iloc[:, 1].max())
         ax.set_xlabel(x0_label)
         ax.set_ylabel(x1_label)
         ax.set_title(title)
@@ -104,4 +115,4 @@ def plot_decision_boundary(est, X0, X1, Y, color_map=None, mode='static', random
         fig.savefig('{}.png'.format(file_name))
         return fig, ax
     else:  # interactive mode
-        return interactive_plot(est, X0, X1, Y, x0_label, x1_label, file_name)
+        return interactive_plot(est, X0, X1, Y, x0_label, x1_label, file_name, height, width)
