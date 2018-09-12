@@ -32,7 +32,7 @@ def _create_meshgrid(xx, yy, plot_step=0.02):
 
 
 def _generate_contours(est, X_, xx, yy, color_map, ax, **params):
-    Z = est.predict(X_).reshape(xx.shape[0])
+    Z = est.predict(X_).reshape(xx.shape)
     cf = ax.contourf(xx, yy, Z, alpha=0.8, cmap=color_map, **params)
     return cf
 
@@ -43,7 +43,7 @@ def interactive_plot(est, X0, X1, Y, x_label="X1", y_label="X2",
     figure = tools.make_subplots(rows=1, cols=1, print_grid=False)
 
     X_, xx, yy = _create_meshgrid(X0, X1)
-    Z = est.predict(X_).reshape(xx.shape[0])
+    Z = est.predict(X_).reshape(xx.shape)
 
     # generate the contour
     trace1 = go.Contour(x=xx[0], y=yy[:, 1], z=Z, colorscale='Viridis', opacity=0.2, showscale=False)
@@ -115,4 +115,8 @@ def plot_decision_boundary(est, X0, X1, Y, mode='static', width=12, height=10,
         fig.savefig('{}.png'.format(file_name))
         return fig, ax
     else:  # interactive mode
-        return interactive_plot(est, X0, X1, Y, x0_label, x1_label, file_name, height, width)
+        fig = plt.gcf()
+        # using matplotlib dpi to convert from inches to pixels
+        dpi = fig.get_dpi()
+        return interactive_plot(est, X0, X1, Y, x0_label, x1_label,
+                                file_name, height*dpi, width*dpi)
