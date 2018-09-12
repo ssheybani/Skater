@@ -28,12 +28,12 @@ def _create_meshgrid(xx, yy, plot_step=0.02):
     xx, yy = np.meshgrid(np.arange(xmin, xmax, plot_step),
                          np.arange(ymin, ymax, plot_step))
     x_ = pd.DataFrame({'F1': xx.ravel(), 'F2': yy.ravel()})
-    return x_
+    return x_, xx, yy
 
 
-def _generate_contours(est, X_, color_map, ax, **params):
-    Z = est.predict(X_).reshape(X_.shape[0])
-    cf = ax.contourf(X_.iloc[:, 0], X_.iloc[:, 1], Z, alpha=0.8, cmap=color_map, **params)
+def _generate_contours(est, X_, xx, yy, color_map, ax, **params):
+    Z = est.predict(X_).reshape(xx.shape[0])
+    cf = ax.contourf(xx, yy, Z, alpha=0.8, cmap=color_map, **params)
     return cf
 
 
@@ -42,11 +42,11 @@ def interactive_plot(est, X0, X1, Y, x_label="X1", y_label="X2",
                      file_name='decision_iplot', height=10, width=10):
     figure = tools.make_subplots(rows=1, cols=1, print_grid=False)
 
-    X_ = _create_meshgrid(X0, X1)
-    Z = est.predict(X_).reshape(X_.shape[0])
+    X_, xx, yy = _create_meshgrid(X0, X1)
+    Z = est.predict(X_).reshape(xx.shape[0])
 
     # generate the contour
-    trace1 = go.Contour(x=X_.iloc[:, 0], y=X_.iloc[:, 1], z=Z, colorscale='Viridis', opacity=0.2, showscale=False)
+    trace1 = go.Contour(x=xx[0], y=yy[:, 1], z=Z, colorscale='Viridis', opacity=0.2, showscale=False)
 
     # Scatter plot is generated using the original specified data points
     trace2 = go.Scatter(x=X0, y=X1, showlegend=False, mode='markers',
@@ -101,8 +101,8 @@ def plot_decision_boundary(est, X0, X1, Y, mode='static', width=12, height=10,
             else ListedColormap(static_color_map)
 
         fig, ax = plt.subplots(1, 1, figsize=(width, height))
-        X_grid = _create_meshgrid(X0, X1)
-        cs = _generate_contours(est, X_grid, cm, ax, **params)
+        X_grid, xx, yy = _create_meshgrid(X0, X1)
+        cs = _generate_contours(est, X_grid, xx, yy, cm, ax, **params)
         # set other properties of the plot
         ax.scatter(X0, X1, c=Y, cmap=cm, alpha=0.6, linewidths=0.9, edgecolors='white')
         ax.set_xlim(X_grid.iloc[:, 0].min(), X_grid.iloc[:, 0].max())
