@@ -119,4 +119,4 @@ def plot_decision_boundary(est, X0, X1, Y, mode='static', width=12, height=10,
         # using matplotlib dpi to convert from inches to pixels
         dpi = fig.get_dpi()
         return interactive_plot(est, X0, X1, Y, x0_label, x1_label,
-                                file_name, height*dpi, width*dpi)
+                                file_name, height * dpi, width * dpi)
