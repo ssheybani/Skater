@@ -1,6 +1,8 @@
+import copy
 import random
 import numpy as np
 import pandas as pd
+
 
 from skater.util import exceptions
 
@@ -87,7 +89,11 @@ def plot_decision_boundary(est, X0, X1, Y, mode='static', width=12, height=10,
                            static_color_map=None, enable_axis=False,
                            file_name='decision_plot', random_state=0, **params):
     f_n = ['F1', 'F2'] if feature_names is None else feature_names
+    x0_label = feature_names[0] if x0_label is None else x0_label
+    x1_label = feature_names[1] if x1_label is None else x1_label
     X = pd.concat([X0, X1], keys=f_n, axis=1)
+
+    est = copy.deepcopy(est)
     if retrain:
         est.fit(X, Y)
 
