@@ -1,5 +1,10 @@
 import numpy as np
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_selection import SelectKBest, chi2
+
 from skater.util.text_ops import cleaner
+from skater.util.dataops import convert_dataframe_to_dict
 
 
 def _handling_ngrams_wts(original_feat_dict):
@@ -9,11 +14,11 @@ def _handling_ngrams_wts(original_feat_dict):
     # TODO: this is just a temporary solution for handling n-grams, figure out a better solution
     for k in list(original_feat_dict.keys()):
         additional_keys = k.split()
-    for a_k in additional_keys:
-        if a_k in original_feat_dict:
-            original_feat_dict[a_k] += original_feat_dict[a_k]
-        else:
-            original_feat_dict[a_k] = original_feat_dict[k]
+        for a_k in additional_keys:
+            if a_k in original_feat_dict:
+                original_feat_dict[a_k] += original_feat_dict[a_k]
+            else:
+                original_feat_dict[a_k] = original_feat_dict[k]
     new_dict = original_feat_dict
     return new_dict
 
@@ -101,13 +106,13 @@ def _compute_top_features(X, y, features, feature_selection_type='default', top_
         'chi2': auto_feature_selection
     }
 
-    type_inst, new_x, top_features = fs_choice_dict[feature_selection_type](X, y, features, top_k)
+    _, _, top_features = fs_choice_dict[feature_selection_type](X, y, features, top_k)
     df = pd.DataFrame(top_features)
     df.columns = ['features', 'relevance_scores']
     return df
 
 
-def query_top_features_in_doc(data, y, features, feature_selection_choice='default', top_k=25):
+def query_top_features_in_doc(data, features, top_k=25):
     """ Compute top features for each document in the corpus. The scores are dependent on the type of
     transformation applied e.g. TF-IDF
 
@@ -116,8 +121,7 @@ def query_top_features_in_doc(data, y, features, feature_selection_choice='defau
     pandas.DataFrame with columns 'features', 'relevance_scores'
     """
     row = np.squeeze(data.toarray())
-    return _compute_top_features(X=row, y=y, features=features, feature_selection_type=feature_selection_choice,
-                                 top_k=top_k)
+    return _compute_top_features(X=row, y=None, features=features, feature_selection_type='default', top_k=top_k)
 
 
 def query_top_features_overall(data, y_true, feature_list, min_threshold=0.1,
@@ -127,7 +131,8 @@ def query_top_features_overall(data, y_true, feature_list, min_threshold=0.1,
     # TODO add summarizer type as a sub-argument
     # The use of summarizer to capture the tf-idf scores overall with use of vanilla aggregation is Experimental.
     # The idea here is to use such aggregation as a simple ranking criteria
-    # On-going discussion: https://stackoverflow.com/questions/42269313/interpreting-the-sum-of-tf-idf-scores-of-words-across-documents
+    # On-going discussion:
+    # https://stackoverflow.com/questions/42269313/interpreting-the-sum-of-tf-idf-scores-of-words-across-documents
     # Always safe to compute globally responsible features using more theoretical statistical tests e.g. chi2
     if feature_selection is 'default':
         d = data.toarray()
