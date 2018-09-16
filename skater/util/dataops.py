@@ -121,6 +121,11 @@ def _render_image(file_name, width=600, height=300):
     return Image(file_name, width=width, height=height)
 
 
+def _render_svg(file_name):
+    from IPython.display import SVG
+    return SVG(file_name)
+
+
 def _render_pdf(file_name, width=600, height=300):
     from IPython.display import IFrame
     IFrame(file_name, width=width, height=height)
@@ -146,7 +151,7 @@ def show_in_notebook(file_name_with_type='rendered.html', width=600, height=300,
             'png': _render_image,
             'jpeg': _render_image,
             'jpg': _render_image,
-            'svg': _render_image,
+            'svg': _render_svg,
             'pdf': _render_pdf
         }
         select_type = lambda choice_type: choice_dict[file_type]
@@ -155,7 +160,7 @@ def show_in_notebook(file_name_with_type='rendered.html', width=600, height=300,
     else:
         # For now using iframe for some interactive plotting. This should be replaced with a better plotting interface
         iframe_style = '<div style="-webkit-overflow-scrolling:touch; overflow-x:hidden; ' \
-                       'overflow-y:auto; width:{}px; height:{}px; margin: -1.2em; ' \
+                       'overflow-y:auto; width:{}px; height:{}px; margin: auto; ' \
                        '-webkit-transform: scale(0.9) -moz-transform-scale(0.5)"> ' \
                        '<iframe src={} style="width:100%; height:100%; frameborder:1px;">' \
                        '</iframe>' \
@@ -186,6 +191,7 @@ class MultiColumnLabelBinarizer(LabelBinarizer):
 
 
     def fit_transform(self, X):
+        # TODO check if this function is needed. Doesn't LabelBinarizer has a fit_transform function
         self.fit(X)
         return self.transform(X)
 

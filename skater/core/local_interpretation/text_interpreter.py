@@ -4,7 +4,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_selection import SelectKBest, chi2
 
 from skater.util.text_ops import cleaner
-from skater.util.dataops import convert_dataframe_to_dict
 
 
 def _handling_ngrams_wts(original_feat_dict):
@@ -56,6 +55,7 @@ def vectorize_as_tf_idf(data, **kwargs):
 
 
 def get_feature_names(vectorizer_inst):
+    # Works for tfidf/countvectorizer
     return vectorizer_inst.get_feature_names()
 
 
@@ -163,70 +163,3 @@ def query_top_features_by_class(X, y, feature_names, class_index, summarizer_typ
                                             min_threshold=min_threshold, summarizer_type=summarizer_type,
                                             top_k=topk_features)
     return feature_df
-
-
-def _single_layer_lrp(feature_coef_df, bias, features_by_class, top_k):
-    """
-    This is a simplified form of LRP(Layerwise Relevance Propagation) adopted to understand Linear classifier decisions
-
-    References
-    ----------
-    Franziska Horn, Leila Arras, Gregoire Montavon, Klaus-Robert Muller, Wojciech Samek. 2017
-    Exploring text datasets by visualizing relevant words (https://arxiv.org/abs/1707.05261)
-    """
-
-    
-    merged_df = pd.merge(feature_coef_df, features_by_class, on='features')
-    merged_df['coef_scores_wts'] = merged_df['coef_scores_wts'].astype('float64')
-    merged_df['relevance_scores'] = merged_df['relevance_scores'].astype('float64')
-
-    # Multiply element-wise transformed relevance score for each class with the wt. vector of the class
-    merged_df['relevance_wts'] = merged_df['coef_scores_wts'] * merged_df['relevance_scores'] + float(bias)
-
-    # This is sorting is more of a precaution for corner cases, might be removed as the implementation matures
-    top_feature_df = merged_df.nlargest(top_k, 'relevance_wts')[['features', 'relevance_wts']]
-    top_feature_df['features'] = top_feature_df['features'].apply(lambda x: x[0])
-    top_feature_df_dict = convert_dataframe_to_dict('features', 'relevance_wts', top_feature_df)
-    return top_feature_df_dict, top_feature_df, merged_df
-
-
-def _based_on_learned_estimator(feature_coef_df, bias, top_k):
-    """
-    Provides access to the learned estimator wts, that could possibly help visualize and understand learned policies
-    globally.
-    """
-    feature_coef_df['coef_scores_wts'] = feature_coef_df['coef_scores_wts'].astype('float64')
-    feature_coef_df['relevance_wts'] = feature_coef_df['coef_scores_wts'] + float(bias)
-    top_feature_df = feature_coef_df.nlargest(top_k, 'relevance_wts')
-
-    top_feature_df['features'] = top_feature_df['features'].apply(lambda x: x[0])
-    top_feature_df_dict = convert_dataframe_to_dict('features', 'relevance_wts', top_feature_df)
-    return top_feature_df_dict, top_feature_df, feature_coef_df
-
-
-def understand_estimator(estimator, class_label_index, feature_wts, feature_names,
-                         top_k, relevance_type='default'):
-    # Currently, support for sklearn based estimator
-    # TODO: extend it for estimator from other frameworks - MLLib, H20, vw
-    if ('coef_' in estimator.__dict__) is False:
-        raise KeyError('the estimator does not support coef, try using LIME for local interpretation')
-
-    # Currently, support for sklearn based estimator
-    # TODO: extend it for estimator from other frameworks - MLLib, H20, vw
-    coef_array = np.squeeze(-estimator.coef_[0]) if estimator.coef_.shape[0] == 1 and class_label_index == 1 \
-        else np.squeeze(estimator.coef_[class_label_index])
-    no_of_features = top_k
-    _, _, feature_coef_list = _default_feature_selection(X=coef_array, y=0, feature_names=feature_names,
-                                                         k_features=no_of_features)
-
-    feature_coef_df = pd.DataFrame(feature_coef_list, columns=['features', 'coef_scores_wts'])
-    bias = estimator.intercept_[0] / no_of_features if estimator.coef_.shape[0] == 1 and class_label_index == 1 \
-        else estimator.intercept_[class_label_index] / no_of_features
-
-    if relevance_type == 'default':
-        feature_df_dict, feature_df, feature_coef_df = _based_on_learned_estimator(feature_coef_df,
-                                                                                   bias, no_of_features)
-    elif relevance_type == 'SLRP':
-        feature_df_dict, feature_df, feature_coef_df = _single_layer_lrp(feature_coef_df, bias,
-                                                                         feature_wts, top_k)
-    return feature_df_dict, feature_df, feature_coef_df
