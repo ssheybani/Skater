@@ -3,7 +3,7 @@
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
-SPHINXBUILD   = python3 -c "import sys,sphinx;sys.exit(sphinx.main(sys.argv))"
+SPHINXBUILD   = python3.6 -c "import sys,sphinx;sys.exit(sphinx.main(sys.argv))"
 PAPER         =
 BUILDDIR      = ../../model-interpretation-docs
 PDFBUILDDIR   = /tmp
