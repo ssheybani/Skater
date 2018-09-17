@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
@@ -63,7 +62,7 @@
             
             
               <div class="version">
-                1.1.1-b1
+                1.1.1b4
               </div>
             
           
@@ -221,12 +220,12 @@ feature names and row indices.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X: 1D/2D numpy array, or pandas DataFrame</strong></p>
-<blockquote class="last">
-<div><blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>X: 1D/2D numpy array, or pandas DataFrame</strong></dt>
+<dd><blockquote class="first">
 <div><p>raw data</p>
 </div></blockquote>
-<dl class="docutils">
+<dl class="last docutils">
 <dt>y: 1D/2D numpy array, or pandas DataFrame</dt>
 <dd><p class="first last">ground truth labels for X</p>
 </dd>
@@ -237,7 +236,8 @@ feature names and row indices.</p>
 <dd><p class="first last">Optional keyword containing names of indexes (rows).</p>
 </dd>
 </dl>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -252,13 +252,13 @@ feature names and row indices.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>sample</strong> : boolean</p>
-<blockquote class="last">
-<div><blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>sample</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd><blockquote class="first">
 <div><p>If False, we’ll take the full dataset, otherwise we’ll sample.</p>
 </div></blockquote>
 <p>include_y: boolean (default=False)</p>
-<dl class="docutils">
+<dl class="last docutils">
 <dt>strategy: string (default=’random-choice’)</dt>
 <dd><p class="first last">Supported strategy types ‘random-choice’, ‘uniform-from-percentile’, ‘uniform-over-similarity-ranks’</p>
 </dd>
@@ -273,7 +273,8 @@ feature names and row indices.</p>
 of samples to take from each discrete rank.</p>
 </dd>
 </dl>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -289,13 +290,13 @@ yj of xi, we will fix xi = yj for every observation in X.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>feature_ids(list):</strong></p>
-<blockquote>
-<div><blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>feature_ids(list):</strong></dt>
+<dd><blockquote class="first">
 <div><p>Feature names for which we’ll generate a grid. Must be contained
 by self.feature_ids</p>
 </div></blockquote>
-<dl class="docutils">
+<dl class="last docutils">
 <dt>grid_resolution(int):</dt>
 <dd><p class="first last">The number of unique values to choose for each feature.</p>
 </dd>
@@ -304,13 +305,15 @@ by self.feature_ids</p>
 the 5th and 95th percentiles, respectively.</p>
 </dd>
 </dl>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">grid(numpy.ndarray):    There are as many rows as there are feature_ids</p>
-<blockquote class="last">
-<div><p>There are as many columns as specified by grid_resolution</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>grid(numpy.ndarray):    There are as many rows as there are feature_ids</strong></dt>
+<dd><p class="first last">There are as many columns as specified by grid_resolution</p>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -325,11 +328,12 @@ the 5th and 95th percentiles, respectively.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>feature_id: hashable</strong></p>
-<blockquote class="last">
-<div><p>name of the feature to sample. If no feature names were passed, then
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>feature_id: hashable</strong></dt>
+<dd><p class="first last">name of the feature to sample. If no feature names were passed, then
 the features are accessible via their column index.</p>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -396,16 +400,11 @@ the features are accessible via their column index.</p>
 
   
 
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {
-          
-          SphinxRtdTheme.Navigation.enableSticky();
-          
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script> 
 

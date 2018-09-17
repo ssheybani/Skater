@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
@@ -63,7 +62,7 @@
             
             
               <div class="version">
-                1.1.1-b1
+                1.1.1b4
               </div>
             
           
@@ -215,57 +214,49 @@ InMemoryModel and DeployedModel class, though this API may change in later versi
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>prediction_fn: callable</strong></p>
-<blockquote>
-<div><p>function that returns predictions</p>
-</div></blockquote>
-<p><strong>input_formatter: callable</strong></p>
-<blockquote>
-<div><p>This function will run on input data before passing
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>prediction_fn: callable</strong></dt>
+<dd><p class="first last">function that returns predictions</p>
+</dd>
+<dt><strong>input_formatter: callable</strong></dt>
+<dd><p class="first last">This function will run on input data before passing
 to the prediction_fn. This usually should take your data type
 and convert them to numpy arrays or dataframes.</p>
-</div></blockquote>
-<p><strong>output_formatter: callable</strong></p>
-<blockquote>
-<div><p>This function will run on input data before passing
+</dd>
+<dt><strong>output_formatter: callable</strong></dt>
+<dd><p class="first last">This function will run on input data before passing
 to the prediction_fn. This usually should take your data type
 and convert them to numpy arrays or dataframes.</p>
-</div></blockquote>
-<p><strong>target_names: array type</strong></p>
-<blockquote>
-<div><p>(optional) names of classes that describe model outputs.</p>
-</div></blockquote>
-<p><strong>feature_names: array type</strong></p>
-<blockquote>
-<div><p>(optional) Names of features the model consumes.</p>
-</div></blockquote>
-<p><strong>unique_values: array type</strong></p>
-<blockquote>
-<div><p>The set of possible output values. Only use on classifier models that
+</dd>
+<dt><strong>target_names: array type</strong></dt>
+<dd><p class="first last">(optional) names of classes that describe model outputs.</p>
+</dd>
+<dt><strong>feature_names: array type</strong></dt>
+<dd><p class="first last">(optional) Names of features the model consumes.</p>
+</dd>
+<dt><strong>unique_values: array type</strong></dt>
+<dd><p class="first">The set of possible output values. Only use on classifier models that
 return “best guess” predictions, not probability scores, e.g.</p>
 <p>model.predict(fruit1) -&gt; ‘apple’
 model.predict(fruit2) -&gt; ‘banana’</p>
-<p>[‘apple’,’banana’] are the unique_values of the classifier</p>
-</div></blockquote>
-<p><strong>examples: numpy.array or pandas.dataframe</strong></p>
-<blockquote>
-<div><p>optional examples to use to make inferences about the function.</p>
-</div></blockquote>
-<p><strong>model_type: None, “classifier”, “regressor”</strong></p>
-<blockquote>
-<div><p>Indicates which type of model is being used. If left as None, will try to infer based on the
+<p class="last">[‘apple’,’banana’] are the unique_values of the classifier</p>
+</dd>
+<dt><strong>examples: numpy.array or pandas.dataframe</strong></dt>
+<dd><p class="first last">optional examples to use to make inferences about the function.</p>
+</dd>
+<dt><strong>model_type: None, “classifier”, “regressor”</strong></dt>
+<dd><p class="first last">Indicates which type of model is being used. If left as None, will try to infer based on the
 signature of the output type.</p>
-</div></blockquote>
-<p><strong>probability: None, True, False</strong></p>
-<blockquote>
-<div><p>If using a classifier, indicates whether probabilities are provided
+</dd>
+<dt><strong>probability: None, True, False</strong></dt>
+<dd><p class="first last">If using a classifier, indicates whether probabilities are provided
 (as opposed to indicators/labels).</p>
-</div></blockquote>
-<p><strong>log_level: int</strong></p>
-<blockquote class="last">
-<div><p>config setting to see model logs. 10 is a good value for seeing debug messages.
+</dd>
+<dt><strong>log_level: int</strong></dt>
+<dd><p class="first last">config setting to see model logs. 10 is a good value for seeing debug messages.
 30 is warnings only.</p>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -286,63 +277,54 @@ to the passed in uri.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>uri: string</strong></p>
-<blockquote>
-<div><p>Where to post requests</p>
-</div></blockquote>
-<p><strong>input_formatter: callable</strong></p>
-<blockquote>
-<div><p>This function will run on input data before passing
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>uri: string</strong></dt>
+<dd><p class="first last">Where to post requests</p>
+</dd>
+<dt><strong>input_formatter: callable</strong></dt>
+<dd><p class="first last">This function will run on input data before passing
 to requests library. This usually should take array types
 and convert them to JSON.</p>
-</div></blockquote>
-<p><strong>output_formatter: callable</strong></p>
-<blockquote>
-<div><p>This function will run on outputs before returning
+</dd>
+<dt><strong>output_formatter: callable</strong></dt>
+<dd><p class="first last">This function will run on outputs before returning
 results to interpretation objects. This usually should take
 request objects and convert them to array types.</p>
-</div></blockquote>
-<p><strong>request_kwargs: dict</strong></p>
-<blockquote>
-<div><p>any additional request headers that need to be passed, such as api
+</dd>
+<dt><strong>request_kwargs: dict</strong></dt>
+<dd><p class="first last">any additional request headers that need to be passed, such as api
 keys, content types, etc.</p>
-</div></blockquote>
-<p><strong>target_names: array type</strong></p>
-<blockquote>
-<div><p>(optional) The names of the target variable/classes. There should be as many
+</dd>
+<dt><strong>target_names: array type</strong></dt>
+<dd><p class="first last">(optional) The names of the target variable/classes. There should be as many
 names as there are outputs per prediction. Defaults to Predicted Value for
 regression and Class 1…n for classification.</p>
-</div></blockquote>
-<p><strong>feature_names: array type</strong></p>
-<blockquote>
-<div><p>(optional) Names of features the model consumes.</p>
-</div></blockquote>
-<p><strong>unique_values: array type</strong></p>
-<blockquote>
-<div><p>The set of possible output values. Only use on classifier models that
+</dd>
+<dt><strong>feature_names: array type</strong></dt>
+<dd><p class="first last">(optional) Names of features the model consumes.</p>
+</dd>
+<dt><strong>unique_values: array type</strong></dt>
+<dd><p class="first">The set of possible output values. Only use on classifier models that
 return “best guess” predictions, not probability scores, e.g.</p>
 <p>model.predict(fruit1) -&gt; ‘apple’
 model.predict(fruit2) -&gt; ‘banana’</p>
-<p>[‘apple’,’banana’] are the unique_values of the classifier</p>
-</div></blockquote>
-<p><strong>examples:</strong></p>
-<blockquote>
-<div><p>optional examples to use to make inferences about the function.</p>
-</div></blockquote>
-<p><strong>model_type: None, “classifier”, “regressor”</strong></p>
-<blockquote>
-<div><p>Indicates which type of model is being used. If left as None, will try to infer based on the
+<p class="last">[‘apple’,’banana’] are the unique_values of the classifier</p>
+</dd>
+<dt><strong>examples:</strong></dt>
+<dd><p class="first last">optional examples to use to make inferences about the function.</p>
+</dd>
+<dt><strong>model_type: None, “classifier”, “regressor”</strong></dt>
+<dd><p class="first last">Indicates which type of model is being used. If left as None, will try to infer based on the
 signature of the output type.</p>
-</div></blockquote>
-<p><strong>probability: None, True, False</strong></p>
-<blockquote>
-<div><p>If using a classifier, indicates whether probabilities are provided
+</dd>
+<dt><strong>probability: None, True, False</strong></dt>
+<dd><p class="first last">If using a classifier, indicates whether probabilities are provided
 (as opposed to indicators/labels).</p>
-</div></blockquote>
-<p><strong>log_level: int</strong></p>
-<blockquote class="last">
-<div><p>see skater.model.Model for details</p>
-</div></blockquote>
+</dd>
+<dt><strong>log_level: int</strong></dt>
+<dd><p class="first last">see skater.model.Model for details</p>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -409,16 +391,11 @@ signature of the output type.</p>
 
   
 
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {
-          
-          SphinxRtdTheme.Navigation.enableSticky();
-          
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script> 
 

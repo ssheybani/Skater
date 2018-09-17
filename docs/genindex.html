@@ -25,8 +25,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="#" />
@@ -62,7 +61,7 @@
             
             
               <div class="version">
-                1.1.1-b1
+                1.1.1b4
               </div>
             
           
@@ -168,6 +167,7 @@
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#L"><strong>L</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
@@ -288,7 +288,7 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="reference/interpretation.html#skater.core.local_interpretation.dnni.relevance_scorer.IntegratedGradients">IntegratedGradients (class in skater.core.local_interpretation.dnni.relevance_scorer)</a>
+      <li><a href="reference/interpretation.html#skater.core.local_interpretation.dnni.gradient_relevance_scorer.IntegratedGradients">IntegratedGradients (class in skater.core.local_interpretation.dnni.gradient_relevance_scorer)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -298,11 +298,9 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="reference/interpretation.html#skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer">LimeTabularExplainer (class in skater.core.local_interpretation.lime.lime_tabular)</a>
 </li>
-      <li><a href="reference/interpretation.html#skater.core.explanations.Interpretation.load_data">load_data() (skater.core.explanations.Interpretation method)</a>
+      <li><a href="reference/interpretation.html#skater.core.global_interpretation.feature_importance.FeatureImportance.load_data">load_data() (skater.core.global_interpretation.feature_importance.FeatureImportance method)</a>
 
       <ul>
-        <li><a href="reference/interpretation.html#skater.core.global_interpretation.feature_importance.FeatureImportance.load_data">(skater.core.global_interpretation.feature_importance.FeatureImportance method)</a>
-</li>
         <li><a href="reference/interpretation.html#skater.core.global_interpretation.partial_dependence.PartialDependence.load_data">(skater.core.global_interpretation.partial_dependence.PartialDependence method)</a>
 </li>
       </ul></li>
@@ -314,7 +312,15 @@
         <li><a href="reference/interpretation.html#skater.core.global_interpretation.interpretable_models.brlc.BRLC.load_model">(skater.core.global_interpretation.interpretable_models.brlc.BRLC method)</a>
 </li>
       </ul></li>
-      <li><a href="reference/interpretation.html#skater.core.local_interpretation.dnni.relevance_scorer.LRP">LRP (class in skater.core.local_interpretation.dnni.relevance_scorer)</a>
+      <li><a href="reference/interpretation.html#skater.core.local_interpretation.dnni.gradient_relevance_scorer.LRP">LRP (class in skater.core.local_interpretation.dnni.gradient_relevance_scorer)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/interpretation.html#skater.core.local_interpretation.dnni.perturbation_relevance_scorer.Occlusion">Occlusion (class in skater.core.local_interpretation.dnni.perturbation_relevance_scorer)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -438,16 +444,11 @@
 
   
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {
-          
-          SphinxRtdTheme.Navigation.enableSticky();
-          
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script> 
 

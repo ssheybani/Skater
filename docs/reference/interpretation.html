@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
@@ -63,7 +62,7 @@
             
             
               <div class="version">
-                1.1.1-b1
+                1.1.1b4
               </div>
             
           
@@ -105,6 +104,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#dnns-deepinterpreter">DNNs: DeepInterpreter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dnns-layerwise-relevance-propagation-e-lrp">DNNs: Layerwise Relevance Propagation(e-LRP)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dnns-integrated-gradient">DNNs: Integrated Gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dnns-occlusion">DNNs: Occlusion</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#global-and-local-interpretations">Global And Local Interpretations</a><ul>
@@ -207,36 +207,6 @@ the distribution of the training set or to pass inputs into a prediction functio
 and observation names, as well as providing various sampling algorithms.</p>
 <p>Currently load_data requires a numpy ndarray or pandas DataFrame, though we may add support for additional data structures in the future.
 For more details on what the DataManager does, please see the relevant documentation [PROVIDE LINK].</p>
-<dl class="method">
-<dt id="skater.core.explanations.Interpretation.load_data">
-<code class="descclassname">Interpretation.</code><code class="descname">load_data</code><span class="sig-paren">(</span><em>training_data</em>, <em>training_labels=None</em>, <em>feature_names=None</em>, <em>index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skater.core.explanations.Interpretation.load_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a DataSet object from inputs, ties to interpretation object.
-This will be exposed to all submodules.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>training_data: numpy.ndarray, pandas.DataFrame</strong></p>
-<blockquote>
-<div><p>the dataset. can be 1D or 2D</p>
-</div></blockquote>
-<p><strong>feature_names: array-type</strong></p>
-<blockquote>
-<div><p>names to call features.</p>
-</div></blockquote>
-<p><strong>index: array-type</strong></p>
-<blockquote>
-<div><p>names to call rows.</p>
-</div></blockquote>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 </div>
 <div class="section" id="global-interpretations">
 <span id="global-interpretation"></span><h2>Global Interpretations<a class="headerlink" href="#global-interpretations" title="Permalink to this headline">¶</a></h2>
@@ -268,18 +238,19 @@ more we’ll see predictions change as a function of perturbing a feature.</p>
 <dt id="skater.core.global_interpretation.feature_importance.FeatureImportance">
 <em class="property">class </em><code class="descclassname">skater.core.global_interpretation.feature_importance.</code><code class="descname">FeatureImportance</code><span class="sig-paren">(</span><em>interpreter</em><span class="sig-paren">)</span><a class="headerlink" href="#skater.core.global_interpretation.feature_importance.FeatureImportance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Contains methods for feature importance. Subclass of BaseGlobalInterpretation.</p>
-<p class="rubric">Attributes</p>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#skater.core.global_interpretation.feature_importance.FeatureImportance.data_set" title="skater.core.global_interpretation.feature_importance.FeatureImportance.data_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_set</span></code></a></td>
-<td>data_set routes to the Interpreter’s dataset</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#skater.core.global_interpretation.feature_importance.FeatureImportance.training_labels" title="skater.core.global_interpretation.feature_importance.FeatureImportance.training_labels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">training_labels</span></code></a></td>
-<td>training_labels routes to the Interpreter’s training labels</td>
+<tr class="field-odd field"><th class="field-name">Attributes:</th><td class="field-body"><dl class="first last docutils">
+<dt><a class="reference internal" href="#skater.core.global_interpretation.feature_importance.FeatureImportance.data_set" title="skater.core.global_interpretation.feature_importance.FeatureImportance.data_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_set</span></code></a></dt>
+<dd><p class="first last">data_set routes to the Interpreter’s dataset</p>
+</dd>
+<dt><a class="reference internal" href="#skater.core.global_interpretation.feature_importance.FeatureImportance.training_labels" title="skater.core.global_interpretation.feature_importance.FeatureImportance.training_labels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">training_labels</span></code></a></dt>
+<dd><p class="first last">training_labels routes to the Interpreter’s training labels</p>
+</dd>
+</dl>
+</td>
 </tr>
 </tbody>
 </table>
@@ -316,60 +287,56 @@ Supports classification, multi-class classification, and regression.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>model_instance: skater.model.model.Model subtype</strong></p>
-<blockquote>
-<div><p>the machine learning model “prediction” function to explain, such that
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>model_instance: skater.model.model.Model subtype</strong></dt>
+<dd><p class="first last">the machine learning model “prediction” function to explain, such that
 predictions = predict_fn(data).</p>
-</div></blockquote>
-<p><strong>ascending: boolean, default True</strong></p>
-<blockquote>
-<div><p>Helps with ordering Ascending vs Descending</p>
-</div></blockquote>
-<p><strong>filter_classes: array type</strong></p>
-<blockquote>
-<div><p>The classes to run partial dependence on. Default None invokes all classes.
+</dd>
+<dt><strong>ascending: boolean, default True</strong></dt>
+<dd><p class="first last">Helps with ordering Ascending vs Descending</p>
+</dd>
+<dt><strong>filter_classes: array type</strong></dt>
+<dd><p class="first last">The classes to run partial dependence on. Default None invokes all classes.
 Only used in classification models.</p>
-</div></blockquote>
-<p><strong>n_jobs: int</strong></p>
-<blockquote>
-<div><p>How many concurrent processes to use. Defaults -1, which grabs as many as are available.
+</dd>
+<dt><strong>n_jobs: int</strong></dt>
+<dd><p class="first last">How many concurrent processes to use. Defaults -1, which grabs as many as are available.
 Use 1 to avoid multiprocessing altogether.</p>
-</div></blockquote>
-<p><strong>progressbar: bool</strong></p>
-<blockquote>
-<div><p>Whether to display progress. This affects which function we use to operate on the pool
+</dd>
+<dt><strong>progressbar: bool</strong></dt>
+<dd><p class="first last">Whether to display progress. This affects which function we use to operate on the pool
 of processes, where including the progress bar results in 10-20% slowdowns.</p>
-</div></blockquote>
-<p><strong>n_samples: int</strong></p>
-<blockquote>
-<div><p>How many samples to use when computing importance.</p>
-</div></blockquote>
-<p><strong>method: string (default ‘prediction-variance’; ‘model-scoring’ for estimator specific scoring metric</strong></p>
-<blockquote>
-<div><p>How to compute feature importance. ‘model-scoring’ requires Interpretation.training_labels.
+</dd>
+<dt><strong>n_samples: int</strong></dt>
+<dd><p class="first last">How many samples to use when computing importance.</p>
+</dd>
+<dt><strong>method: string (default ‘prediction-variance’; ‘model-scoring’ for estimator specific scoring metric</strong></dt>
+<dd><p class="first last">How to compute feature importance. ‘model-scoring’ requires Interpretation.training_labels.
 Note this choice should only rarely makes any significant differences
 prediction-variance: mean absolute value of changes in predictions, given perturbations.
 model-scoring: difference in log_loss or MAE of training_labels given perturbations.</p>
-</div></blockquote>
-<p><strong>scorer_type: string</strong></p>
-<blockquote>
-<div><p>only used when method=’model-scoring’, and in this case defines which scoring function to use.
+</dd>
+<dt><strong>scorer_type: string</strong></dt>
+<dd><p class="first">only used when method=’model-scoring’, and in this case defines which scoring function to use.
 Default value is ‘default’, which evaluates to:</p>
 <blockquote>
 <div><p>regressors: mean absolute error
 classifiers with probabilities: cross entropy
 classifiers without probabilities: f1 score</p>
 </div></blockquote>
-<p>See Skater.model.scorers for details.</p>
-</div></blockquote>
-<p><strong>use_scaling: bool</strong></p>
-<blockquote>
-<div><p>Whether to weight the importance values by the strength of the perturbations.
+<p class="last">See Skater.model.scorers for details.</p>
+</dd>
+<dt><strong>use_scaling: bool</strong></dt>
+<dd><p class="first last">Whether to weight the importance values by the strength of the perturbations.
 Generally doesn’t effect results unless n_samples is very small.</p>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>importances</strong> : Sorted Series</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>importances</strong> <span class="classifier-delimiter">:</span> <span class="classifier">Sorted Series</span></dt>
+<dd></dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -406,69 +373,63 @@ then plots the results. Supports classification, multi-class classification, and
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>modelinstance: skater.model.model.Model subtype</strong></p>
-<blockquote>
-<div><p>estimator “prediction” function to explain the predictive model. Could be probability scores
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>modelinstance: skater.model.model.Model subtype</strong></dt>
+<dd><p class="first last">estimator “prediction” function to explain the predictive model. Could be probability scores
 or target values</p>
-</div></blockquote>
-<p><strong>filter_classes: array type</strong></p>
-<blockquote>
-<div><p>The classes to run partial dependence on. Default None invokes all classes.
+</dd>
+<dt><strong>filter_classes: array type</strong></dt>
+<dd><p class="first last">The classes to run partial dependence on. Default None invokes all classes.
 Only used in classification models.</p>
-</div></blockquote>
-<p><strong>ascending: boolean, default True</strong></p>
-<blockquote>
-<div><p>Helps with ordering Ascending vs Descending</p>
-</div></blockquote>
-<p><strong>ax: matplotlib.axes._subplots.AxesSubplot</strong></p>
-<blockquote>
-<div><p>existing subplot on which to plot feature importance. If none is provided,
+</dd>
+<dt><strong>ascending: boolean, default True</strong></dt>
+<dd><p class="first last">Helps with ordering Ascending vs Descending</p>
+</dd>
+<dt><strong>ax: matplotlib.axes._subplots.AxesSubplot</strong></dt>
+<dd><p class="first last">existing subplot on which to plot feature importance. If none is provided,
 one will be created.</p>
-</div></blockquote>
-<p><strong>progressbar: bool</strong></p>
-<blockquote>
-<div><p>Whether to display progress. This affects which function we use to operate on the pool
+</dd>
+<dt><strong>progressbar: bool</strong></dt>
+<dd><p class="first last">Whether to display progress. This affects which function we use to operate on the pool
 of processes, where including the progress bar results in 10-20% slowdowns.</p>
-</div></blockquote>
-<p><strong>n_jobs: int</strong></p>
-<blockquote>
-<div><p>How many concurrent processes to use. Defaults -1, which grabs as many as are available.
+</dd>
+<dt><strong>n_jobs: int</strong></dt>
+<dd><p class="first last">How many concurrent processes to use. Defaults -1, which grabs as many as are available.
 Use 1 to avoid multiprocessing altogether.</p>
-</div></blockquote>
-<p><strong>n_samples: int</strong></p>
-<blockquote>
-<div><p>How many samples to use when computing importance.</p>
-</div></blockquote>
-<p><strong>method: string</strong></p>
-<blockquote>
-<div><p>How to compute feature importance. ‘model-scoring’ requires Interpretation.training_labels
+</dd>
+<dt><strong>n_samples: int</strong></dt>
+<dd><p class="first last">How many samples to use when computing importance.</p>
+</dd>
+<dt><strong>method: string</strong></dt>
+<dd><p class="first last">How to compute feature importance. ‘model-scoring’ requires Interpretation.training_labels
 prediction-variance: mean absolute value of changes in predictions, given perturbations.
 model-scoring: difference in log_loss or MAE of training_labels given perturbations.
 Note this vary rarely makes any significant differences</p>
-</div></blockquote>
-<p><strong>scorer_type: string</strong></p>
-<blockquote>
-<div><p>only used when method=’model-scoring’, and in this case defines which scoring function to use.
+</dd>
+<dt><strong>scorer_type: string</strong></dt>
+<dd><p class="first">only used when method=’model-scoring’, and in this case defines which scoring function to use.
 Default value is ‘default’, which evaluates to:</p>
 <blockquote>
 <div><p>regressors: mean absolute error
 classifiers with probabilities: cross entropy
 classifiers without probabilities: f1 score</p>
 </div></blockquote>
-<p>See Skater.model.scorers for details.</p>
-</div></blockquote>
-<p><strong>use_scaling: bool</strong></p>
-<blockquote>
-<div><p>Whether to weight the importance values by the strength of the perturbations.
+<p class="last">See Skater.model.scorers for details.</p>
+</dd>
+<dt><strong>use_scaling: bool</strong></dt>
+<dd><p class="first last">Whether to weight the importance values by the strength of the perturbations.
 Generally doesn’t effect results unless n_samples is very small.</p>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">f: figure instance</p>
-<p>ax: matplotlib.axes._subplots.AxesSubplot</p>
-<blockquote class="last">
-<div><p>could be used to for further modification to the plots</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>f: figure instance</strong></dt>
+<dd></dd>
+<dt><strong>ax: matplotlib.axes._subplots.AxesSubplot</strong></dt>
+<dd><p class="first last">could be used to for further modification to the plots</p>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -516,18 +477,19 @@ feature (analogous to a feature coefficient in a regression model).</p>
 <p>Partial dependence adapted from:</p>
 <p>T. Hastie, R. Tibshirani and J. Friedman,
 Elements of Statistical Learning Ed. 2, Springer, 2009.</p>
-<p class="rubric">Attributes</p>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.data_set" title="skater.core.global_interpretation.partial_dependence.PartialDependence.data_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_set</span></code></a></td>
-<td>data_set routes to the Interpreter’s dataset</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.training_labels" title="skater.core.global_interpretation.partial_dependence.PartialDependence.training_labels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">training_labels</span></code></a></td>
-<td>training_labels routes to the Interpreter’s training labels</td>
+<tr class="field-odd field"><th class="field-name">Attributes:</th><td class="field-body"><dl class="first last docutils">
+<dt><a class="reference internal" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.data_set" title="skater.core.global_interpretation.partial_dependence.PartialDependence.data_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_set</span></code></a></dt>
+<dd><p class="first last">data_set routes to the Interpreter’s dataset</p>
+</dd>
+<dt><a class="reference internal" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.training_labels" title="skater.core.global_interpretation.partial_dependence.PartialDependence.training_labels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">training_labels</span></code></a></dt>
+<dd><p class="first last">training_labels routes to the Interpreter’s training labels</p>
+</dd>
+</dl>
+</td>
 </tr>
 </tbody>
 </table>
@@ -541,17 +503,25 @@ Elements of Statistical Learning Ed. 2, Springer, 2009.</p>
 <tr class="row-odd"><td><a class="reference internal" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.compute_3d_gradients" title="skater.core.global_interpretation.partial_dependence.PartialDependence.compute_3d_gradients"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_3d_gradients</span></code></a>(pdp,&nbsp;mean_col,&nbsp;…[,&nbsp;…])</td>
 <td>Computes component-wise gradients of pdp dataframe.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">feature_column_name_formatter</span></code>(columnname)</td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.load_data" title="skater.core.global_interpretation.partial_dependence.PartialDependence.load_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_data</span></code></a>(training_data[,&nbsp;index,&nbsp;feature_names])</td>
+<tr class="row-even"><td><a class="reference internal" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.load_data" title="skater.core.global_interpretation.partial_dependence.PartialDependence.load_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_data</span></code></a>(training_data[,&nbsp;index,&nbsp;feature_names])</td>
 <td>.consider routes to Interpreter’s .consider</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence" title="skater.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">partial_dependence</span></code></a>(feature_ids,&nbsp;modelinstance)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence" title="skater.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">partial_dependence</span></code></a>(feature_ids,&nbsp;modelinstance)</td>
 <td>Approximates the partial dependence of the predict_fn with respect to the variables passed.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence" title="skater.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_partial_dependence</span></code></a>(feature_ids,&nbsp;…[,&nbsp;…])</td>
+<tr class="row-even"><td><a class="reference internal" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence" title="skater.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_partial_dependence</span></code></a>(feature_ids,&nbsp;…[,&nbsp;…])</td>
 <td>Computes partial_dependence of a set of variables.</td>
+</tr>
+</tbody>
+</table>
+<table border="1" class="docutils">
+<colgroup>
+<col width="77%" />
+<col width="23%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>feature_column_name_formatter</strong></td>
+<td>&#160;</td>
 </tr>
 </tbody>
 </table>
@@ -563,29 +533,29 @@ Elements of Statistical Learning Ed. 2, Springer, 2009.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>pdp: pandas.DataFrame</strong></p>
-<blockquote>
-<div><p>DataFrame containing partial dependence values</p>
-</div></blockquote>
-<p><strong>mean_col: string</strong></p>
-<blockquote>
-<div><p>column name corresponding to pdp value</p>
-</div></blockquote>
-<p><strong>feature_1: string</strong></p>
-<blockquote>
-<div><p>column name corresponding to feature 1</p>
-</div></blockquote>
-<p><strong>feature_2: string</strong></p>
-<blockquote>
-<div><p>column name corresponding to feature 2</p>
-</div></blockquote>
-<p><strong>scaled: bool</strong></p>
-<blockquote>
-<div><p>Whether to scale the x1 and x2 gradients relative to x1 and x2 bin sizes</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>pdp: pandas.DataFrame</strong></dt>
+<dd><p class="first last">DataFrame containing partial dependence values</p>
+</dd>
+<dt><strong>mean_col: string</strong></dt>
+<dd><p class="first last">column name corresponding to pdp value</p>
+</dd>
+<dt><strong>feature_1: string</strong></dt>
+<dd><p class="first last">column name corresponding to feature 1</p>
+</dd>
+<dt><strong>feature_2: string</strong></dt>
+<dd><p class="first last">column name corresponding to feature 2</p>
+</dd>
+<dt><strong>scaled: bool</strong></dt>
+<dd><p class="first last">Whether to scale the x1 and x2 gradients relative to x1 and x2 bin sizes</p>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dx, dy, x_matrix, y_matrix, z_matrix</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>dx, dy, x_matrix, y_matrix, z_matrix</strong></dt>
+<dd></dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -690,11 +660,19 @@ explained.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_and_round</span></code>(values)</td>
-<td></td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_instance" title="skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_instance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">explain_instance</span></code></a>(data_row,&nbsp;predict_fn[,&nbsp;…])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_instance" title="skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_instance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">explain_instance</span></code></a>(data_row,&nbsp;predict_fn[,&nbsp;…])</td>
 <td>Generates explanations for a prediction.</td>
+</tr>
+</tbody>
+</table>
+<table border="1" class="docutils">
+<colgroup>
+<col width="68%" />
+<col width="32%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>convert_and_round</strong></td>
+<td>&#160;</td>
 </tr>
 </tbody>
 </table>
@@ -727,7 +705,7 @@ this parameter.</div></blockquote>
 num_samples: size of the neighborhood to learn the linear model
 distance_metric: the distance metric to use for weights.
 model_regressor: sklearn regressor to use in explanation. Defaults
-to Ridge regression in LimeBase. Must have <a href="#id17"><span class="problematic" id="id18">model_regressor.coef_</span></a>
+to Ridge regression in LimeBase. Must have <a href="#id20"><span class="problematic" id="id21">model_regressor.coef_</span></a>
 and ‘sample_weight’ as a parameter to model_regressor.fit()</p>
 </dd>
 <dt>Returns:</dt>
@@ -763,21 +741,24 @@ an estimator’s decision for or against the respective class</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>graph</strong> : tensorflow.Graph instance</p>
-<p><strong>session</strong> : tensorflow.Session to execute the graph(default session: tf.get_default_session())</p>
-<p><strong>log_level</strong> : int (default: _WARNING)</p>
-<blockquote class="last">
-<div><p>The log_level could be adjusted to other values as well. Check here <cite>./skater/util/logger.py</cite></p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>graph</strong> <span class="classifier-delimiter">:</span> <span class="classifier">tensorflow.Graph instance</span></dt>
+<dd></dd>
+<dt><strong>session</strong> <span class="classifier-delimiter">:</span> <span class="classifier">tensorflow.Session to execute the graph(default session: tf.get_default_session())</span></dt>
+<dd></dd>
+<dt><strong>log_level</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default: _WARNING)</span></dt>
+<dd><p class="first last">The log_level could be adjusted to other values as well. Check here <cite>./skater/util/logger.py</cite></p>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">References</p>
-<table class="docutils citation" frame="void" id="r1" rules="none">
+<table class="docutils citation" frame="void" id="r0fc9b34abba1-1" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[R1]</a></td><td>Ancona M, Ceolini E, Öztireli C, Gross M (ICLR, 2018).
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Ancona M, Ceolini E, Oztireli C, Gross M (ICLR, 2018).
 Towards better understanding of gradient-based attribution methods for Deep Neural Networks.
 <a class="reference external" href="https://arxiv.org/abs/1711.06104">https://arxiv.org/abs/1711.06104</a>
 (<a class="reference external" href="https://github.com/marcoancona/DeepExplain/blob/master/deepexplain/tensorflow/methods.py">https://github.com/marcoancona/DeepExplain/blob/master/deepexplain/tensorflow/methods.py</a>)</td></tr>
@@ -803,11 +784,11 @@ Towards better understanding of gradient-based attribution methods for Deep Neur
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>relevance_type: str</strong></p>
-<blockquote>
-<div><p>Currently, relevance score could be computed using e-LRP(‘elrp’) or Integrated Gradient(‘ig’). Other
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>relevance_type: str</strong></dt>
+<dd><p class="first">Currently, relevance score could be computed using e-LRP(‘elrp’) or Integrated Gradient(‘ig’). Other
 algorithms are under development.</p>
-<blockquote>
+<blockquote class="last">
 <div><ul class="simple">
 <li>epsilon-LRP(‘eLRP’):
 Is recommended with Activation ops (‘ReLU’ and ‘Tanh’). Current implementation of
@@ -820,61 +801,60 @@ Gradient is computed by varying the input from the baseline(x’) to the provide
 are element of R with n dimension —&gt; [0,1]</li>
 </ul>
 </div></blockquote>
-</div></blockquote>
-<p><strong>output_tensor: tensorflow.python.framework.ops.Tensor</strong></p>
-<blockquote>
-<div><p>Specify the output layer to start from</p>
-</div></blockquote>
-<p><strong>input_tensor: tensorflow.python.framework.ops.Tensor</strong></p>
-<blockquote>
-<div><p>Specify the input layer to reach to</p>
-</div></blockquote>
-<p><strong>samples: numpy.array</strong></p>
-<blockquote>
-<div><p>Batch of input for which explanations are desired.
+</dd>
+<dt><strong>output_tensor: tensorflow.python.framework.ops.Tensor</strong></dt>
+<dd><p class="first last">Specify the output layer to start from</p>
+</dd>
+<dt><strong>input_tensor: tensorflow.python.framework.ops.Tensor</strong></dt>
+<dd><p class="first last">Specify the input layer to reach to</p>
+</dd>
+<dt><strong>samples: numpy.array</strong></dt>
+<dd><p class="first">Batch of input for which explanations are desired.
 Note: The first dimension of the array specifies the batch size. For e.g.,</p>
-<blockquote>
+<blockquote class="last">
 <div><ul class="simple">
 <li>for an image input of batch size 2: (2, 150, 150, 3) &lt;batch_size, image_width, image_height, no_of_channels&gt;</li>
 <li>for a text input of batch size 1: (1, 80) &lt;batch_size, embedding_dimensions&gt;</li>
 </ul>
 </div></blockquote>
-</div></blockquote>
-<p><strong>use_case: str</strong></p>
-<blockquote>
-<div><p>Options: ‘image’ or ‘txt</p>
-</div></blockquote>
-<p><strong>kwargs: optional</strong></p>
+</dd>
+<dt><strong>use_case: str</strong></dt>
+<dd><p class="first last">Options: ‘image’ or ‘txt</p>
+</dd>
+<dt><strong>kwargs: optional</strong></dt>
+<dd></dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">result: numpy.ndarray</p>
-<blockquote class="last">
-<div><p>Computed relevance(contribution) score for the given input</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>result: numpy.ndarray</strong></dt>
+<dd><p class="first last">Computed relevance(contribution) score for the given input</p>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">References</p>
-<table class="docutils citation" frame="void" id="r2" rules="none">
+<table class="docutils citation" frame="void" id="r58da8c0454e4-1" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[R2]</a></td><td>Bach S, Binder A, Montavon G, Klauschen F, Müller K-R, Samek W (2015)
+<tr><td class="label"><a class="fn-backref" href="#id2">[1]</a></td><td>Bach S, Binder A, Montavon G, Klauschen F, Müller K-R, Samek W (2015)
 On Pixel-Wise Explanations for Non-Linear Classifier Decisions by Layer-Wise Relevance Propagation.
 PLoS ONE 10(7): e0130140. <a class="reference external" href="https://doi.org/10.1371/journal.pone.0130140">https://doi.org/10.1371/journal.pone.0130140</a></td></tr>
 </tbody>
 </table>
-<table class="docutils citation" frame="void" id="r3" rules="none">
+<table class="docutils citation" frame="void" id="r58da8c0454e4-2" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id3">[R3]</a></td><td>Sundararajan, M, Taly, A, Yan, Q (ICML, 2017).
+<tr><td class="label"><a class="fn-backref" href="#id3">[2]</a></td><td>Sundararajan, M, Taly, A, Yan, Q (ICML, 2017).
 Axiomatic Attribution for Deep Networks. <a class="reference external" href="http://arxiv.org/abs/1703.01365">http://arxiv.org/abs/1703.01365</a></td></tr>
 </tbody>
 </table>
-<table class="docutils citation" frame="void" id="r4" rules="none">
+<table class="docutils citation" frame="void" id="r58da8c0454e4-3" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id4">[R4]</a></td><td>Ancona M, Ceolini E, Öztireli C, Gross M (ICLR, 2018).
+<tr><td class="label"><a class="fn-backref" href="#id4">[3]</a></td><td>Ancona M, Ceolini E, Öztireli C, Gross M (ICLR, 2018).
 Towards better understanding of gradient-based attribution methods for Deep Neural Networks.
 <a class="reference external" href="https://arxiv.org/abs/1711.06104">https://arxiv.org/abs/1711.06104</a></td></tr>
 </tbody>
@@ -944,26 +924,26 @@ Towards better understanding of gradient-based attribution methods for Deep Neur
 <div class="section" id="dnns-layerwise-relevance-propagation-e-lrp">
 <h3>DNNs: Layerwise Relevance Propagation(e-LRP)<a class="headerlink" href="#dnns-layerwise-relevance-propagation-e-lrp" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
-<dt id="skater.core.local_interpretation.dnni.relevance_scorer.LRP">
-<em class="property">class </em><code class="descclassname">skater.core.local_interpretation.dnni.relevance_scorer.</code><code class="descname">LRP</code><span class="sig-paren">(</span><em>output_tensor</em>, <em>input_tensor</em>, <em>samples</em>, <em>session</em>, <em>epsilon=0.0001</em><span class="sig-paren">)</span><a class="headerlink" href="#skater.core.local_interpretation.dnni.relevance_scorer.LRP" title="Permalink to this definition">¶</a></dt>
+<dt id="skater.core.local_interpretation.dnni.gradient_relevance_scorer.LRP">
+<em class="property">class </em><code class="descclassname">skater.core.local_interpretation.dnni.gradient_relevance_scorer.</code><code class="descname">LRP</code><span class="sig-paren">(</span><em>output_tensor</em>, <em>input_tensor</em>, <em>samples</em>, <em>session</em>, <em>epsilon=0.0001</em><span class="sig-paren">)</span><a class="headerlink" href="#skater.core.local_interpretation.dnni.gradient_relevance_scorer.LRP" title="Permalink to this definition">¶</a></dt>
 <dd><p>LRP is technique to decompose the prediction(output) of a deep neural networks(DNNs) by computing relevance at
 each layer in a backward pass. Current implementation is computed using backpropagation by applying change rule on
 a modified gradient function. LRP could be implemented in different ways.
 This version implements the epsilon-LRP(Eq (58) as stated in [1] or Eq (2) in [2].
 Epsilon acts as a numerical stabilizer.</p>
 <p class="rubric">References</p>
-<table class="docutils citation" frame="void" id="r8" rules="none">
+<table class="docutils citation" frame="void" id="rb853e2c760bc-1" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id5">[R8]</a></td><td>Bach S, Binder A, Montavon G, Klauschen F, Müller K-R, Samek W (2015)
+<tr><td class="label"><a class="fn-backref" href="#id5">[1]</a></td><td>Bach S, Binder A, Montavon G, Klauschen F, Müller K-R, Samek W (2015)
 On Pixel-Wise Explanations for Non-Linear Classifier Decisions by Layer-Wise Relevance Propagation.
 PLoS ONE 10(7): e0130140. <a class="reference external" href="https://doi.org/10.1371/journal.pone.0130140">https://doi.org/10.1371/journal.pone.0130140</a></td></tr>
 </tbody>
 </table>
-<table class="docutils citation" frame="void" id="r9" rules="none">
+<table class="docutils citation" frame="void" id="rb853e2c760bc-2" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id6">[R9]</a></td><td>Ancona M, Ceolini E, Öztireli C, Gross M:
+<tr><td class="label"><a class="fn-backref" href="#id6">[2]</a></td><td>Ancona M, Ceolini E, Öztireli C, Gross M:
 Towards better understanding of gradient-based attribution methods for Deep Neural Networks. ICLR, 2018</td></tr>
 </tbody>
 </table>
@@ -973,8 +953,8 @@ Towards better understanding of gradient-based attribution methods for Deep Neur
 <div class="section" id="dnns-integrated-gradient">
 <h3>DNNs: Integrated Gradient<a class="headerlink" href="#dnns-integrated-gradient" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
-<dt id="skater.core.local_interpretation.dnni.relevance_scorer.IntegratedGradients">
-<em class="property">class </em><code class="descclassname">skater.core.local_interpretation.dnni.relevance_scorer.</code><code class="descname">IntegratedGradients</code><span class="sig-paren">(</span><em>output_tensor</em>, <em>input_tensor</em>, <em>samples</em>, <em>session</em>, <em>steps=100</em>, <em>baseline=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skater.core.local_interpretation.dnni.relevance_scorer.IntegratedGradients" title="Permalink to this definition">¶</a></dt>
+<dt id="skater.core.local_interpretation.dnni.gradient_relevance_scorer.IntegratedGradients">
+<em class="property">class </em><code class="descclassname">skater.core.local_interpretation.dnni.gradient_relevance_scorer.</code><code class="descname">IntegratedGradients</code><span class="sig-paren">(</span><em>output_tensor</em>, <em>input_tensor</em>, <em>samples</em>, <em>session</em>, <em>steps=100</em>, <em>baseline=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skater.core.local_interpretation.dnni.gradient_relevance_scorer.IntegratedGradients" title="Permalink to this definition">¶</a></dt>
 <dd><p>Integrated Gradient is a relevance scoring algorithm for Deep network based on final predictions to its input
 features. The algorithm statisfies two fundamental axioms related to relevance/attribution computation,</p>
 <blockquote>
@@ -984,22 +964,57 @@ then the that feature should have non-zero relevance score</p>
 networks.</p>
 </div></blockquote>
 <p class="rubric">References</p>
-<table class="docutils citation" frame="void" id="r10" rules="none">
+<table class="docutils citation" frame="void" id="r1cb969422b9a-1" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id7">[R10]</a></td><td>Sundararajan, Mukund, Taly, Ankur, Yan, Qiqi (ICML, 2017).</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id7">[1]</a></td><td>Sundararajan, Mukund, Taly, Ankur, Yan, Qiqi (ICML, 2017).</td></tr>
 </tbody>
 </table>
-<table class="docutils citation" frame="void" id="r11" rules="none">
+<table class="docutils citation" frame="void" id="r1cb969422b9a-2" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id8">[R11]</a></td><td>Ancona M, Ceolini E, Öztireli C, Gross M:</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id8">[2]</a></td><td>Ancona M, Ceolini E, Öztireli C, Gross M (ICLR, 2018).</td></tr>
 </tbody>
 </table>
-<table class="docutils citation" frame="void" id="r12" rules="none">
+<table class="docutils citation" frame="void" id="r1cb969422b9a-3" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id9">[R12]</a></td><td>Taly, Ankur(2017) <a class="reference external" href="http://theory.stanford.edu/~ataly/Talks/sri_attribution_talk_jun_2017.pdf">http://theory.stanford.edu/~ataly/Talks/sri_attribution_talk_jun_2017.pdf</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id9">[3]</a></td><td>Taly, Ankur(2017) <a class="reference external" href="http://theory.stanford.edu/~ataly/Talks/sri_attribution_talk_jun_2017.pdf">http://theory.stanford.edu/~ataly/Talks/sri_attribution_talk_jun_2017.pdf</a></td></tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="dnns-occlusion">
+<h3>DNNs: Occlusion<a class="headerlink" href="#dnns-occlusion" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="skater.core.local_interpretation.dnni.perturbation_relevance_scorer.Occlusion">
+<em class="property">class </em><code class="descclassname">skater.core.local_interpretation.dnni.perturbation_relevance_scorer.</code><code class="descname">Occlusion</code><span class="sig-paren">(</span><em>output_tensor</em>, <em>input_tensor</em>, <em>samples</em>, <em>current_session</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#skater.core.local_interpretation.dnni.perturbation_relevance_scorer.Occlusion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occlusion is a perturbation based inference algorithm. Such forms of algorithm direcly computes the
+relevance/attribution of the input features <span class="math notranslate nohighlight">\((X_{i})\)</span> by systematically occluding different
+portions of the image (by removing, masking or altering them), then running a forward pass on the new input to
+produce a new output, and then measuring and monitoring the difference between the original output and new output.
+Perturbation based interpretation helps one to compute direct estimation of the marginal effect of a feature but
+the inference might be computationally expensive depending on the cardinatlity of the feature space.
+The choice of the baseline value while perturbing through the feature space could be set to 0,
+as explained in detail by Zeiler &amp; Fergus, 2014[2].</p>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="rc648168cf5f8-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id10">[1]</a></td><td>Ancona M, Ceolini E, Oztireli C, Gross M (ICLR, 2018).</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="rc648168cf5f8-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id11">[2]</a></td><td>Zeiler, M and Fergus, R (Springer, 2014). Visualizing and understanding convolutional networks.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="rc648168cf5f8-3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id12">[3]</a></td><td><a class="reference external" href="https://github.com/marcoancona/DeepExplain/blob/master/deepexplain/tensorflow/methods.py">https://github.com/marcoancona/DeepExplain/blob/master/deepexplain/tensorflow/methods.py</a></td></tr>
 </tbody>
 </table>
 </dd></dl>
@@ -1022,80 +1037,69 @@ Benjamin Letham, Hongyu Yang, Margo Seltzer and others. For more information che
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>iterations</strong> : int (default=30000)</p>
-<blockquote>
-<div><p>number of iterations for each MCMC chain.</p>
-</div></blockquote>
-<p><strong>pos_sign</strong> : int (default=1)</p>
-<blockquote>
-<div><p>sign for the positive labels in the “label” column.</p>
-</div></blockquote>
-<p><strong>neg_sign</strong> : int (default=0)</p>
-<blockquote>
-<div><p>sign for the negative labels in the “label” column.</p>
-</div></blockquote>
-<p><strong>min_rule_len</strong> : int (default=1)</p>
-<blockquote>
-<div><p>minimum number of cardinality for rules to be mined from the data-frame.</p>
-</div></blockquote>
-<p><strong>max_rule_len</strong> : int (default=8)</p>
-<blockquote>
-<div><p>maximum number of cardinality for rules to be mined from the data-frame.</p>
-</div></blockquote>
-<p><strong>min_support_pos</strong> : float (default=0.1)</p>
-<blockquote>
-<div><p>a number between 0 and 1, for the minimum percentage support for the positive observations.</p>
-</div></blockquote>
-<p><strong>min_support_neg</strong> : float (default 0.1)</p>
-<blockquote>
-<div><p>a number between 0 and 1, for the minimum percentage support for the negative observations.</p>
-</div></blockquote>
-<p><strong>eta</strong> : int (default=1)</p>
-<blockquote>
-<div><p>a hyper-parameter for the expected cardinality of the rules in the optimal rule list.</p>
-</div></blockquote>
-<p><strong>n_chains</strong> : int (default=10)</p>
-<blockquote>
-<div><p>number of chains</p>
-</div></blockquote>
-<p><strong>alpha</strong> : int (default=1)</p>
-<blockquote>
-<div><p>a prior pseudo-count for the positive(alpha1) and negative(alpha0) classes.         Default values (1, 1)</p>
-</div></blockquote>
-<p><strong>lambda_</strong> : int (default=8)</p>
-<blockquote>
-<div><p>a hyper-parameter for the expected length of the rule list.</p>
-</div></blockquote>
-<p><strong>discretize</strong> : bool (default=True)</p>
-<blockquote>
-<div><p>apply discretizer to handle continuous features.</p>
-</div></blockquote>
-<p><strong>drop_features</strong> : bool (default=False)</p>
-<blockquote class="last">
-<div><p>once continuous features are discretized, use this flag to either retain or drop them from the dataframe</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>iterations</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=30000)</span></dt>
+<dd><p class="first last">number of iterations for each MCMC chain.</p>
+</dd>
+<dt><strong>pos_sign</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=1)</span></dt>
+<dd><p class="first last">sign for the positive labels in the “label” column.</p>
+</dd>
+<dt><strong>neg_sign</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=0)</span></dt>
+<dd><p class="first last">sign for the negative labels in the “label” column.</p>
+</dd>
+<dt><strong>min_rule_len</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=1)</span></dt>
+<dd><p class="first last">minimum number of cardinality for rules to be mined from the data-frame.</p>
+</dd>
+<dt><strong>max_rule_len</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=8)</span></dt>
+<dd><p class="first last">maximum number of cardinality for rules to be mined from the data-frame.</p>
+</dd>
+<dt><strong>min_support_pos</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float (default=0.1)</span></dt>
+<dd><p class="first last">a number between 0 and 1, for the minimum percentage support for the positive observations.</p>
+</dd>
+<dt><strong>min_support_neg</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float (default 0.1)</span></dt>
+<dd><p class="first last">a number between 0 and 1, for the minimum percentage support for the negative observations.</p>
+</dd>
+<dt><strong>eta</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=1)</span></dt>
+<dd><p class="first last">a hyper-parameter for the expected cardinality of the rules in the optimal rule list.</p>
+</dd>
+<dt><strong>n_chains</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=10)</span></dt>
+<dd><p class="first last">number of chains</p>
+</dd>
+<dt><strong>alpha</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=1)</span></dt>
+<dd><p class="first last">a prior pseudo-count for the positive(alpha1) and negative(alpha0) classes.         Default values (1, 1)</p>
+</dd>
+<dt><strong>lambda_</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=8)</span></dt>
+<dd><p class="first last">a hyper-parameter for the expected length of the rule list.</p>
+</dd>
+<dt><strong>discretize</strong> <span class="classifier-delimiter">:</span> <span class="classifier">bool (default=True)</span></dt>
+<dd><p class="first last">apply discretizer to handle continuous features.</p>
+</dd>
+<dt><strong>drop_features</strong> <span class="classifier-delimiter">:</span> <span class="classifier">bool (default=False)</span></dt>
+<dd><p class="first last">once continuous features are discretized, use this flag to either retain or drop them from the dataframe</p>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">References</p>
-<table class="docutils citation" frame="void" id="r13" rules="none">
+<table class="docutils citation" frame="void" id="r4433b1951d96-1" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id10">[R13]</a></td><td>Letham et.al(2015) Interpretable classifiers using rules and Bayesian analysis:
+<tr><td class="label"><a class="fn-backref" href="#id13">[1]</a></td><td>Letham et.al(2015) Interpretable classifiers using rules and Bayesian analysis:
 Building a better stroke prediction model (<a class="reference external" href="https://arxiv.org/abs/1511.01644">https://arxiv.org/abs/1511.01644</a>)</td></tr>
 </tbody>
 </table>
-<table class="docutils citation" frame="void" id="r14" rules="none">
+<table class="docutils citation" frame="void" id="r4433b1951d96-2" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id11">[R14]</a></td><td>Yang et.al(2016) Scalable Bayesian Rule Lists (<a class="reference external" href="https://arxiv.org/abs/1602.08610">https://arxiv.org/abs/1602.08610</a>)</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id14">[2]</a></td><td>Yang et.al(2016) Scalable Bayesian Rule Lists (<a class="reference external" href="https://arxiv.org/abs/1602.08610">https://arxiv.org/abs/1602.08610</a>)</td></tr>
 </tbody>
 </table>
-<table class="docutils citation" frame="void" id="r15" rules="none">
+<table class="docutils citation" frame="void" id="r4433b1951d96-3" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id12">[R15]</a></td><td><a class="reference external" href="https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py">https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id15">[3]</a></td><td><a class="reference external" href="https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py">https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py</a></td></tr>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
@@ -1170,11 +1174,12 @@ Building a better stroke prediction model (<a class="reference external" href="h
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>rule_indexes: str (default=”all”, retrieves all the rules)</strong></p>
-<blockquote class="last">
-<div><p>Specify the index of the rules to be retrieved
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>rule_indexes: str (default=”all”, retrieves all the rules)</strong></dt>
+<dd><p class="first last">Specify the index of the rules to be retrieved
 index could be set as ‘all’ or a range could be specified e.g. ‘(1:3)’ will retrieve the rules 1 and 2</p>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -1189,27 +1194,29 @@ index could be set as ‘all’ or a range could be specified e.g. ‘(1:3)’ w
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : pandas.DataFrame</p>
-<blockquote>
-<div><p>Dataframe containing continuous features</p>
-</div></blockquote>
-<p><strong>column_list</strong> : list/tuple</p>
-<p><strong>no_of_quantiles</strong> : int or list</p>
-<blockquote>
-<div><p>Number of quantiles, e.g. deciles(10), quartiles(4) or as a list of quantiles[0, .25, .5, .75, 1.]
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas.DataFrame</span></dt>
+<dd><p class="first last">Dataframe containing continuous features</p>
+</dd>
+<dt><strong>column_list</strong> <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple</span></dt>
+<dd></dd>
+<dt><strong>no_of_quantiles</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int or list</span></dt>
+<dd><p class="first last">Number of quantiles, e.g. deciles(10), quartiles(4) or as a list of quantiles[0, .25, .5, .75, 1.]
 if ‘None’ then [0, .25, .5, .75, 1.] is used</p>
-</div></blockquote>
-<p><strong>labels_for_bin</strong> : labels for the resulting bins</p>
-<p><strong>precision</strong> : int</p>
-<blockquote>
-<div><p>precision for storing and creating bins</p>
-</div></blockquote>
+</dd>
+<dt><strong>labels_for_bin</strong> <span class="classifier-delimiter">:</span> <span class="classifier">labels for the resulting bins</span></dt>
+<dd></dd>
+<dt><strong>precision</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">precision for storing and creating bins</p>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">new_X: pandas.DataFrame</p>
-<blockquote class="last">
-<div><p>Contains discretized features</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>new_X: pandas.DataFrame</strong></dt>
+<dd><p class="first last">Contains discretized features</p>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -1232,16 +1239,20 @@ if ‘None’ then [0, .25, .5, .75, 1.] is used</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : pandas.DataFrame object, that could be used by the model for training.</p>
-<blockquote>
-<div><blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas.DataFrame object, that could be used by the model for training.</span></dt>
+<dd><blockquote class="first">
 <div><p>It must not have a column named ‘label’</p>
 </div></blockquote>
-<p>y_true : pandas.Series, 1-D array to store ground truth labels</p>
-</div></blockquote>
+<p class="last">y_true : pandas.Series, 1-D array to store ground truth labels</p>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">SBRL model instance: rpy2.robjects.vectors.ListVector</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>SBRL model instance: rpy2.robjects.vectors.ListVector</strong></dt>
+<dd></dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -1272,27 +1283,28 @@ balance between sensitivity and specificity</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X: pandas.DataFrame</strong></p>
-<blockquote>
-<div><p>input examples to be scored</p>
-</div></blockquote>
-<p><strong>prob_score: pandas.DataFrame or None (default=None)</strong></p>
-<blockquote>
-<div><p>If set to None, <cite>predict_proba</cite> is called before computing the class labels.
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X: pandas.DataFrame</strong></dt>
+<dd><p class="first last">input examples to be scored</p>
+</dd>
+<dt><strong>prob_score: pandas.DataFrame or None (default=None)</strong></dt>
+<dd><p class="first last">If set to None, <cite>predict_proba</cite> is called before computing the class labels.
 If you have access to probability scores already, use the dataframe of probability scores to compute the
 final class label</p>
-</div></blockquote>
-<p><strong>threshold: float (default=0.5)</strong></p>
-<p><strong>pos_label: int (default=1)</strong></p>
-<blockquote>
-<div><p>specify how to identify positive label</p>
-</div></blockquote>
+</dd>
+<dt><strong>threshold: float (default=0.5)</strong></dt>
+<dd></dd>
+<dt><strong>pos_label: int (default=1)</strong></dt>
+<dd><p class="first last">specify how to identify positive label</p>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">y_prob, y_prob[‘label]: pandas.Series, numpy.ndarray</p>
-<blockquote class="last">
-<div><p>Contains the probability score for the input ‘X’</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>y_prob, y_prob[‘label]: pandas.Series, numpy.ndarray</strong></dt>
+<dd><p class="first last">Contains the probability score for the input ‘X’</p>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -1307,9 +1319,17 @@ final class label</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X: pandas.DataFrame object</strong></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X: pandas.DataFrame object</strong></dt>
+<dd></dd>
+</dl>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">pandas.DataFrame of shape (#datapoints, 2), the possible probability of each class for each observation</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>pandas.DataFrame of shape (#datapoints, 2), the possible probability of each class for each observation</strong></dt>
+<dd></dd>
+</dl>
+</td>
 </tr>
 </tbody>
 </table>
@@ -1349,68 +1369,56 @@ This helps in reducing the computation time to build the final BRL.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>sub_sample_percentage</strong> : float (default=0.1)</p>
-<blockquote>
-<div><p>specify the fraction of the training sample to be retained for training BRL.</p>
-</div></blockquote>
-<p><strong>iterations</strong> : int (default=30000)</p>
-<blockquote>
-<div><p>number of iterations for each MCMC chain.</p>
-</div></blockquote>
-<p><strong>pos_sign</strong> : int (default=1)</p>
-<blockquote>
-<div><p>sign for the positive labels in the “label” column.</p>
-</div></blockquote>
-<p><strong>neg_sign</strong> : int (default=0)</p>
-<blockquote>
-<div><p>sign for the negative labels in the “label” column.</p>
-</div></blockquote>
-<p><strong>min_rule_len</strong> : int (default=1)</p>
-<blockquote>
-<div><p>minimum number of cardinality for rules to be mined from the data-frame.</p>
-</div></blockquote>
-<p><strong>max_rule_len</strong> : int (default=8)</p>
-<blockquote>
-<div><p>maximum number of cardinality for rules to be mined from the data-frame.</p>
-</div></blockquote>
-<p><strong>min_support_pos</strong> : float (default=0.1)</p>
-<blockquote>
-<div><p>a number between 0 and 1, for the minimum percentage support for the positive observations.</p>
-</div></blockquote>
-<p><strong>min_support_neg</strong> : float (default 0.1)</p>
-<blockquote>
-<div><p>a number between 0 and 1, for the minimum percentage support for the negative observations.</p>
-</div></blockquote>
-<p><strong>eta</strong> : int (default=1)</p>
-<p><strong>n_chains: int (default=10)</strong></p>
-<p><strong>alpha</strong> : int (default=1)</p>
-<blockquote>
-<div><p>a prior pseudo-count for the positive(alpha1) and negative(alpha0) classes. Default values (1, 1)</p>
-</div></blockquote>
-<p><strong>lambda_</strong> : int (default=8)</p>
-<blockquote>
-<div><p>a hyper-parameter for the expected length of the rule list.</p>
-</div></blockquote>
-<p><strong>discretize</strong> : bool (default=True)</p>
-<blockquote>
-<div><p>apply discretizer to handle continuous features.</p>
-</div></blockquote>
-<p><strong>drop_features</strong> : bool (default=False)</p>
-<blockquote>
-<div><p>once continuous features are discretized, use this flag to either retain or drop them from the dataframe</p>
-</div></blockquote>
-<p><strong>threshold</strong> : float (default=0.5)</p>
-<blockquote>
-<div><p>specify the threshold for the decision boundary. This is the probability level to compute         distance of the predictions(for input examples) from the decision boundary. Input examples closest to the         decision boundary are sub-sampled. Size of sub-sampled data is controlled using ‘sub_sample_percentage’.</p>
-</div></blockquote>
-<p><strong>penalty_param_svm</strong> : float (default=0.01)</p>
-<blockquote>
-<div><p>Regularization parameter(‘C’) for Linear Support Vector Classifier. Lower regularization value forces the         optimizer to maximize the hyperplane.</p>
-<p>References: <a class="reference external" href="https://stats.stackexchange.com/questions/31066/what-is-the-influence-of-c-in-svms-with-linear-kernel">https://stats.stackexchange.com/questions/31066/what-is-the-influence-of-c-in-svms-with-linear-kernel</a></p>
-</div></blockquote>
-<p><strong>calibration_type</strong> : string (default=’sigmoid’)</p>
-<blockquote>
-<div><p>Calibrate the base estimator’s prediction(currently, all the base estimators are calibrated, that might
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>sub_sample_percentage</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float (default=0.1)</span></dt>
+<dd><p class="first last">specify the fraction of the training sample to be retained for training BRL.</p>
+</dd>
+<dt><strong>iterations</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=30000)</span></dt>
+<dd><p class="first last">number of iterations for each MCMC chain.</p>
+</dd>
+<dt><strong>pos_sign</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=1)</span></dt>
+<dd><p class="first last">sign for the positive labels in the “label” column.</p>
+</dd>
+<dt><strong>neg_sign</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=0)</span></dt>
+<dd><p class="first last">sign for the negative labels in the “label” column.</p>
+</dd>
+<dt><strong>min_rule_len</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=1)</span></dt>
+<dd><p class="first last">minimum number of cardinality for rules to be mined from the data-frame.</p>
+</dd>
+<dt><strong>max_rule_len</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=8)</span></dt>
+<dd><p class="first last">maximum number of cardinality for rules to be mined from the data-frame.</p>
+</dd>
+<dt><strong>min_support_pos</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float (default=0.1)</span></dt>
+<dd><p class="first last">a number between 0 and 1, for the minimum percentage support for the positive observations.</p>
+</dd>
+<dt><strong>min_support_neg</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float (default 0.1)</span></dt>
+<dd><p class="first last">a number between 0 and 1, for the minimum percentage support for the negative observations.</p>
+</dd>
+<dt><strong>eta</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=1)</span></dt>
+<dd></dd>
+<dt><strong>n_chains: int (default=10)</strong></dt>
+<dd></dd>
+<dt><strong>alpha</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=1)</span></dt>
+<dd><p class="first last">a prior pseudo-count for the positive(alpha1) and negative(alpha0) classes. Default values (1, 1)</p>
+</dd>
+<dt><strong>lambda_</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=8)</span></dt>
+<dd><p class="first last">a hyper-parameter for the expected length of the rule list.</p>
+</dd>
+<dt><strong>discretize</strong> <span class="classifier-delimiter">:</span> <span class="classifier">bool (default=True)</span></dt>
+<dd><p class="first last">apply discretizer to handle continuous features.</p>
+</dd>
+<dt><strong>drop_features</strong> <span class="classifier-delimiter">:</span> <span class="classifier">bool (default=False)</span></dt>
+<dd><p class="first last">once continuous features are discretized, use this flag to either retain or drop them from the dataframe</p>
+</dd>
+<dt><strong>threshold</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float (default=0.5)</span></dt>
+<dd><p class="first last">specify the threshold for the decision boundary. This is the probability level to compute         distance of the predictions(for input examples) from the decision boundary. Input examples closest to the         decision boundary are sub-sampled. Size of sub-sampled data is controlled using ‘sub_sample_percentage’.</p>
+</dd>
+<dt><strong>penalty_param_svm</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float (default=0.01)</span></dt>
+<dd><p class="first">Regularization parameter(‘C’) for Linear Support Vector Classifier. Lower regularization value forces the         optimizer to maximize the hyperplane.</p>
+<p class="last">References: <a class="reference external" href="https://stats.stackexchange.com/questions/31066/what-is-the-influence-of-c-in-svms-with-linear-kernel">https://stats.stackexchange.com/questions/31066/what-is-the-influence-of-c-in-svms-with-linear-kernel</a></p>
+</dd>
+<dt><strong>calibration_type</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string (default=’sigmoid’)</span></dt>
+<dd><p class="first">Calibrate the base estimator’s prediction(currently, all the base estimators are calibrated, that might
 change in future with more experimentation). Calibration could be performed in 2 ways
 1. parametric approach using Platt Scaling (‘sigmoid’)
 2. non-parametric approach using isotonic regression(‘isotonic).
@@ -1418,45 +1426,45 @@ Avoid using isotonic regression for input examples&lt;&lt;1k because it tends to
 <p>References:</p>
 <p>[1] A. Niculescu-Mizil &amp; R. Caruana(ICML2005), Predicting Good Probabilities With Supervised Learning</p>
 <p>[2] <a class="reference external" href="https://www.cs.cornell.edu/~alexn/papers/calibration.icml05.crc.rev3.pdf">https://www.cs.cornell.edu/~alexn/papers/calibration.icml05.crc.rev3.pdf</a></p>
-<p>[3] <a class="reference external" href="http://fastml.com/classifier-calibration-with-platts-scaling-and-isotonic-regression/">http://fastml.com/classifier-calibration-with-platts-scaling-and-isotonic-regression/</a></p>
-</div></blockquote>
-<p><strong>cv_calibration</strong> : int (default=3)</p>
-<blockquote>
-<div><p>specify number of folds for cross-validation splitting strategy</p>
-</div></blockquote>
-<p><strong>random_state: int (default=0)</strong></p>
-<p><strong>surrogate_estimator: string (default=’SVM’, ‘RF’: RandomForest)</strong></p>
-<blockquote class="last">
-<div><p>Surrogate model to build the initial model for handling large datasets. Currently, SVM and RandomForest
+<p class="last">[3] <a class="reference external" href="http://fastml.com/classifier-calibration-with-platts-scaling-and-isotonic-regression/">http://fastml.com/classifier-calibration-with-platts-scaling-and-isotonic-regression/</a></p>
+</dd>
+<dt><strong>cv_calibration</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=3)</span></dt>
+<dd><p class="first last">specify number of folds for cross-validation splitting strategy</p>
+</dd>
+<dt><strong>random_state: int (default=0)</strong></dt>
+<dd></dd>
+<dt><strong>surrogate_estimator: string (default=’SVM’, ‘RF’: RandomForest)</strong></dt>
+<dd><p class="first last">Surrogate model to build the initial model for handling large datasets. Currently, SVM and RandomForest
 is supported.</p>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">References</p>
-<table class="docutils citation" frame="void" id="r16" rules="none">
+<table class="docutils citation" frame="void" id="r7d42cc42bd51-1" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id13">[R16]</a></td><td>Dr. Tamas Madl, <a class="reference external" href="https://github.com/tmadl/sklearn-expertsys/blob/master/BigDataRuleListClassifier.py">https://github.com/tmadl/sklearn-expertsys/blob/master/BigDataRuleListClassifier.py</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id16">[1]</a></td><td>Dr. Tamas Madl, <a class="reference external" href="https://github.com/tmadl/sklearn-expertsys/blob/master/BigDataRuleListClassifier.py">https://github.com/tmadl/sklearn-expertsys/blob/master/BigDataRuleListClassifier.py</a></td></tr>
 </tbody>
 </table>
-<table class="docutils citation" frame="void" id="r17" rules="none">
+<table class="docutils citation" frame="void" id="r7d42cc42bd51-2" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id14">[R17]</a></td><td><a class="reference external" href="https://pdfs.semanticscholar.org/e44c/9dcf90d5a9a7e74a1d74c9900ff69142c67f.pdf">https://pdfs.semanticscholar.org/e44c/9dcf90d5a9a7e74a1d74c9900ff69142c67f.pdf</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id17">[2]</a></td><td><a class="reference external" href="https://pdfs.semanticscholar.org/e44c/9dcf90d5a9a7e74a1d74c9900ff69142c67f.pdf">https://pdfs.semanticscholar.org/e44c/9dcf90d5a9a7e74a1d74c9900ff69142c67f.pdf</a></td></tr>
 </tbody>
 </table>
-<table class="docutils citation" frame="void" id="r18" rules="none">
+<table class="docutils citation" frame="void" id="r7d42cc42bd51-3" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id15">[R18]</a></td><td>Surrogate model: <a class="reference external" href="https://en.wikipedia.org/wiki/Surrogate_model">https://en.wikipedia.org/wiki/Surrogate_model</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id18">[3]</a></td><td>Surrogate model: <a class="reference external" href="https://en.wikipedia.org/wiki/Surrogate_model">https://en.wikipedia.org/wiki/Surrogate_model</a></td></tr>
 </tbody>
 </table>
-<table class="docutils citation" frame="void" id="r19" rules="none">
+<table class="docutils citation" frame="void" id="r7d42cc42bd51-4" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id16">[R19]</a></td><td><ol class="first last upperalpha simple" start="23">
+<tr><td class="label"><a class="fn-backref" href="#id19">[4]</a></td><td><ol class="first last upperalpha simple" start="23">
 <li>Andrew Pruett , Robert L. Hester(2016),</li>
 </ol>
 </td></tr>
@@ -1529,11 +1537,12 @@ is supported.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>rule_indexes: str (default=”all”, retrieves all the rules)</strong></p>
-<blockquote class="last">
-<div><p>Specify the index of the rules to be retrieved
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>rule_indexes: str (default=”all”, retrieves all the rules)</strong></dt>
+<dd><p class="first last">Specify the index of the rules to be retrieved
 index could be set as ‘all’ or a range could be specified e.g. ‘(1:3)’ will retrieve the rules 1 and 2</p>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -1548,27 +1557,29 @@ index could be set as ‘all’ or a range could be specified e.g. ‘(1:3)’ w
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : pandas.DataFrame</p>
-<blockquote>
-<div><p>Dataframe containing continuous features</p>
-</div></blockquote>
-<p><strong>column_list</strong> : list/tuple</p>
-<p><strong>no_of_quantiles</strong> : int or list</p>
-<blockquote>
-<div><p>Number of quantiles, e.g. deciles(10), quartiles(4) or as a list of quantiles[0, .25, .5, .75, 1.]
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas.DataFrame</span></dt>
+<dd><p class="first last">Dataframe containing continuous features</p>
+</dd>
+<dt><strong>column_list</strong> <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple</span></dt>
+<dd></dd>
+<dt><strong>no_of_quantiles</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int or list</span></dt>
+<dd><p class="first last">Number of quantiles, e.g. deciles(10), quartiles(4) or as a list of quantiles[0, .25, .5, .75, 1.]
 if ‘None’ then [0, .25, .5, .75, 1.] is used</p>
-</div></blockquote>
-<p><strong>labels_for_bin</strong> : labels for the resulting bins</p>
-<p><strong>precision</strong> : int</p>
-<blockquote>
-<div><p>precision for storing and creating bins</p>
-</div></blockquote>
+</dd>
+<dt><strong>labels_for_bin</strong> <span class="classifier-delimiter">:</span> <span class="classifier">labels for the resulting bins</span></dt>
+<dd></dd>
+<dt><strong>precision</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">precision for storing and creating bins</p>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">new_X: pandas.DataFrame</p>
-<blockquote class="last">
-<div><p>Contains discretized features</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>new_X: pandas.DataFrame</strong></dt>
+<dd><p class="first last">Contains discretized features</p>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -1591,16 +1602,20 @@ if ‘None’ then [0, .25, .5, .75, 1.] is used</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : pandas.DataFrame object, that could be used by the model for training.</p>
-<blockquote>
-<div><blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas.DataFrame object, that could be used by the model for training.</span></dt>
+<dd><blockquote class="first">
 <div><p>It must not have a column named ‘label’</p>
 </div></blockquote>
-<p>y_true : pandas.Series, 1-D array to store ground truth labels</p>
-</div></blockquote>
+<p class="last">y_true : pandas.Series, 1-D array to store ground truth labels</p>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">SBRL model instance: rpy2.robjects.vectors.ListVector</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>SBRL model instance: rpy2.robjects.vectors.ListVector</strong></dt>
+<dd></dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -1631,27 +1646,28 @@ balance between sensitivity and specificity</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X: pandas.DataFrame</strong></p>
-<blockquote>
-<div><p>input examples to be scored</p>
-</div></blockquote>
-<p><strong>prob_score: pandas.DataFrame or None (default=None)</strong></p>
-<blockquote>
-<div><p>If set to None, <cite>predict_proba</cite> is called before computing the class labels.
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X: pandas.DataFrame</strong></dt>
+<dd><p class="first last">input examples to be scored</p>
+</dd>
+<dt><strong>prob_score: pandas.DataFrame or None (default=None)</strong></dt>
+<dd><p class="first last">If set to None, <cite>predict_proba</cite> is called before computing the class labels.
 If you have access to probability scores already, use the dataframe of probability scores to compute the
 final class label</p>
-</div></blockquote>
-<p><strong>threshold: float (default=0.5)</strong></p>
-<p><strong>pos_label: int (default=1)</strong></p>
-<blockquote>
-<div><p>specify how to identify positive label</p>
-</div></blockquote>
+</dd>
+<dt><strong>threshold: float (default=0.5)</strong></dt>
+<dd></dd>
+<dt><strong>pos_label: int (default=1)</strong></dt>
+<dd><p class="first last">specify how to identify positive label</p>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">y_prob, y_prob[‘label]: pandas.Series, numpy.ndarray</p>
-<blockquote class="last">
-<div><p>Contains the probability score for the input ‘X’</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>y_prob, y_prob[‘label]: pandas.Series, numpy.ndarray</strong></dt>
+<dd><p class="first last">Contains the probability score for the input ‘X’</p>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -1666,9 +1682,17 @@ final class label</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X: pandas.DataFrame object</strong></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X: pandas.DataFrame object</strong></dt>
+<dd></dd>
+</dl>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">pandas.DataFrame of shape (#datapoints, 2), the possible probability of each class for each observation</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>pandas.DataFrame of shape (#datapoints, 2), the possible probability of each class for each observation</strong></dt>
+<dd></dd>
+</dl>
+</td>
 </tr>
 </tbody>
 </table>
@@ -1700,20 +1724,26 @@ final class label</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : pandas.DataFrame</p>
-<blockquote>
-<div><p>input examples representing the training set</p>
-</div></blockquote>
-<p><strong>y</strong> : pandas.DataFrame</p>
-<blockquote>
-<div><p>target labels associated with the training set</p>
-</div></blockquote>
-<p><strong>pos_label</strong> : int</p>
-<p><strong>neg_label</strong> : int</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas.DataFrame</span></dt>
+<dd><p class="first last">input examples representing the training set</p>
+</dd>
+<dt><strong>y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas.DataFrame</span></dt>
+<dd><p class="first last">target labels associated with the training set</p>
+</dd>
+<dt><strong>pos_label</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd></dd>
+<dt><strong>neg_label</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd></dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>X_, y_</strong> : pandas.dataframe</p>
-<p class="last">sub-sampled input examples</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>X_, y_</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas.dataframe</span></dt>
+<dd></dd>
+<dt><strong>sub-sampled input examples</strong></dt>
+<dd></dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -1783,16 +1813,11 @@ final class label</p>
 
   
 
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {
-          
-          SphinxRtdTheme.Navigation.enableSticky();
-          
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script> 
 

@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
@@ -62,7 +61,7 @@
             
             
               <div class="version">
-                1.1.1-b1
+                1.1.1b4
               </div>
             
           
@@ -244,10 +243,13 @@
 <div><ul class="simple">
 <li>epsilon-Layer-wise Relevance Propagation(e-LRP): only for image currently</li>
 <li>Integrated Gradient(IG): image and text</li>
+<li>Occlusion: only for image currently</li>
 </ul>
 </div></blockquote>
 <a class="reference internal image-reference" href="_images/example_lrp_ig.png"><img alt="Interpreting pre-trained Inception-V3 model" src="_images/example_lrp_ig.png" style="width: 49%;" /></a>
 <a class="reference internal image-reference" href="_images/interpreting_inverted_panda_ig_elrp.png"><img alt="some more examples on image interpretability" src="_images/interpreting_inverted_panda_ig_elrp.png" style="width: 49%;" /></a>
+<a class="reference internal image-reference" href="_images/left_steer.png"><img alt="input image for steering left" src="_images/left_steer.png" style="width: 30%;" /></a>
+<a class="reference internal image-reference" href="_images/inference_on_left_steer_angle_prediction.png"><img alt="inference on steering prediction using e-LRP, Integrated Gradient and Occlusion" src="_images/inference_on_left_steer_angle_prediction.png" style="width: 69%;" /></a>
 <dl class="docutils">
 <dt>Image Interpretability</dt>
 <dd><ul class="first last simple">
@@ -258,6 +260,11 @@
 <li><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretability/imagenet_adv_inceptionv3_tensorflow.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretability/imagenet_adv_inceptionv3_tensorflow.ipynb</a></li>
 <li><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretability/mnist_cnn_keras.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretability/mnist_cnn_keras.ipynb</a></li>
 <li><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretability/mnist_mlp_tensorflow.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretability/mnist_mlp_tensorflow.ipynb</a></li>
+<li><dl class="first docutils">
+<dt>Toy Example on self driving car:</dt>
+<dd><a class="reference external" href="https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretability/self_driving_toy_example/toy_self_driving_example.ipynb">https://github.com/datascienceinc/Skater/blob/master/examples/image_interpretability/self_driving_toy_example/toy_self_driving_example.ipynb</a></dd>
+</dl>
+</li>
 </ul>
 </dd>
 </dl>
@@ -354,16 +361,11 @@
 
   
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {
-          
-          SphinxRtdTheme.Navigation.enableSticky();
-          
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script> 
 

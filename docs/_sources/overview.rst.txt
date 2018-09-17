@@ -68,7 +68,8 @@ implementing other algorithms, `issues <https://github.com/datascienceinc/Skater
 |                         |           | - Integrated Gradient: image and text   |
 |                         |           |                                         |
 +---------+---------+-----+-----------+-----------------------------------------+
-| Global and Local        | Scalable Bayesian Rule Lists                        |
+| Global and Local        | - Scalable Bayesian Rule Lists                      |
 | Interpretation          |                                                     |
+|                         | - Tree Surrogates                                   |
 +---------+---------+-----+-----------+-----------+--------------+--------------+
 
