@@ -80,6 +80,7 @@ class RegressionScorer(Scorer):
 
 # Regression Scorers
 class MeanSquaredError(RegressionScorer):
+    __name__ = "MSE"
     type = StaticTypes.scorer_types.decreasing
 
     @staticmethod
@@ -88,6 +89,7 @@ class MeanSquaredError(RegressionScorer):
 
 
 class MeanAbsoluteError(RegressionScorer):
+    __name__ = "MAE"
     type = StaticTypes.scorer_types.decreasing
 
     @staticmethod
@@ -96,6 +98,7 @@ class MeanAbsoluteError(RegressionScorer):
 
 
 class RSquared(RegressionScorer):
+    __name__ = "R2"
     # Reference: https://en.wikipedia.org/wiki/Coefficient_of_determination
     # The score values range between [0, 1]. The best possible value is 1, however one could expect negative values as
     # well because of the arbitrary model fit.
@@ -125,6 +128,7 @@ class ClassifierScorer(Scorer):
 
 # Metrics related to Classification
 class CrossEntropy(ClassifierScorer):
+    __name__ = "cross-entropy"
     type = StaticTypes.scorer_types.decreasing
 
     @staticmethod
@@ -140,6 +144,7 @@ class CrossEntropy(ClassifierScorer):
 
 
 class F1(ClassifierScorer):
+    __name__ = "f1-score"
     type = StaticTypes.scorer_types.increasing
 
     @staticmethod
@@ -174,7 +179,9 @@ class ScorerFactory(object):
         elif model.model_type == StaticTypes.model_types.classifier:
             self.cross_entropy = CrossEntropy(model)
             self.f1 = F1(model)
-            if model.probability is not None and not 'unknown':
+            # TODO: Not sure why the first condition is relevant, probably some early design decision.
+            # TODO Need to check other examples and add more test before removing the first check completely
+            if model.probability is not None and not 'unknown' or model.probability is True:
                 self.default = self.cross_entropy
             else:
                 self.default = self.f1
@@ -206,4 +213,5 @@ class ScorerFactory(object):
                                              "or allowed for model type".format(scorer_type)
         scorer = self.__dict__[scorer_type]._score
         scorer.type = self.__dict__[scorer_type].type
+        scorer.name = self.__dict__[scorer_type].__name__
         return scorer

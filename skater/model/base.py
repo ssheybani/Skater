@@ -183,7 +183,6 @@ class ModelType(object):
         ----------
         examples: array type
 
-
         """
         if isinstance(examples, (pd.DataFrame, np.ndarray)):
             return examples
@@ -245,7 +244,7 @@ class ModelType(object):
             # 1D array of continuous values
             self.model_type = self._if_no_model(StaticTypes.model_types.regressor)
             self.n_classes = 1
-            self.probability = StaticTypes.not_applicable
+            self.probability = self._if_no_prob(False)
 
         elif self.output_type == 'multiclass':
             # 2D array of 1s and 0, exclusive

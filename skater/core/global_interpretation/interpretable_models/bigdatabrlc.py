@@ -132,7 +132,8 @@ class BigDataBRLC(BRLC):
         self.threhold = threshold
 
         self.surrogate_estimator = CalibratedClassifierCV(RandomForestClassifier(warm_start=True, oob_score=True,
-                                                          max_features="sqrt", random_state=random_state),
+                                                                                 max_features="sqrt",
+                                                                                 random_state=random_state),
                                                           method=calibration_type, cv=cv_calibration) \
             if surrogate_estimator is 'RF' else surrogate_estimator
 
