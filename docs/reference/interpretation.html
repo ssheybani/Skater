@@ -108,6 +108,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#global-and-local-interpretations">Global And Local Interpretations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tree-surrogates-using-decision-trees">Tree Surrogates (using Decision Trees)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#bayesian-rule-lists-brl">Bayesian Rule Lists(BRL)</a></li>
 </ul>
 </li>
@@ -207,6 +208,38 @@ the distribution of the training set or to pass inputs into a prediction functio
 and observation names, as well as providing various sampling algorithms.</p>
 <p>Currently load_data requires a numpy ndarray or pandas DataFrame, though we may add support for additional data structures in the future.
 For more details on what the DataManager does, please see the relevant documentation [PROVIDE LINK].</p>
+<dl class="method">
+<dt id="skater.core.explanations.Interpretation.load_data">
+<code class="descclassname">Interpretation.</code><code class="descname">load_data</code><span class="sig-paren">(</span><em>training_data</em>, <em>training_labels=None</em>, <em>feature_names=None</em>, <em>index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skater.core.explanations.Interpretation.load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a DataSet object from inputs, ties to interpretation object.
+This will be exposed to all submodules.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>training_data: numpy.ndarray, pandas.DataFrame</strong></dt>
+<dd><p class="first last">the dataset. can be 1D or 2D</p>
+</dd>
+<dt><strong>feature_names: array-type</strong></dt>
+<dd><p class="first last">names to call features.</p>
+</dd>
+<dt><strong>index: array-type</strong></dt>
+<dd><p class="first last">names to call rows.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>None</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="global-interpretations">
 <span id="global-interpretation"></span><h2>Global Interpretations<a class="headerlink" href="#global-interpretations" title="Permalink to this headline">¶</a></h2>
@@ -705,7 +738,7 @@ this parameter.</div></blockquote>
 num_samples: size of the neighborhood to learn the linear model
 distance_metric: the distance metric to use for weights.
 model_regressor: sklearn regressor to use in explanation. Defaults
-to Ridge regression in LimeBase. Must have <a href="#id20"><span class="problematic" id="id21">model_regressor.coef_</span></a>
+to Ridge regression in LimeBase. Must have <a href="#id27"><span class="problematic" id="id28">model_regressor.coef_</span></a>
 and ‘sample_weight’ as a parameter to model_regressor.fit()</p>
 </dd>
 <dt>Returns:</dt>
@@ -1023,6 +1056,301 @@ as explained in detail by Zeiler &amp; Fergus, 2014[2].</p>
 </div>
 <div class="section" id="global-and-local-interpretations">
 <span id="interpretable-rule-based"></span><h2>Global And Local Interpretations<a class="headerlink" href="#global-and-local-interpretations" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="tree-surrogates-using-decision-trees">
+<h3>Tree Surrogates (using Decision Trees)<a class="headerlink" href="#tree-surrogates-using-decision-trees" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="skater.core.global_interpretation.tree_surrogate.TreeSurrogate">
+<em class="property">class </em><code class="descclassname">skater.core.global_interpretation.tree_surrogate.</code><code class="descname">TreeSurrogate</code><span class="sig-paren">(</span><em>oracle=None</em>, <em>splitter='best'</em>, <em>max_depth=None</em>, <em>min_samples_split=2</em>, <em>min_samples_leaf=1</em>, <em>min_weight_fraction_leaf=0.0</em>, <em>max_features=None</em>, <em>seed=None</em>, <em>max_leaf_nodes=None</em>, <em>min_impurity_decrease=0.0</em>, <em>min_impurity_split=None</em>, <em>class_weight='balanced'</em>, <em>presort=False</em>, <em>impurity_threshold=0.01</em><span class="sig-paren">)</span><a class="headerlink" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate" title="Permalink to this definition">¶</a></dt>
+<dd><p>:: Experimental :: The implementation is currently experimental and might change in future.
+The idea of using TreeSurrogates as means for explaining a model’s(Oracle or the base model)
+learned decision policies(for inductive learning tasks) is inspired by the work of Mark W. Craven
+described as the TREPAN algorithm. In this explanation learning hypothesis, the base estimator(Oracle)
+could be any form of supervised learning predictive models. The explanations are approximated using
+DecisionTrees(both for Classification/Regression) by learning decision boundaries similar to that learned by
+the Oracle(predictions from the base model are used for learning the DecisionTree representation).
+The implementation also generates a fidelity score to quantify tree based surrogate model’s
+approximation to the Oracle. Ideally, the score should be 0 for truthful explanation
+both globally and locally.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>oracle</strong> <span class="classifier-delimiter">:</span> <span class="classifier">InMemory instance type</span></dt>
+<dd><p class="first last">model instance having access to the base estimator(InMemory/DeployedModel).
+Currently, only InMemory is supported.</p>
+</dd>
+<dt><strong>splitter</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str (default=”best”)</span></dt>
+<dd><p class="first last">Strategy used to split at each the node. Supported strategies(“best” or “random”).</p>
+</dd>
+<dt><strong>max_depth</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=None)</span></dt>
+<dd><p class="first last">Defines the maximum depth of a tree. If ‘None’ then nodes are expanded till all leaves are pure or contain less
+than min_samples_split samples.
+Deeper trees are prone to be more expensive and tend to over-fit.
+Pruning is a technique which could be applied to avoid over-fitting.</p>
+</dd>
+<dt><strong>min_samples_split</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int/float (default=2)</span></dt>
+<dd><p class="first">Defines the minimum number of samples required to split an internal node.
+- ‘int’ : specifies the minimum number of samples
+- ‘float’ : then represents a percentage. Minimum number of samples is computed as</p>
+<blockquote class="last">
+<div><p><cite>ceil(min_samples_split*n_samples)</cite></p>
+</div></blockquote>
+</dd>
+<dt><strong>min_samples_leaf</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int/float (default=1)</span></dt>
+<dd><p class="first">Defines requirement for a leaf node. The minimum number of samples needed to be a leaf node.
+- int : specifies the minimum number of samples
+- float : then represents a percentage. Minimum number of samples is computed as</p>
+<blockquote class="last">
+<div><p><a href="#id13"><span class="problematic" id="id14">`</span></a>ceil(min_samples_split*n_samples)</p>
+</div></blockquote>
+</dd>
+<dt><strong>min_weight_fraction_leaf</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float (default=0.0)</span></dt>
+<dd><p class="first last">Defines requirement for a leaf node. The minimum weight percentage of the sum total of the weights of
+all input samples.</p>
+</dd>
+<dt><strong>max_features</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, float, string or None (default=None)</span></dt>
+<dd><p class="first last">Defines number of features to consider for the best possible split
+- None : all specified features are used (oracle.feature_names)
+- int : uses specified values as <cite>max_features</cite> at each split.
+- float : as a percentage. Value for split is computed as <cite>int(max_features * n_features)</cite>.
+- “auto” : <cite>max_features=sqrt(n_features)</cite>.
+- “sqrt” : <cite>max_features=sqrt(n_features)</cite>.
+- “log2” : <cite>max_features=log2(n_features)</cite>.</p>
+</dd>
+<dt><strong>seed</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, (default=None)</span></dt>
+<dd><p class="first last">seed for random number generator</p>
+</dd>
+<dt><strong>max_leaf_nodes</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int or None (default=None)</span></dt>
+<dd><p class="first last">TreeSurrogates are constructed top-down in best first manner(best decrease in relative impurity)
+If None, results in maximum possible number of leaf nodes. This tends to overfitting</p>
+</dd>
+<dt><strong>min_impurity_decrease</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float (default=0.0)</span></dt>
+<dd><p class="first last">Tree node is considered for splitting if relative decrease in impurity is &gt;= <cite>min_impurity_decrease</cite></p>
+</dd>
+<dt><strong>class_weight</strong> <span class="classifier-delimiter">:</span> <span class="classifier">dict, list of dicts, str (“balanced” or None) (default=”balanced”)</span></dt>
+<dd><p class="first">Weights associated with classes for handling data imbalance
+- None : all classes have equal weights
+- “balanced” : adjusts the class weights automatically. Weights are assigned inversely propotional</p>
+<blockquote class="last">
+<div><p>to class frequencies <code class="docutils literal notranslate"><span class="pre">n_samples</span> <span class="pre">/</span> <span class="pre">(n_classes</span> <span class="pre">*</span> <span class="pre">np.bincount(y))</span></code></p>
+</div></blockquote>
+</dd>
+<dt><strong>presort</strong> <span class="classifier-delimiter">:</span> <span class="classifier">bool (default=False)</span></dt>
+<dd><p class="first last">Sorts the data before building surrogates trees to find the best splits. When dealing with larger datasets,
+setting it to True might result in increasing computation time because of the pre sorting operation.</p>
+</dd>
+<dt><strong>impurity_threshold</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float (default=0.01)</span></dt>
+<dd><p class="first last">Specifies the acceptable disparity between the Oracle and TreeSurrogates. The higher the difference between
+the Oracle and TreeSurrogate less faithful are the explanations generated.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r4a5a5c3b5496-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id15">[1]</a></td><td>Mark W. Craven(1996) EXTRACTING COMPREHENSIBLE MODELS FROM TRAINED NEURAL NETWORKS
+(<a class="reference external" href="http://ftp.cs.wisc.edu/machine-learning/shavlik-group/craven.thesis.pdf">http://ftp.cs.wisc.edu/machine-learning/shavlik-group/craven.thesis.pdf</a>)</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r4a5a5c3b5496-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id16">[2]</a></td><td>Mark W. Craven and Jude W. Shavlik(NIPS, 96). Extracting Thee-Structured Representations of Thained Networks
+(<a class="reference external" href="https://papers.nips.cc/paper/1152-extracting-tree-structured-representations-of-trained-networks.pdf">https://papers.nips.cc/paper/1152-extracting-tree-structured-representations-of-trained-networks.pdf</a>)</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r4a5a5c3b5496-3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id17">[3]</a></td><td>DecisionTreeClassifier: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html">http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r4a5a5c3b5496-4" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id18">[4]</a></td><td>DecisionTreeRegressor: <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html">http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html</a></td></tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.util.logger</span> <span class="k">import</span> <span class="n">_INFO</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">iris</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model_inst</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">,</span> <span class="n">examples</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span> <span class="n">model_type</span><span class="o">=</span><span class="s1">&#39;classifier&#39;</span><span class="p">,</span> <span class="n">unique_values</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+<span class="gp">&gt;&gt;&gt; </span>                      <span class="n">feature_names</span><span class="o">=</span><span class="n">iris</span><span class="o">.</span><span class="n">feature_names</span><span class="p">,</span> <span class="n">target_names</span><span class="o">=</span><span class="n">iris</span><span class="o">.</span><span class="n">target_names</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="n">_INFO</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Using the interpreter instance invoke call to the TreeSurrogate</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">surrogate_explainer</span> <span class="o">=</span> <span class="n">interpreter</span><span class="o">.</span><span class="n">tree_surrogate</span><span class="p">(</span><span class="n">oracle</span><span class="o">=</span><span class="n">model_inst</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">surrogate_explainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">use_oracle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">prune</span><span class="o">=</span><span class="s1">&#39;post&#39;</span><span class="p">,</span> <span class="n">scorer_type</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">surrogate_explainer</span><span class="o">.</span><span class="n">plot_global_decisions</span><span class="p">(</span><span class="n">colors</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;coral&#39;</span><span class="p">,</span> <span class="s1">&#39;lightsteelblue&#39;</span><span class="p">,</span><span class="s1">&#39;darkkhaki&#39;</span><span class="p">],</span>
+<span class="gp">&gt;&gt;&gt; </span>                                         <span class="n">file_name</span><span class="o">=</span><span class="s1">&#39;simple_tree_pre.png&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">show_in_notebook</span><span class="p">(</span><span class="s1">&#39;simple_tree_pre.png&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Attributes:</th><td class="field-body"><dl class="first last docutils">
+<dt><a class="reference internal" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.best_score_" title="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.best_score_"><code class="xref py py-obj docutils literal notranslate"><span class="pre">best_score_</span></code></a></dt>
+<dd><p class="first last">Best score post pre-pruning</p>
+</dd>
+<dt><a class="reference internal" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.estimator_" title="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.estimator_"><code class="xref py py-obj docutils literal notranslate"><span class="pre">estimator_</span></code></a></dt>
+<dd><p class="first last">Learned approximate surrogate estimator</p>
+</dd>
+<dt><a class="reference internal" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.estimator_type_" title="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.estimator_type_"><code class="xref py py-obj docutils literal notranslate"><span class="pre">estimator_type_</span></code></a></dt>
+<dd><p class="first last">Estimator type</p>
+</dd>
+<dt><a class="reference internal" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.scorer_name_" title="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.scorer_name_"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scorer_name_</span></code></a></dt>
+<dd><p class="first last">Cost function used for optimization</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.decisions_as_txt" title="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.decisions_as_txt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decisions_as_txt</span></code></a>([scope,&nbsp;X])</td>
+<td>Retrieve the decision policies as text</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.fit" title="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(X,&nbsp;Y[,&nbsp;use_oracle,&nbsp;prune,&nbsp;cv,&nbsp;…])</td>
+<td>Learn an approximate representation by constructing a Decision Tree based on the results retrieved by querying the Oracle(base model).</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.plot_global_decisions" title="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.plot_global_decisions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_global_decisions</span></code></a>([colors,&nbsp;…])</td>
+<td>Visualizes the decision policies of the surrogate tree.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.predict" title="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code></a>(X[,&nbsp;prob_score])</td>
+<td>Predict for input X</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.best_score_">
+<code class="descname">best_score_</code><a class="headerlink" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.best_score_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Best score post pre-pruning</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.decisions_as_txt">
+<code class="descname">decisions_as_txt</code><span class="sig-paren">(</span><em>scope='global'</em>, <em>X=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.decisions_as_txt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the decision policies as text</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.estimator_">
+<code class="descname">estimator_</code><a class="headerlink" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.estimator_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Learned approximate surrogate estimator</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.estimator_type_">
+<code class="descname">estimator_type_</code><a class="headerlink" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.estimator_type_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimator type</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>Y</em>, <em>use_oracle=True</em>, <em>prune='post'</em>, <em>cv=5</em>, <em>n_iter_search=10</em>, <em>scorer_type='default'</em>, <em>n_jobs=1</em>, <em>param_grid=None</em>, <em>impurity_threshold=0.01</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Learn an approximate representation by constructing a Decision Tree based on the results retrieved by
+querying the Oracle(base model). Instances used for training should belong to the base learners instance space.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.ndarray, pandas.DataFrame</span></dt>
+<dd><p class="first last">Training input samples</p>
+</dd>
+<dt><strong>Y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.ndarray, target values(ground truth)</span></dt>
+<dd></dd>
+<dt><strong>use_oracle</strong> <span class="classifier-delimiter">:</span> <span class="classifier">bool (defaul=True)</span></dt>
+<dd><ul class="first last simple">
+<li>True, builds a surrogate model against the predictions of the base model(Oracle)</li>
+<li>False, learns an interpretable tree based model using the supplied training examples and ground truth</li>
+</ul>
+</dd>
+<dt><strong>prune</strong> <span class="classifier-delimiter">:</span> <span class="classifier">None, str (default=”post”)</span></dt>
+<dd><p class="first">Pruning is a useful technique to controle the complexity of the tree (keeping the trees comprehensive
+and interpretable) without compromising on model’s accuracy. Avoiding to build large and deep trees
+also helps in preventing over-fitting.
+- “pre” : Also known as forward/online pruning. This pruning process uses a termination
+condition(high and low thresholds) to prematurely terminate some of the branches and nodes.
+Cross Validation is applied to measure the goodness of the fit while the tree is pruned.
+- “post” : Also known as backward pruning. The pruning process is applied post the construction of the</p>
+<blockquote class="last">
+<div><p>Tree using the specified model parameters. This involves reducing the branches and nodes using
+a cost function. The current implementation support cost optimization using
+Model’s scoring metrics(e.g. r2, log-loss, f1, …)</p>
+</div></blockquote>
+</dd>
+<dt><strong>cv</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, (default=5)</span></dt>
+<dd><p class="first last">Randomized cross validation used only for ‘pre-pruning’ right now.</p>
+</dd>
+<dt><strong>n_iter_search</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=10)</span></dt>
+<dd><p class="first last">Number of parameter setting combinations that are sampled for pre-pruning.</p>
+</dd>
+<dt><strong>scorer_type</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str (default=”default”)</span></dt>
+<dd></dd>
+<dt><strong>n_jobs</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=1)</span></dt>
+<dd><p class="first last">Number of jobs to run in parallel.</p>
+</dd>
+<dt><strong>param_grid</strong> <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd><p class="first last">Dictionary of parameters to specify the termination condition for pre-pruning.</p>
+</dd>
+<dt><strong>impurity_threshold</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float (default=0.01)</span></dt>
+<dd><p class="first last">Specifies acceptable performance drop when using Tree based surrogates to replicate the decision policies
+learned by the Oracle</p>
+</dd>
+<dt><strong>verbose</strong> <span class="classifier-delimiter">:</span> <span class="classifier">bool (default=False)</span></dt>
+<dd><p class="first last">Helps control the verbosity.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r1f74c90da31f-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id19">[1]</a></td><td>Nikita Patel and Saurabh Upadhyay(2012)
+Study of Various Decision Tree Pruning Methods with their Empirical Comparison in WEKA
+(<a class="reference external" href="https://pdfs.semanticscholar.org/025b/8c109c38dc115024e97eb0ede5ea873fffdb.pdf">https://pdfs.semanticscholar.org/025b/8c109c38dc115024e97eb0ede5ea873fffdb.pdf</a>)</td></tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.plot_global_decisions">
+<code class="descname">plot_global_decisions</code><span class="sig-paren">(</span><em>colors=None</em>, <em>enable_node_id=True</em>, <em>random_state=0</em>, <em>file_name='interpretable_tree.png'</em>, <em>show_img=False</em>, <em>fig_size=(20</em>, <em>8)</em><span class="sig-paren">)</span><a class="headerlink" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.plot_global_decisions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualizes the decision policies of the surrogate tree.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em>, <em>prob_score=False</em><span class="sig-paren">)</span><a class="headerlink" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict for input X</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.scorer_name_">
+<code class="descname">scorer_name_</code><a class="headerlink" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.scorer_name_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cost function used for optimization</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="bayesian-rule-lists-brl">
 <h3>Bayesian Rule Lists(BRL)<a class="headerlink" href="#bayesian-rule-lists-brl" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
@@ -1086,20 +1414,20 @@ Benjamin Letham, Hongyu Yang, Margo Seltzer and others. For more information che
 <table class="docutils citation" frame="void" id="r4433b1951d96-1" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id13">[1]</a></td><td>Letham et.al(2015) Interpretable classifiers using rules and Bayesian analysis:
+<tr><td class="label"><a class="fn-backref" href="#id20">[1]</a></td><td>Letham et.al(2015) Interpretable classifiers using rules and Bayesian analysis:
 Building a better stroke prediction model (<a class="reference external" href="https://arxiv.org/abs/1511.01644">https://arxiv.org/abs/1511.01644</a>)</td></tr>
 </tbody>
 </table>
 <table class="docutils citation" frame="void" id="r4433b1951d96-2" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id14">[2]</a></td><td>Yang et.al(2016) Scalable Bayesian Rule Lists (<a class="reference external" href="https://arxiv.org/abs/1602.08610">https://arxiv.org/abs/1602.08610</a>)</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id21">[2]</a></td><td>Yang et.al(2016) Scalable Bayesian Rule Lists (<a class="reference external" href="https://arxiv.org/abs/1602.08610">https://arxiv.org/abs/1602.08610</a>)</td></tr>
 </tbody>
 </table>
 <table class="docutils citation" frame="void" id="r4433b1951d96-3" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id15">[3]</a></td><td><a class="reference external" href="https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py">https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id22">[3]</a></td><td><a class="reference external" href="https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py">https://github.com/Hongyuy/sbrl-python-wrapper/blob/master/sbrl/C_sbrl.py</a></td></tr>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
@@ -1446,32 +1774,29 @@ is supported.</p>
 <table class="docutils citation" frame="void" id="r7d42cc42bd51-1" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id16">[1]</a></td><td>Dr. Tamas Madl, <a class="reference external" href="https://github.com/tmadl/sklearn-expertsys/blob/master/BigDataRuleListClassifier.py">https://github.com/tmadl/sklearn-expertsys/blob/master/BigDataRuleListClassifier.py</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id23">[1]</a></td><td>Dr. Tamas Madl, <a class="reference external" href="https://github.com/tmadl/sklearn-expertsys/blob/master/BigDataRuleListClassifier.py">https://github.com/tmadl/sklearn-expertsys/blob/master/BigDataRuleListClassifier.py</a></td></tr>
 </tbody>
 </table>
 <table class="docutils citation" frame="void" id="r7d42cc42bd51-2" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id17">[2]</a></td><td><a class="reference external" href="https://pdfs.semanticscholar.org/e44c/9dcf90d5a9a7e74a1d74c9900ff69142c67f.pdf">https://pdfs.semanticscholar.org/e44c/9dcf90d5a9a7e74a1d74c9900ff69142c67f.pdf</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id24">[2]</a></td><td><a class="reference external" href="https://pdfs.semanticscholar.org/e44c/9dcf90d5a9a7e74a1d74c9900ff69142c67f.pdf">https://pdfs.semanticscholar.org/e44c/9dcf90d5a9a7e74a1d74c9900ff69142c67f.pdf</a></td></tr>
 </tbody>
 </table>
 <table class="docutils citation" frame="void" id="r7d42cc42bd51-3" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id18">[3]</a></td><td>Surrogate model: <a class="reference external" href="https://en.wikipedia.org/wiki/Surrogate_model">https://en.wikipedia.org/wiki/Surrogate_model</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id25">[3]</a></td><td>Surrogate model: <a class="reference external" href="https://en.wikipedia.org/wiki/Surrogate_model">https://en.wikipedia.org/wiki/Surrogate_model</a></td></tr>
 </tbody>
 </table>
 <table class="docutils citation" frame="void" id="r7d42cc42bd51-4" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id19">[4]</a></td><td><ol class="first last upperalpha simple" start="23">
-<li>Andrew Pruett , Robert L. Hester(2016),</li>
-</ol>
-</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id26">[4]</a></td><td>W. Andrew Pruett , Robert L. Hester(2016),
+The Creation of Surrogate Models for Fast Estimation of Complex Model Outcomes
+(<a class="reference external" href="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0156574">http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0156574</a>)</td></tr>
 </tbody>
 </table>
-<p>The Creation of Surrogate Models for Fast Estimation of Complex Model Outcomes
-(<a class="reference external" href="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0156574">http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0156574</a>)</p>
 <p class="rubric">Examples</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.core.global_interpretation.interpretable_models.brlc</span> <span class="k">import</span> <span class="n">BRLC</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.core.global_interpretation.interpretable_models.bigdatabrlc</span> <span class="k">import</span> <span class="n">BigDataBRLC</span>

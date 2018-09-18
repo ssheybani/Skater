@@ -100,13 +100,14 @@ class BigDataBRLC(BRLC):
         is supported.
 
     References
-    -----------
+    ----------
+
     .. [1] Dr. Tamas Madl, https://github.com/tmadl/sklearn-expertsys/blob/master/BigDataRuleListClassifier.py
     .. [2] https://pdfs.semanticscholar.org/e44c/9dcf90d5a9a7e74a1d74c9900ff69142c67f.pdf
     .. [3] Surrogate model: https://en.wikipedia.org/wiki/Surrogate_model
     .. [4] W. Andrew Pruett , Robert L. Hester(2016),
-    The Creation of Surrogate Models for Fast Estimation of Complex Model Outcomes
-    (http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0156574)
+       The Creation of Surrogate Models for Fast Estimation of Complex Model Outcomes
+       (http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0156574)
 
     Examples
     --------

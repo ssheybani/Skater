@@ -14,7 +14,8 @@ __all__ = ['DataManager']
 
 
 class DataManager(object):
-    """Module for passing around data to interpretation objects"""
+    """Module for passing around data to interpretation objects
+    """
 
     # Todo: we can probably remove some of the keys from data_info, and have properties
     # executed as pure functions for easy to access metadata, such as n_rows, etc

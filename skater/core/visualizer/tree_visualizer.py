@@ -5,6 +5,8 @@ import numpy as np
 
 from skater.util import exceptions
 try:
+    import matplotlib
+    matplotlib.use('agg')
     import matplotlib.pyplot as plt
     from matplotlib.colors import rgb2hex
 except ImportError:
