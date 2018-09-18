@@ -1084,65 +1084,60 @@ Currently, only InMemory is supported.</p>
 <dd><p class="first last">Strategy used to split at each the node. Supported strategies(“best” or “random”).</p>
 </dd>
 <dt><strong>max_depth</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int (default=None)</span></dt>
-<dd><p class="first last">Defines the maximum depth of a tree. If ‘None’ then nodes are expanded till all leaves are pure or contain less
-than min_samples_split samples.
+<dd><p class="first last">Defines the maximum depth of a tree. If ‘None’ then nodes are expanded till all leaves are         pure or contain less than min_samples_split samples.
 Deeper trees are prone to be more expensive and tend to over-fit.
 Pruning is a technique which could be applied to avoid over-fitting.</p>
 </dd>
 <dt><strong>min_samples_split</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int/float (default=2)</span></dt>
-<dd><p class="first">Defines the minimum number of samples required to split an internal node.
-- ‘int’ : specifies the minimum number of samples
-- ‘float’ : then represents a percentage. Minimum number of samples is computed as</p>
-<blockquote class="last">
-<div><p><cite>ceil(min_samples_split*n_samples)</cite></p>
-</div></blockquote>
+<dd><p class="first">Defines the minimum number of samples required to split an internal node:</p>
+<ul class="last simple">
+<li>int, specifies the minimum number of samples</li>
+<li>float, then represents a percentage. Minimum number of samples is computed as           <cite>ceil(min_samples_split*n_samples)</cite></li>
+</ul>
 </dd>
 <dt><strong>min_samples_leaf</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int/float (default=1)</span></dt>
-<dd><p class="first">Defines requirement for a leaf node. The minimum number of samples needed to be a leaf node.
-- int : specifies the minimum number of samples
-- float : then represents a percentage. Minimum number of samples is computed as</p>
-<blockquote class="last">
-<div><p><a href="#id13"><span class="problematic" id="id14">`</span></a>ceil(min_samples_split*n_samples)</p>
-</div></blockquote>
+<dd><p class="first">Defines requirement for a leaf node. The minimum number of samples needed to be a leaf node:</p>
+<ul class="last simple">
+<li>int, specifies the minimum number of samples</li>
+<li>float, then represents a percentage. Minimum number of samples is computed as           <a href="#id13"><span class="problematic" id="id14">`</span></a>ceil(min_samples_split*n_samples)</li>
+</ul>
 </dd>
 <dt><strong>min_weight_fraction_leaf</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float (default=0.0)</span></dt>
-<dd><p class="first last">Defines requirement for a leaf node. The minimum weight percentage of the sum total of the weights of
-all input samples.</p>
+<dd><p class="first last">Defines requirement for a leaf node. The minimum weight percentage of the sum total of the weights of         all input samples.</p>
 </dd>
 <dt><strong>max_features</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, float, string or None (default=None)</span></dt>
-<dd><p class="first last">Defines number of features to consider for the best possible split
-- None : all specified features are used (oracle.feature_names)
-- int : uses specified values as <cite>max_features</cite> at each split.
-- float : as a percentage. Value for split is computed as <cite>int(max_features * n_features)</cite>.
-- “auto” : <cite>max_features=sqrt(n_features)</cite>.
-- “sqrt” : <cite>max_features=sqrt(n_features)</cite>.
-- “log2” : <cite>max_features=log2(n_features)</cite>.</p>
+<dd><p class="first">Defines number of features to consider for the best possible split:</p>
+<ul class="last simple">
+<li>None, all specified features are used (oracle.feature_names)</li>
+<li>int, uses specified values as <cite>max_features</cite> at each split.</li>
+<li>float, as a percentage. Value for split is computed as <cite>int(max_features * n_features)</cite>.</li>
+<li>“auto”, <cite>max_features=sqrt(n_features)</cite>.</li>
+<li>“sqrt”, <cite>max_features=sqrt(n_features)</cite>.</li>
+<li>“log2”, <cite>max_features=log2(n_features)</cite>.</li>
+</ul>
 </dd>
 <dt><strong>seed</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, (default=None)</span></dt>
 <dd><p class="first last">seed for random number generator</p>
 </dd>
 <dt><strong>max_leaf_nodes</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int or None (default=None)</span></dt>
-<dd><p class="first last">TreeSurrogates are constructed top-down in best first manner(best decrease in relative impurity)
-If None, results in maximum possible number of leaf nodes. This tends to overfitting</p>
+<dd><p class="first last">TreeSurrogates are constructed top-down in best first manner(best decrease in relative impurity).
+If None, results in maximum possible number of leaf nodes. This tends to over-fitting.</p>
 </dd>
 <dt><strong>min_impurity_decrease</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float (default=0.0)</span></dt>
-<dd><p class="first last">Tree node is considered for splitting if relative decrease in impurity is &gt;= <cite>min_impurity_decrease</cite></p>
+<dd><p class="first last">Tree node is considered for splitting if relative decrease in impurity is &gt;= <cite>min_impurity_decrease</cite>.</p>
 </dd>
 <dt><strong>class_weight</strong> <span class="classifier-delimiter">:</span> <span class="classifier">dict, list of dicts, str (“balanced” or None) (default=”balanced”)</span></dt>
-<dd><p class="first">Weights associated with classes for handling data imbalance
-- None : all classes have equal weights
-- “balanced” : adjusts the class weights automatically. Weights are assigned inversely propotional</p>
-<blockquote class="last">
-<div><p>to class frequencies <code class="docutils literal notranslate"><span class="pre">n_samples</span> <span class="pre">/</span> <span class="pre">(n_classes</span> <span class="pre">*</span> <span class="pre">np.bincount(y))</span></code></p>
-</div></blockquote>
+<dd><p class="first">Weights associated with classes for handling data imbalance:</p>
+<ul class="last simple">
+<li>None, all classes have equal weights</li>
+<li>“balanced”, adjusts the class weights automatically. Weights are assigned inversely proportional           to class frequencies <code class="docutils literal notranslate"><span class="pre">n_samples</span> <span class="pre">/</span> <span class="pre">(n_classes</span> <span class="pre">*</span> <span class="pre">np.bincount(y))</span></code></li>
+</ul>
 </dd>
 <dt><strong>presort</strong> <span class="classifier-delimiter">:</span> <span class="classifier">bool (default=False)</span></dt>
-<dd><p class="first last">Sorts the data before building surrogates trees to find the best splits. When dealing with larger datasets,
-setting it to True might result in increasing computation time because of the pre sorting operation.</p>
+<dd><p class="first last">Sorts the data before building surrogates trees to find the best splits. When dealing with larger datasets,         setting it to True might result in increasing computation time because of the pre sorting operation.</p>
 </dd>
 <dt><strong>impurity_threshold</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float (default=0.01)</span></dt>
-<dd><p class="first last">Specifies the acceptable disparity between the Oracle and TreeSurrogates. The higher the difference between
-the Oracle and TreeSurrogate less faithful are the explanations generated.</p>
+<dd><p class="first last">Specifies the acceptable disparity between the Oracle and TreeSurrogates. The higher the difference between         the Oracle and TreeSurrogate less faithful are the explanations generated.</p>
 </dd>
 </dl>
 </td>
@@ -1196,16 +1191,22 @@ the Oracle and TreeSurrogate less faithful are the explanations generated.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Attributes:</th><td class="field-body"><dl class="first last docutils">
-<dt><a class="reference internal" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.best_score_" title="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.best_score_"><code class="xref py py-obj docutils literal notranslate"><span class="pre">best_score_</span></code></a></dt>
-<dd><p class="first last">Best score post pre-pruning</p>
+<dt><strong>oracle</strong> <span class="classifier-delimiter">:</span> <span class="classifier">skater.model.local_model.InMemoryModel</span></dt>
+<dd><p class="first last">The fitted base model with the prediction function</p>
 </dd>
-<dt><a class="reference internal" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.estimator_" title="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.estimator_"><code class="xref py py-obj docutils literal notranslate"><span class="pre">estimator_</span></code></a></dt>
+<dt><strong>feature_names: list of str</strong></dt>
+<dd><p class="first last">Names of the features considered.</p>
+</dd>
+<dt><a class="reference internal" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.estimator_" title="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.estimator_"><code class="xref py py-obj docutils literal notranslate"><span class="pre">estimator_</span></code></a> <span class="classifier-delimiter">:</span> <span class="classifier">DecisionTreeClassifier/DecisionTreeRegressor</span></dt>
 <dd><p class="first last">Learned approximate surrogate estimator</p>
 </dd>
-<dt><a class="reference internal" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.estimator_type_" title="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.estimator_type_"><code class="xref py py-obj docutils literal notranslate"><span class="pre">estimator_type_</span></code></a></dt>
+<dt><a class="reference internal" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.estimator_type_" title="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.estimator_type_"><code class="xref py py-obj docutils literal notranslate"><span class="pre">estimator_type_</span></code></a> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
 <dd><p class="first last">Estimator type</p>
 </dd>
-<dt><a class="reference internal" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.scorer_name_" title="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.scorer_name_"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scorer_name_</span></code></a></dt>
+<dt><a class="reference internal" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.best_score_" title="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.best_score_"><code class="xref py py-obj docutils literal notranslate"><span class="pre">best_score_</span></code></a> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.float64</span></dt>
+<dd><p class="first last">Best score post pre-pruning</p>
+</dd>
+<dt><a class="reference internal" href="#skater.core.global_interpretation.tree_surrogate.TreeSurrogate.scorer_name_" title="skater.core.global_interpretation.tree_surrogate.TreeSurrogate.scorer_name_"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scorer_name_</span></code></a> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
 <dd><p class="first last">Cost function used for optimization</p>
 </dd>
 </dl>
@@ -1274,23 +1275,26 @@ querying the Oracle(base model). Instances used for training should belong to th
 <dt><strong>Y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.ndarray, target values(ground truth)</span></dt>
 <dd></dd>
 <dt><strong>use_oracle</strong> <span class="classifier-delimiter">:</span> <span class="classifier">bool (defaul=True)</span></dt>
-<dd><ul class="first last simple">
-<li>True, builds a surrogate model against the predictions of the base model(Oracle)</li>
-<li>False, learns an interpretable tree based model using the supplied training examples and ground truth</li>
+<dd><p class="first">Use of Oracle, helps the Surrogate model train on the decision boundaries learned by the base model.             The closer the surrogate model is to the Oracle, more faithful are the explanations.</p>
+<blockquote class="last">
+<div><ul class="simple">
+<li>True, builds a surrogate model against the predictions of the base model(Oracle).</li>
+<li>False, learns an interpretable tree based model using the supplied training examples and ground truth.</li>
 </ul>
+</div></blockquote>
 </dd>
 <dt><strong>prune</strong> <span class="classifier-delimiter">:</span> <span class="classifier">None, str (default=”post”)</span></dt>
-<dd><p class="first">Pruning is a useful technique to controle the complexity of the tree (keeping the trees comprehensive
-and interpretable) without compromising on model’s accuracy. Avoiding to build large and deep trees
-also helps in preventing over-fitting.
-- “pre” : Also known as forward/online pruning. This pruning process uses a termination
-condition(high and low thresholds) to prematurely terminate some of the branches and nodes.
-Cross Validation is applied to measure the goodness of the fit while the tree is pruned.
-- “post” : Also known as backward pruning. The pruning process is applied post the construction of the</p>
+<dd><p class="first">Pruning is a useful technique to control the complexity of the tree (keeping the trees comprehensive             and interpretable) without compromising on model’s accuracy. Avoiding to build large and deep trees             also helps in preventing over-fitting.</p>
 <blockquote class="last">
-<div><p>Tree using the specified model parameters. This involves reducing the branches and nodes using
-a cost function. The current implementation support cost optimization using
-Model’s scoring metrics(e.g. r2, log-loss, f1, …)</p>
+<div><ul class="simple">
+<li>“pre”</li>
+</ul>
+<p>Also known as forward/online pruning. This pruning process uses a termination               condition(high and low thresholds) to prematurely terminate some of the branches and nodes.
+Cross Validation is applied to measure the goodness of the fit while the tree is pruned.</p>
+<ul class="simple">
+<li>“pos”</li>
+</ul>
+<p>Also known as backward pruning. The pruning process is applied post the construction of the               tree using the specified model parameters. This involves reducing the branches and nodes using               a cost function. The current implementation support cost optimization using               Model’s scoring metrics(e.g. r2, log-loss, f1, …).</p>
 </div></blockquote>
 </dd>
 <dt><strong>cv</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, (default=5)</span></dt>

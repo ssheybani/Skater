@@ -150,6 +150,12 @@ DNNs: Occlusion
 
 Global And Local Interpretations
 --------------------------------
+
+Tree Surrogates (using Decision Trees)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: skater.core.global_interpretation.tree_surrogate.TreeSurrogate
+      :members:
+
 Bayesian Rule Lists(BRL)
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

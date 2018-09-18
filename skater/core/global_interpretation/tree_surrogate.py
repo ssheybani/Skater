@@ -34,49 +34,72 @@ class TreeSurrogate(object):
     splitter : str (default="best")
         Strategy used to split at each the node. Supported strategies("best" or "random").
     max_depth : int (default=None)
-        Defines the maximum depth of a tree. If 'None' then nodes are expanded till all leaves are pure or contain less
-        than min_samples_split samples.
+        Defines the maximum depth of a tree. If 'None' then nodes are expanded till all leaves are \
+        pure or contain less than min_samples_split samples.
         Deeper trees are prone to be more expensive and tend to over-fit.
         Pruning is a technique which could be applied to avoid over-fitting.
     min_samples_split : int/float (default=2)
-        Defines the minimum number of samples required to split an internal node.
-        - 'int' : specifies the minimum number of samples
-        - 'float' : then represents a percentage. Minimum number of samples is computed as
+        Defines the minimum number of samples required to split an internal node:
+
+        - int, specifies the minimum number of samples
+        - float, then represents a percentage. Minimum number of samples is computed as \
           `ceil(min_samples_split*n_samples)`
+
     min_samples_leaf : int/float (default=1)
-        Defines requirement for a leaf node. The minimum number of samples needed to be a leaf node.
-        - int : specifies the minimum number of samples
-        - float : then represents a percentage. Minimum number of samples is computed as
+        Defines requirement for a leaf node. The minimum number of samples needed to be a leaf node:
+
+        - int, specifies the minimum number of samples
+        - float, then represents a percentage. Minimum number of samples is computed as \
           `ceil(min_samples_split*n_samples)
+
     min_weight_fraction_leaf : float (default=0.0)
-        Defines requirement for a leaf node. The minimum weight percentage of the sum total of the weights of
+        Defines requirement for a leaf node. The minimum weight percentage of the sum total of the weights of \
         all input samples.
     max_features : int, float, string or None (default=None)
-        Defines number of features to consider for the best possible split
-        - None : all specified features are used (oracle.feature_names)
-        - int : uses specified values as `max_features` at each split.
-        - float : as a percentage. Value for split is computed as `int(max_features * n_features)`.
-        - "auto" : `max_features=sqrt(n_features)`.
-        - "sqrt" : `max_features=sqrt(n_features)`.
-        - "log2" : `max_features=log2(n_features)`.
+        Defines number of features to consider for the best possible split:
+
+        - None, all specified features are used (oracle.feature_names)
+        - int, uses specified values as `max_features` at each split.
+        - float, as a percentage. Value for split is computed as `int(max_features * n_features)`.
+        - "auto", `max_features=sqrt(n_features)`.
+        - "sqrt", `max_features=sqrt(n_features)`.
+        - "log2", `max_features=log2(n_features)`.
+
     seed : int, (default=None)
         seed for random number generator
     max_leaf_nodes : int or None (default=None)
-        TreeSurrogates are constructed top-down in best first manner(best decrease in relative impurity)
-        If None, results in maximum possible number of leaf nodes. This tends to overfitting
+        TreeSurrogates are constructed top-down in best first manner(best decrease in relative impurity).
+        If None, results in maximum possible number of leaf nodes. This tends to over-fitting.
     min_impurity_decrease : float (default=0.0)
-        Tree node is considered for splitting if relative decrease in impurity is >= `min_impurity_decrease`
+        Tree node is considered for splitting if relative decrease in impurity is >= `min_impurity_decrease`.
     class_weight : dict, list of dicts, str ("balanced" or None) (default="balanced")
-        Weights associated with classes for handling data imbalance
-        - None : all classes have equal weights
-        - "balanced" : adjusts the class weights automatically. Weights are assigned inversely propotional
+        Weights associated with classes for handling data imbalance:
+
+        - None, all classes have equal weights
+        - "balanced", adjusts the class weights automatically. Weights are assigned inversely proportional \
           to class frequencies ``n_samples / (n_classes * np.bincount(y))``
+
     presort : bool (default=False)
-        Sorts the data before building surrogates trees to find the best splits. When dealing with larger datasets,
+        Sorts the data before building surrogates trees to find the best splits. When dealing with larger datasets, \
         setting it to True might result in increasing computation time because of the pre sorting operation.
     impurity_threshold : float (default=0.01)
-        Specifies the acceptable disparity between the Oracle and TreeSurrogates. The higher the difference between
+        Specifies the acceptable disparity between the Oracle and TreeSurrogates. The higher the difference between \
         the Oracle and TreeSurrogate less faithful are the explanations generated.
+
+    Attributes
+    ----------
+    oracle : skater.model.local_model.InMemoryModel
+        The fitted base model with the prediction function
+    feature_names: list of str
+        Names of the features considered.
+    estimator_ : DecisionTreeClassifier/DecisionTreeRegressor
+        The Surrogate estimator.
+    estimator_type_ : str
+        Surrogate estimator type ("classifier" or "regressor").
+    best_score_ : numpy.float64
+        Surrogate estimator's best score post pre-pruning.
+    scorer_name_ : str
+        Scorer used for optimizing the surrogate estimator
 
     Examples
     --------
@@ -235,19 +258,28 @@ class TreeSurrogate(object):
             Training input samples
         Y : numpy.ndarray, target values(ground truth)
         use_oracle : bool (defaul=True)
-            - True, builds a surrogate model against the predictions of the base model(Oracle)
-            - False, learns an interpretable tree based model using the supplied training examples and ground truth
+            Use of Oracle, helps the Surrogate model train on the decision boundaries learned by the base model. \
+            The closer the surrogate model is to the Oracle, more faithful are the explanations.
+
+              - True, builds a surrogate model against the predictions of the base model(Oracle).
+              - False, learns an interpretable tree based model using the supplied training examples and ground truth.
+
         prune : None, str (default="post")
-            Pruning is a useful technique to controle the complexity of the tree (keeping the trees comprehensive
-            and interpretable) without compromising on model's accuracy. Avoiding to build large and deep trees
+            Pruning is a useful technique to control the complexity of the tree (keeping the trees comprehensive \
+            and interpretable) without compromising on model's accuracy. Avoiding to build large and deep trees \
             also helps in preventing over-fitting.
-            - "pre" : Also known as forward/online pruning. This pruning process uses a termination
-            condition(high and low thresholds) to prematurely terminate some of the branches and nodes.
-            Cross Validation is applied to measure the goodness of the fit while the tree is pruned.
-            - "post" : Also known as backward pruning. The pruning process is applied post the construction of the
-                       Tree using the specified model parameters. This involves reducing the branches and nodes using
-                       a cost function. The current implementation support cost optimization using
-                       Model's scoring metrics(e.g. r2, log-loss, f1, ...)
+
+              - "pre"
+              Also known as forward/online pruning. This pruning process uses a termination \
+              condition(high and low thresholds) to prematurely terminate some of the branches and nodes.
+              Cross Validation is applied to measure the goodness of the fit while the tree is pruned.
+
+              - "pos"
+              Also known as backward pruning. The pruning process is applied post the construction of the \
+              tree using the specified model parameters. This involves reducing the branches and nodes using \
+              a cost function. The current implementation support cost optimization using \
+              Model's scoring metrics(e.g. r2, log-loss, f1, ...).
+
         cv : int, (default=5)
             Randomized cross validation used only for 'pre-pruning' right now.
         n_iter_search : int (default=10)
