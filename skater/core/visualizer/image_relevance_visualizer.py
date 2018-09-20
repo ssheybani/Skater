@@ -2,13 +2,19 @@
 
 from skimage.filters import roberts, sobel
 import numpy as np
-from skater.util.exceptions import MatplotlibUnavailableError
+from skater.util.exceptions import MatplotlibUnavailableError, KerasUnavailableError
+from skater.util.image_ops import normalize
+
 try:
     import matplotlib.pyplot as plt
 except ImportError:
-    raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
+    raise MatplotlibUnavailableError("Matplotlib is required but unavailable on your system.")
 
-from skater.util.image_ops import normalize
+try:
+    from keras.models import Model
+except ImportError:
+    raise KerasUnavailableError("Keras binaries are not installed")
+
 
 # helper function to enable or disable matplotlib access
 _enable_axis = lambda ax, flag: ax.axis("off") if flag is True else ax.axis("on")
@@ -51,3 +57,26 @@ def _edge_detection(original_input_img=None, edge_detector_alg='sobel'):
     # Reference: http://scikit-image.org/docs/0.11.x/auto_examples/plot_edge_filter.html
     edge_detector = {'robert': roberts, 'sobel': sobel}
     return edge_detector[edge_detector_alg](xi_greyscale)
+
+
+def visualize_feature_maps(model_inst, X, layer_name=None, framework_type='keras',
+                           plt_height=20, plt_width=20, **plot_kwargs):
+    # reference: https://matplotlib.org/2.0.0/examples/color/named_colors.html
+    model_class = Model(inputs=model_inst.input, outputs=model_inst.get_layer(layer_name).output) \
+        if framework_type == 'keras' else None
+    feature_maps = model_class.predict(X)[0]
+
+    if len(feature_maps.shape) != 3:
+        raise Exception("In-correct shape of the feature map used. "
+                        "Feature map should be of the form (height, weight, depth) "
+                        "in that order to get accurate results")
+    _, _, depth = feature_maps.shape
+    n_plts_per_row = np.rint(np.sqrt(depth))
+    n_rows, n_cols = n_plts_per_row, n_plts_per_row
+    fig = plt.figure(figsize=(plt_height, plt_width))
+    fig.set_facecolor('peachpuff')
+    for index in range(depth):
+        ax = plt.subplot(n_rows, n_cols, index + 1, **plot_kwargs)
+        ax.imshow(feature_maps[:, :, index], cmap='bwr')
+        ax.set_title('filter {}'.format(index + 1))
+    return plt, fig
