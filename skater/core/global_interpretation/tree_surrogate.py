@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.metrics import make_scorer
@@ -27,60 +29,92 @@ class TreeSurrogate(object):
     Parameters
     ----------
     oracle : InMemory instance type
-        model instance having access to the base estimator(InMemory/DeployedModel). Currently, only InMemory is
-        is supported.
-    splitter : str, (default='best')
-        Strategy used to split at each the node. Supported strategies('best' or 'random')
-    max_depth : int, (default=None)
-        Defines the maximum depth of a tree. If 'None' then nodes are expanded till all leaves are pure or contain less
-        than min_samples_split samples. Deeper trees are prone to be more expensive and tend to overfit. Pruning is a
-        technique which could be applied to avoid overfitting.
-    min_samples_split : int/float, (default=2)
-        Defines the minimum number of samples required to split an internal node.
-        - 'int' : specifies the minimum number of samples
-        - 'float' : then represents a percentage. Minimum number of samples is computed as
+        model instance having access to the base estimator(InMemory/DeployedModel).
+        Currently, only InMemory is supported.
+    splitter : str (default="best")
+        Strategy used to split at each the node. Supported strategies("best" or "random").
+    max_depth : int (default=None)
+        Defines the maximum depth of a tree. If 'None' then nodes are expanded till all leaves are \
+        pure or contain less than min_samples_split samples.
+        Deeper trees are prone to be more expensive and tend to over-fit.
+        Pruning is a technique which could be applied to avoid over-fitting.
+    min_samples_split : int/float (default=2)
+        Defines the minimum number of samples required to split an internal node:
+
+        - int, specifies the minimum number of samples
+        - float, then represents a percentage. Minimum number of samples is computed as \
+          `ceil(min_samples_split*n_samples)`
+
+    min_samples_leaf : int/float (default=1)
+        Defines requirement for a leaf node. The minimum number of samples needed to be a leaf node:
+
+        - int, specifies the minimum number of samples
+        - float, then represents a percentage. Minimum number of samples is computed as \
           `ceil(min_samples_split*n_samples)
-    min_samples_leaf : int/float, (default=1)
-        Defines requirement for a leaf node. The minimum number of samples needed to be a leaf node.
-        - int : specifies the minimum number of samples
-        - float : then represents a percentage. Minimum number of samples is computed as
-          `ceil(min_samples_split*n_samples)
-    min_weight_fraction_leaf : float, (default=0.0)
-        Defines requirement for a leaf node. The minimum weight percentage of the sum total of the weights of
+
+    min_weight_fraction_leaf : float (default=0.0)
+        Defines requirement for a leaf node. The minimum weight percentage of the sum total of the weights of \
         all input samples.
-    max_features : int, float, string or None, (default=None)
-        Defines number of features to consider for the best possible split
-        - None : all specified features are used (oracle.feature_names)
-        - int : uses specified values as `max_features` at each split.
-        - float : as a percentage. Value for split is computed as `int(max_features * n_features)`.
-        - "auto" : `max_features=sqrt(n_features)`.
-        - "sqrt" : `max_features=sqrt(n_features)`.
-        - "log2" : `max_features=log2(n_features)`.
+    max_features : int, float, string or None (default=None)
+        Defines number of features to consider for the best possible split:
+
+        - None, all specified features are used (oracle.feature_names)
+        - int, uses specified values as `max_features` at each split.
+        - float, as a percentage. Value for split is computed as `int(max_features * n_features)`.
+        - "auto", `max_features=sqrt(n_features)`.
+        - "sqrt", `max_features=sqrt(n_features)`.
+        - "log2", `max_features=log2(n_features)`.
+
     seed : int, (default=None)
         seed for random number generator
-    max_leaf_nodes : int or None, (default=None)
-        TreeSurrogates are constructed top-down in best first manner(best decrease in relative impurity)
-        If None, results in maximum possible number of leaf nodes. This tends to overfitting
-    min_impurity_decrease : float, (default=0.0)
-        Tree node is considered for splitting if relative decrease in impurity is >= `min_impurity_decrease`
-    class_weight : dict, list of dicts, str:"balanced" or None (default="balanced")
-        Weights associated with classes for handling data imbalance.
-        - None : all classes have equal weights
-        - "balanced" : adjusts the class weights automatically. Weights are assigned inversely propotional
+    max_leaf_nodes : int or None (default=None)
+        TreeSurrogates are constructed top-down in best first manner(best decrease in relative impurity).
+        If None, results in maximum possible number of leaf nodes. This tends to over-fitting.
+    min_impurity_decrease : float (default=0.0)
+        Tree node is considered for splitting if relative decrease in impurity is >= `min_impurity_decrease`.
+    class_weight : dict, list of dicts, str ("balanced" or None) (default="balanced")
+        Weights associated with classes for handling data imbalance:
+
+        - None, all classes have equal weights
+        - "balanced", adjusts the class weights automatically. Weights are assigned inversely proportional \
           to class frequencies ``n_samples / (n_classes * np.bincount(y))``
-    presort : bool, (default=False)
-        Sorts the data before building surrogates trees to find the best splits. When dealing with larger datasets,
-        setting it to True might result in increasing computation time because of the pre sorting opertation.
-    impurity_threshold : float, (default=0.01)
-        Specifies the acceptable disparity between the Oracle and TreeSurrogates. The higher the difference between
+
+    presort : bool (default=False)
+        Sorts the data before building surrogates trees to find the best splits. When dealing with larger datasets, \
+        setting it to True might result in increasing computation time because of the pre sorting operation.
+    impurity_threshold : float (default=0.01)
+        Specifies the acceptable disparity between the Oracle and TreeSurrogates. The higher the difference between \
         the Oracle and TreeSurrogate less faithful are the explanations generated.
 
     Attributes
     ----------
-    estimator_
-    estimator_type_
-    best_score_
-    scorer_name_
+    oracle : skater.model.local_model.InMemoryModel
+        The fitted base model with the prediction function
+    feature_names: list of str
+        Names of the features considered.
+    estimator_ : DecisionTreeClassifier/DecisionTreeRegressor
+        The Surrogate estimator.
+    estimator_type_ : str
+        Surrogate estimator type ("classifier" or "regressor").
+    best_score_ : numpy.float64
+        Surrogate estimator's best score post pre-pruning.
+    scorer_name_ : str
+        Scorer used for optimizing the surrogate estimator
+
+    Examples
+    --------
+    >>> from skater.core.explanations import Interpretation
+    >>> from skater.model import InMemoryModel
+    >>> from skater.util.logger import _INFO
+    >>> interpreter = Interpretation(X_train, feature_names=iris.feature_names)
+    >>> model_inst = InMemoryModel(clf.predict, examples=X_train, model_type='classifier', unique_values=[0, 1],
+    >>>                       feature_names=iris.feature_names, target_names=iris.target_names, log_level=_INFO)
+    >>> # Using the interpreter instance invoke call to the TreeSurrogate
+    >>> surrogate_explainer = interpreter.tree_surrogate(oracle=model_inst, seed=5)
+    >>> surrogate_explainer.fit(X_train, y_train, use_oracle=True, prune='post', scorer_type='default')
+    >>> surrogate_explainer.plot_global_decisions(colors=['coral', 'lightsteelblue','darkkhaki'],
+    >>>                                          file_name='simple_tree_pre.png')
+    >>> show_in_notebook('simple_tree_pre.png', width=400, height=300)
 
     References
     ----------
@@ -140,7 +174,8 @@ class TreeSurrogate(object):
 
     @staticmethod
     def __optimizer_condition(o_s, new_s, scoring_type, threshold):
-        # if optimizing on a loss function then the type is decreasing vs optimizing on a model metric which is increasing
+        # if optimizing on a loss function then the type is decreasing
+        # vs optimizing on a model metric which is increasing
         if scoring_type == 'decreasing':
             return round(o_s, 3) + threshold >= round(new_s, 3)
         else:
@@ -213,7 +248,7 @@ class TreeSurrogate(object):
         self.__best_score = random_search_estimator.best_score_
 
 
-    def fit(self, X, Y, use_oracle=True, prune=None, cv=5, n_iter_search=10,
+    def fit(self, X, Y, use_oracle=True, prune='post', cv=5, n_iter_search=10,
             scorer_type='default', n_jobs=1, param_grid=None, impurity_threshold=0.01, verbose=False):
         """ Learn an approximate representation by constructing a Decision Tree based on the results retrieved by
         querying the Oracle(base model). Instances used for training should belong to the base learners instance space.
@@ -223,30 +258,39 @@ class TreeSurrogate(object):
         X : numpy.ndarray, pandas.DataFrame
             Training input samples
         Y : numpy.ndarray, target values(ground truth)
-        use_oracle : bool, (defaul=True)
-            - True, builds a surrogate model against the predictions of the base model(Oracle)
-            - False, learns an interpretable tree based model using the supplied training examples and ground truth
+        use_oracle : bool (defaul=True)
+            Use of Oracle, helps the Surrogate model train on the decision boundaries learned by the base model. \
+            The closer the surrogate model is to the Oracle, more faithful are the explanations.
+
+              - True, builds a surrogate model against the predictions of the base model(Oracle).
+              - False, learns an interpretable tree based model using the supplied training examples and ground truth.
+
         prune : None, str (default="post")
-            Pruning is a useful technique to controle the complexity of the tree (keeping the trees comprehensive
-            and interpretable) without compromising on model's accuracy. Avoiding to build large and deep trees
-            also helps in preventing overfitting.
-            - "pre" : Also known as forward/online pruning. This pruning process uses a termination
-            condition(high and low thresholds) to prematurely terminate some of the branches and nodes.
-            Cross Validation is applied to measure the goodness of the fit while the tree is pruned.
-            - "post" : Also known as backward pruning. The pruning process is applied post the construction of the
-                       Tree using the specified model parameters. This involves reducing the branches and nodes using
-                       a cost function. The current implementation support cost optimizatio using
-                       Model's scoric metrics(e.g. r2, log-loss, f1, ...)
+            Pruning is a useful technique to control the complexity of the tree (keeping the trees comprehensive \
+            and interpretable) without compromising on model's accuracy. Avoiding to build large and deep trees \
+            also helps in preventing over-fitting.
+
+              - "pre"
+              Also known as forward/online pruning. This pruning process uses a termination \
+              condition(high and low thresholds) to prematurely terminate some of the branches and nodes.
+              Cross Validation is applied to measure the goodness of the fit while the tree is pruned.
+
+              - "pos"
+              Also known as backward pruning. The pruning process is applied post the construction of the \
+              tree using the specified model parameters. This involves reducing the branches and nodes using \
+              a cost function. The current implementation support cost optimization using \
+              Model's scoring metrics(e.g. r2, log-loss, f1, ...).
+
         cv : int, (default=5)
             Randomized cross validation used only for 'pre-pruning' right now.
-        n_iter_search : int, (default=10)
+        n_iter_search : int (default=10)
             Number of parameter setting combinations that are sampled for pre-pruning.
-        scorer_type : str, (default="default")
+        scorer_type : str (default="default")
         n_jobs : int (default=1)
             Number of jobs to run in parallel.
         param_grid : dict
             Dictionary of parameters to specify the termination condition for pre-pruning.
-        impurity_threshold : float, (default=0.01)
+        impurity_threshold : float (default=0.01)
             Specifies acceptable performance drop when using Tree based surrogates to replicate the decision policies
             learned by the Oracle
         verbose : bool (default=False)
@@ -359,6 +403,8 @@ class TreeSurrogate(object):
         graph_inst.write_png(f_name)
 
         try:
+            import matplotlib
+            matplotlib.use('agg')
             import matplotlib.pyplot as plt
         except ImportError:
             raise exceptions.MatplotlibUnavailableError("Matplotlib is required but unavailable on the system.")
