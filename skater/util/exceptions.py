@@ -41,6 +41,8 @@ MalformedGridRangeError = exception_factory("MalformedGridRangeError",
 
 MatplotlibUnavailableError = exception_factory('MatplotlibUnavailableError', base_exception=ImportError)
 
+PlotlyUnavailableError = exception_factory('PlotlyUnavailableError', base_exception=ImportError)
+
 TensorflowUnavailableError = exception_factory('TensorflowUnavailableError', base_exception=ImportError)
 
 KerasUnavailableError = exception_factory('KerasUnavailableError', base_exception=ImportError)
