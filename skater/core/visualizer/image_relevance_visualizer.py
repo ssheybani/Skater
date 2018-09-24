@@ -2,13 +2,15 @@
 
 from skimage.filters import roberts, sobel
 import numpy as np
-from skater.util.exceptions import MatplotlibUnavailableError, KerasUnavailableError
+from skater.util.exceptions import MatplotlibUnavailableError, MatplotlibDisplayError, KerasUnavailableError
 from skater.util.image_ops import normalize
 
 try:
     import matplotlib.pyplot as plt
 except ImportError:
     raise MatplotlibUnavailableError("Matplotlib is required but unavailable on your system.")
+except RuntimeError:
+    raise (MatplotlibDisplayError("Matplotlib unable to open display"))
 
 try:
     from keras.models import Model
@@ -59,7 +61,7 @@ def _edge_detection(original_input_img=None, edge_detector_alg='sobel'):
     return edge_detector[edge_detector_alg](xi_greyscale)
 
 
-def visualize_feature_maps(model_inst, X, layer_name=None, framework_type='keras',
+def visualize_feature_maps(model_inst, X, layer_name=None, n_filters=16, framework_type='keras',
                            plt_height=20, plt_width=20, **plot_kwargs):
     # reference: https://matplotlib.org/2.0.0/examples/color/named_colors.html
     model_class = Model(inputs=model_inst.input, outputs=model_inst.get_layer(layer_name).output) \
@@ -70,7 +72,7 @@ def visualize_feature_maps(model_inst, X, layer_name=None, framework_type='keras
         raise Exception("In-correct shape of the feature map used. "
                         "Feature map should be of the form (height, weight, depth) "
                         "in that order to get accurate results")
-    _, _, depth = feature_maps.shape
+    _, _, depth = feature_maps.shape if n_filters is 'all' else (0, 0, n_filters)
     n_plts_per_row = np.rint(np.sqrt(depth))
     n_rows, n_cols = n_plts_per_row, n_plts_per_row
     fig = plt.figure(figsize=(plt_height, plt_width))
