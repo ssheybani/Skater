@@ -40,7 +40,7 @@ def _generate_contours(est, X_, xx, yy, color_map, ax, **params):
 
 
 # Reference: https://plot.ly/scikit-learn/plot-voting-decision-regions/
-def interactive_plot(est, X0, X1, Y, x_label="X1", y_label="X2",
+def interactive_plot(est, X0, X1, Y, x_label="X1", y_label="X2", title="decision_boundary",
                      file_name='decision_iplot', height=10, width=10):
     figure = tools.make_subplots(rows=1, cols=1, print_grid=False)
 
@@ -75,7 +75,8 @@ def interactive_plot(est, X0, X1, Y, x_label="X1", y_label="X2",
                    title=y_label),
         plot_bgcolor='rgba(0, 0, 0, 0)',
         width=width,
-        height=height
+        height=height,
+        title=title
     )
 
     figure.update(layout=layout)
@@ -124,5 +125,5 @@ def plot_decision_boundary(est, X0, X1, Y, mode='static', width=12, height=10,
         fig = plt.gcf()
         # using matplotlib dpi to convert from inches to pixels
         dpi = fig.get_dpi()
-        return interactive_plot(est, X0, X1, Y, x0_label, x1_label,
+        return interactive_plot(est, X0, X1, Y, x0_label, x1_label, title,
                                 file_name, height * dpi, width * dpi)
