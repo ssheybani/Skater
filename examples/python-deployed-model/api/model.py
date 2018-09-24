@@ -18,9 +18,6 @@ app = Flask(__name__)
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    # Note:
-    # This is not a scalable solution
-    # Refer to DataScience Inc.'s product offering for a scalable solution
     query = json_to_model_input(request)
     prediction = estimator.predict(query)
     return jsonify({'predictions': list(prediction)})

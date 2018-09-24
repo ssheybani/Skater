@@ -2,7 +2,8 @@
 
 Ensure flask, numpy, and scikit-learn are available in your environment.
 
-To run, execute api/model.py, which will host the model as a service. The service should be available on localhost, so the model endpoint would be:
+To run, execute api/model.py, which will host the model as a service. 
+The service should be available on localhost, so the model endpoint would be:
 
 -http://localhost:5000/predict
 or
