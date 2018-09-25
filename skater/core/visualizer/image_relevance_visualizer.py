@@ -63,7 +63,7 @@ def _edge_detection(original_input_img=None, edge_detector_alg='sobel'):
 
 
 def visualize_feature_maps(model_inst, X, layer_name=None, n_filters=16, framework_type='keras',
-                           plt_height=20, plt_width=20, **plot_kwargs):
+                           plt_height=20, plt_width=20, fig_bg_color='darkgrey', **plot_kwargs):
     # reference: https://matplotlib.org/2.0.0/examples/color/named_colors.html
     model_class = Model(inputs=model_inst.input, outputs=model_inst.get_layer(layer_name).output) \
         if framework_type == 'keras' else None
@@ -77,7 +77,7 @@ def visualize_feature_maps(model_inst, X, layer_name=None, n_filters=16, framewo
     n_plts_per_row = np.rint(np.sqrt(depth))
     n_rows, n_cols = n_plts_per_row, n_plts_per_row
     fig = plt.figure(figsize=(plt_height, plt_width))
-    fig.set_facecolor('peachpuff')
+    fig.set_facecolor(fig_bg_color)
     for index in range(depth):
         ax = plt.subplot(n_rows, n_cols, index + 1, **plot_kwargs)
         # normalize the weights to be in the range (0, 1)
