@@ -4,6 +4,7 @@ from skimage.filters import roberts, sobel
 import numpy as np
 from skater.util.exceptions import MatplotlibUnavailableError, MatplotlibDisplayError, KerasUnavailableError
 from skater.util.image_ops import normalize
+from sklearn.preprocessing import MinMaxScaler
 
 try:
     import matplotlib.pyplot as plt
@@ -79,6 +80,8 @@ def visualize_feature_maps(model_inst, X, layer_name=None, n_filters=16, framewo
     fig.set_facecolor('peachpuff')
     for index in range(depth):
         ax = plt.subplot(n_rows, n_cols, index + 1, **plot_kwargs)
-        ax.imshow(feature_maps[:, :, index], cmap='bwr')
+        # normalize the weights to be in the range (0, 1)
+        fm = MinMaxScaler().fit_transform(feature_maps[:, :, index])
+        ax.imshow(fm, cmap='bwr')
         ax.set_title('filter {}'.format(index + 1))
     return plt, fig
