@@ -62,17 +62,23 @@ def _edge_detection(original_input_img=None, edge_detector_alg='sobel'):
     return edge_detector[edge_detector_alg](xi_greyscale)
 
 
-def visualize_feature_maps(model_inst, X, layer_name=None, n_filters=16, framework_type='keras',
+def visualize_feature_maps(model_inst, X, layer_name=None,
+                           precomputed_feature_map=None, n_filters=16,
                            plt_height=20, plt_width=20, fig_bg_color='darkgrey', **plot_kwargs):
     # reference: https://matplotlib.org/2.0.0/examples/color/named_colors.html
+    framework_type = 'keras' if 'keras' in str(type(model_inst)) else None
     model_class = Model(inputs=model_inst.input, outputs=model_inst.get_layer(layer_name).output) \
         if framework_type == 'keras' else None
-    feature_maps = model_class.predict(X)[0]
+    feature_maps = model_class.predict(X)[0] if model_class is not None else precomputed_feature_map
+
+    if feature_maps is None:
+        raise Exception("All option to compute feature map failed")
 
     if len(feature_maps.shape) != 3:
         raise Exception("In-correct shape of the feature map used. "
                         "Feature map should be of the form (height, weight, depth) "
                         "in that order to get accurate results")
+
     _, _, depth = feature_maps.shape if n_filters is 'all' else (0, 0, n_filters)
     n_plts_per_row = np.rint(np.sqrt(depth))
     n_rows, n_cols = n_plts_per_row, n_plts_per_row
