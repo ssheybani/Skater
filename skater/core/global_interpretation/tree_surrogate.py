@@ -174,7 +174,8 @@ class TreeSurrogate(object):
 
     @staticmethod
     def __optimizer_condition(o_s, new_s, scoring_type, threshold):
-        # if optimizing on a loss function then the type is decreasing vs optimizing on a model metric which is increasing
+        # if optimizing on a loss function then the type is decreasing
+        # vs optimizing on a model metric which is increasing
         if scoring_type == 'decreasing':
             return round(o_s, 3) + threshold >= round(new_s, 3)
         else:
