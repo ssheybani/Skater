@@ -88,6 +88,6 @@ def visualize_feature_maps(model_inst, X, layer_name=None,
         ax = plt.subplot(n_rows, n_cols, index + 1, **plot_kwargs)
         # normalize the weights to be in the range (0, 1)
         fm = MinMaxScaler().fit_transform(feature_maps[:, :, index])
-        ax.imshow(fm, cmap='bwr')
+        ax.imshow(fm, interpolation="nearest", cmap='bwr')
         ax.set_title('filter {}'.format(index + 1))
     return plt, fig
