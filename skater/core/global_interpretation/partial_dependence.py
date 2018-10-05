@@ -25,7 +25,7 @@ from ...util.progressbar import ProgressBar
 
 def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data, filter_classes=None):
     """ Helper function to compute partial dependence for each grid value. This function is
-    designed to unbound/static to avoid issues when computing partial dendendences in
+    designed to unbound/static to avoid issues when computing partial dependencies in
     separate processes.
 
     Parameters:
