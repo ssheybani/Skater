@@ -10,8 +10,8 @@
 
 Contributing to Skater
 ===========
-Skater is an open source project released under the MIT license. We invite
-users help contribute to the project by reporting bugs, requesting features, working
+Skater is an open source project under the MIT license. We invite
+users to help contribute to the project by reporting bugs, requesting features, working
 on the documentation and codebase.
 
 .. contents:: Types of Contributions
@@ -33,15 +33,9 @@ We may augment this tag set as needed.
 
 Submitting a test
 -----------------
-Currently there are 4 test files:
-
-============================ ===
-Feature Importance           test_feature_importance.py
-Partial Dependence           test_partial_dependence.py
-Tests of LIME functionality  test_lime.py
-DataManager                  test_data.py
-============================ ===
-
+Currently, the test coverage is low which needs to be improved to guarantee robustness of the solutions supported.
+When adding a new funcionality, a subsequent test is desired. 
+All test files are under ``skater/tests/``
 New tests should be added to relevant test file. If no current file covers
 the feature, please add a new file with the following structure:
 
@@ -49,12 +43,24 @@ the feature, please add a new file with the following structure:
 
     class MyNewTestClass(unittest.TestCase):
         def setUp(self):
-            create objects and data
+            # allows one to define instructions that need to be executed before each test method.
+        
+        @classmethod
+        def setUpClass(cls):
+            # allows one to define instructions that need to be executed before all the tests in an individual class.
 
         def test_function_1(self):
             ...
         def test_function_2(self):
             ...
+            
+        def tearDown(self):
+            # allows one to define instructions that need to be executed after each test method. 
+            
+        @classmethod    
+        def tearDownClass()
+            # allows one to define instructions that need to be executed after all tests in an individual class.
+        
     if __name__ == '__main__':
         runner = unittest.TextTestRunner(verbosity=2)
         runner.run(unittest.makeSuite(TestData))
@@ -65,16 +71,16 @@ Contributing Code
 Skater is distributed under an MIT license. By submitting a pull request for this project,
 you agree to license your contribution under the MIT license to this project as well.
 
+
 Style
 ~~~~~~~~~~~~~~~~~~~~
 Stylistically, contributions should follow PEP8, with the exception that methods
 are separated by 2 lines instead of 1.
 
-
 Pull Requests
 ~~~~~~~~~~~~~~~~~~~~
 Before a PR is accepted, travis builds must pass on all environments, and flake8
-tests must all pass.
+tests must all pass. We also use codacy(https://www.codacy.com/) for code reviews(very helpful in identifying anti-patterns)
 
 
 Dependencies
@@ -110,26 +116,12 @@ Performance             We would like to improve performance where ever possible
                         how few observations can we pass to each function).
 Algorithms              There are other interpretation algorithms we'd like to support. One family of algorithms would
                         fall under the category of "model surrogates", where models are approximated, either locally
-                        (like LIME) or globally. These algorithms must be accurate/faithful to the original model,
-                        and simple/interpretable to be useful. We are considering bayesian rule lists and regressions for
-                        now, though this may change. The user would also need to know if and where the surrogate is
-                        a poor representative of the original model. There are also extensions to partial dependence such
-                        as ICE and accumulated local effects plots that may give better indication of interaction effects.
+                        or globally. These algorithms must be accurate/faithful to the original model,
+                        and simple/interpretable to be useful. The user would also need to know if and where the surrogate is
+                        a poor representative of the original model. Check out the issues sections under tag "algorithm" for 
+                        latest set of new algorithms being considered. Create a new issue, if you have another idea.
 Plotting                We'd like to iterate on our visualizations to make them more intuitive, and ideally not rely
-                        on matplotlib.
+                        on matplotlib. We have slowly started improving the visualization but lot more work needs to be done.
 ======================= ===
 
-The following list represents aspects that are not definite, but are currently being considered for the roadmap.
-
-========================    ===
-Validation                  Currently Skater explains model behavior. It in no way evaluates the quality of that behavior
-                            through validation. Extending the library to support conditional validation--when and why does a
-                            model do well or poorly--may be within scope.
-Model Comparison            Early users of the package used Skater to compare models to each other. Currently, model comparisons
-                            must be done manually by the user; run an algorithm, store results in a dictionary, plot.
-Dependence probabilities    Currently there is no built in way to assess whether a model may have learned an interaction
-                            other than explicitly plotting partial dependence with respect to two features. We're interested
-                            in providing a matrix of probabilities of dependence. More formally, for features x1, x2, and model f
-                            f(x1, x2, x_compliment), the probability that the partial derivative of f with respect to x1
-                            is unequal to the probability is unequal to that conditioned on values of x2.
-========================    ===
+**We are also in the process of re-defining the roadmap.
