@@ -1,8 +1,7 @@
 .. raw:: html
 
     <div align="center">
-    <a href="https://www.datascience.com">
-    <img src ="https://cdn2.hubspot.net/hubfs/532045/Logos/DS_Skater%2BDataScience_Colored.svg" height="300" width="400"/>
+    <img src ="https://image.ibb.co/fS9yRz/another_logo.png" height="300" width="400"/>
     </a>
     </div>
 
