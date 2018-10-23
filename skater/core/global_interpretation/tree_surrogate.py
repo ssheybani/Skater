@@ -223,7 +223,7 @@ class TreeSurrogate(object):
         default_grid = {
             "criterion": self.criterion_types[self.__model_type]['criterion'],
             "max_depth": [2, 4, 6, 8, 10, 12],  # helps in reducing the depth of the tree
-            "min_samples_leaf": [2, 4],  # restrict the minimum number of samples in a leaf
+            "min_samples_leaf": [2, 4, 6],  # restrict the minimum number of samples in a leaf
             "max_leaf_nodes": [2, 4, 6, 8, 10]  # reduce the number of leaf nodes
         }
         search_space = param_grid if param_grid is not None else default_grid
@@ -312,6 +312,7 @@ class TreeSurrogate(object):
         X, Y = dm.X, dm.y
         # Below is an anti-pattern but had to use it. Should fix it in the long term
         y_hat_original = self.oracle._execute(X)
+        self.logger.info("Shape of y_hat generated using the oracle: {}".format(y_hat_original.shape))
 
         # TODO: Revisit the check on using probability or class labels
         if use_oracle and self.oracle.probability:

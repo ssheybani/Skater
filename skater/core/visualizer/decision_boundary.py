@@ -40,20 +40,29 @@ def _generate_contours(est, X_, xx, yy, color_map, ax, **params):
 
 
 # Reference: https://plot.ly/scikit-learn/plot-voting-decision-regions/
-def interactive_plot(est, X0, X1, Y, x_label="X1", y_label="X2", title="decision_boundary",
-                     file_name='decision_iplot', height=10, width=10):
+def interactive_plot(est, X, feature_index0, feature_index1, Y, x_title, y_title, title="decision_boundary",
+                     color_scale='RdBu', file_name='decision_iplot', height=10, width=10):
     figure = tools.make_subplots(rows=1, cols=1, print_grid=False)
 
+    # number of features
+    dimension = X.shape[1]
+    X0 = X.iloc[:, feature_index0]
+    X1 = X.iloc[:, feature_index1]
     X_, xx, yy = _create_meshgrid(X0, X1)
     Z = est.predict(X_).reshape(xx.shape)
+    X_grid = np.array([X_['F1'], X_['F2']]).T
+    x_dummy = np.zeros((X_grid.shape[0], dimension))
+    x_dummy[:, feature_index0] = X_grid[:, 0]
+    x_dummy[:, feature_index1] = X_grid[:, 1]
+    Z = est.predict(x_dummy).reshape(xx.shape)
 
     # generate the contour
-    trace1 = go.Contour(x=xx[0], y=yy[:, 1], z=Z, colorscale='Viridis', opacity=0.2, showscale=False)
+    trace1 = go.Contour(x=xx[0], y=yy[:, 1], z=Z, colorscale=color_scale, opacity=0.2, showscale=False)
 
     # Scatter plot is generated using the original specified data points
     trace2 = go.Scatter(x=X0, y=X1, showlegend=False, mode='markers',
                         marker=dict(color=Y, line=dict(color='black', width=1),
-                                    colorscale='Viridis', showscale=True))
+                                    colorscale=color_scale, showscale=True))
 
     figure.append_trace(trace1, 1, 1)
     figure.append_trace(trace2, 1, 1)
@@ -65,14 +74,14 @@ def interactive_plot(est, X0, X1, Y, x_label="X1", y_label="X2", title="decision
                    showline=True,
                    ticks='',
                    showticklabels=True,
-                   title=x_label),
+                   title=x_title),
         yaxis=dict(autorange=True,
                    showgrid=False,
                    zeroline=False,
                    showline=True,
                    ticks='',
                    showticklabels=True,
-                   title=y_label),
+                   title=y_title),
         plot_bgcolor='rgba(0, 0, 0, 0)',
         width=width,
         height=height,
@@ -84,7 +93,8 @@ def interactive_plot(est, X0, X1, Y, x_label="X1", y_label="X2", title="decision
     return py, figure
 
 
-def plot_decision_boundary(est, X0, X1, Y, mode='static', width=12, height=10,
+def plot_decision_boundary(est, X, feature_index0, feature_index1, Y, mode='static', 
+                           width=12, height=10,
                            retrain=True, title='decision_boundary',
                            x0_label='X1', x1_label='X2', feature_names=None,
                            static_color_map=None, enable_axis=False,
@@ -92,7 +102,8 @@ def plot_decision_boundary(est, X0, X1, Y, mode='static', width=12, height=10,
     f_n = ['F1', 'F2'] if feature_names is None else feature_names
     x0_label = feature_names[0] if x0_label is None else x0_label
     x1_label = feature_names[1] if x1_label is None else x1_label
-    X = pd.concat([X0, X1], keys=f_n, axis=1)
+    X0 = X.iloc[:, feature_index0]
+    X1 = X.iloc[:, feature_index1]
 
     est = copy.deepcopy(est)
     if retrain:
@@ -125,5 +136,6 @@ def plot_decision_boundary(est, X0, X1, Y, mode='static', width=12, height=10,
         fig = plt.gcf()
         # using matplotlib dpi to convert from inches to pixels
         dpi = fig.get_dpi()
-        return interactive_plot(est, X0, X1, Y, x0_label, x1_label, title,
+        return interactive_plot(est, X, feature_index0, feature_index1, Y, 
+                                x0_label, x1_label, title,
                                 file_name, height * dpi, width * dpi)
