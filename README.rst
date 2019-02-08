@@ -12,7 +12,7 @@ machine learning system often needed for real world use-cases(** we are actively
 demystify the learned structures of a black box model both globally(inference on the basis of a complete data set)
 and locally(inference about an individual prediction). 
 
-The project was started as a research idea to find ways to enable better interpretability(preferably human interpretability) to predictive "black boxes" both for researchers and practioners. The project is still in beta phase.
+The project was started as a research idea to find ways to enable better interpretability(preferably human interpretability) to predictive "black boxes" both for researchers and practitioners. The project is still in beta phase.
 
 .. image:: https://travis-ci.org/datascienceinc/Skater.svg?branch=master
     :target: https://travis-ci.com/datascienceinc/Skater
